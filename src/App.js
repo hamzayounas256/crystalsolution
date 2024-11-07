@@ -42,6 +42,8 @@ import SupplierprogressReport from "./Component/Reports/Daily_Jobs_Reports/ledge
 import ReceivableReport from "./Component/Reports/MiscReports/ReceivableReport.jsx";
 import PayableReport from "./Component/Reports/MiscReports/PayableReport.jsx";
 import InstallarPayableReport from "./Component/Reports/InstallationReports/InstallarPayableReport.jsx";
+import DailyCashBankBalance from "./Component/Reports/DailyReports/DailyCashBankBalance.jsx";
+import DailyCollectionReport from "./Component/Reports/DailyReports/DailyCollectionReport.jsx";
 
 function App() {
 	const queryClient = new QueryClient();
@@ -145,7 +147,21 @@ function App() {
 								<Route exact path="/MenuUser/:tusrid" element={<MenuUser />} />
 								<Route exact path="/AddUser1" element={<AddUser1 />} />
 
+								{/* Daily Reports */}
+
+								<Route
+									exact
+									path="DailyCollectionReport"
+									element={<DailyCollectionReport />}
+								/>
+								<Route
+									exact
+									path="/Cash&BankBalance"
+									element={<DailyCashBankBalance />}
+								/>
+
 								{/* Misc Reports */}
+
 								<Route
 									exact
 									path="/ReceivableReport"

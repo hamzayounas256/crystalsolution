@@ -19,7 +19,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { fetchGetUser } from "../../Redux/action";
 // import "./ledger.css";
 
-export default function InstallarPayableReport() {
+export default function DailyCashBankBalance() {
 	const user = getUserData();
 	const organisation = getOrganisationData();
 
@@ -434,7 +434,7 @@ export default function InstallarPayableReport() {
 	// Bind to window
 	window.closeAlert = closeAlert;
 
-	function fetchInstallarPayableReport() {
+	function fetchDailyCashBankBalance() {
 		const fromDateElement = document.getElementById("fromdatevalidation");
 		const toDateElement = document.getElementById("todatevalidation");
 
@@ -643,11 +643,11 @@ export default function InstallarPayableReport() {
 			"todatevalidation"
 		).style.border = `1px solid ${fontcolor}`;
 
-		const apiUrl = apiLinks + "/InstallarPayableReport.php";
+		const apiUrl = apiLinks + "/DailyCashBankBalance.php";
 		setIsLoading(true);
 		const formData = new URLSearchParams({
 			// code: organisation.code,
-			code: "AMRELEC",
+			code: "EMART",
 			// FLocCod: getLocationNumber,
 			FLocCod: "001",
 			// FYerDsc: getyeardescription,
@@ -805,7 +805,7 @@ export default function InstallarPayableReport() {
 
 		// Define table data (rows)
 		const rows = tableData.map((item) => [
-			item.code,
+			item.Code,
 			item.Description,
 			item.Opening,
 			item.Debit,
@@ -1057,7 +1057,7 @@ export default function InstallarPayableReport() {
 				// ); // Render sale report title with decreased font size, provide the time, and page number
 				// startY += 7;
 				addTitle(
-					`Installar Payable Report From: ${fromInputDate} To: ${toInputDate}`,
+					`Cash & Bank Balance From: ${fromInputDate} To: ${toInputDate}`,
 					"",
 					"",
 					pageNumber,
@@ -1125,7 +1125,7 @@ export default function InstallarPayableReport() {
 		handlePagination();
 
 		// Save the PDF file
-		doc.save("InstallarPayableReport.pdf");
+		doc.save("DailyCashBankBalance.pdf");
 
 		const pdfBlob = doc.output("blob");
 		const pdfFile = new File([pdfBlob], "table_data.pdf", {
@@ -1164,7 +1164,7 @@ export default function InstallarPayableReport() {
 		// Add title rows
 		[
 			comapnyname,
-			`Installar Payable Report From ${fromInputDate} To ${toInputDate}`,
+			`Cash & Bank Balance From ${fromInputDate} To ${toInputDate}`,
 		].forEach((title, index) => {
 			worksheet.addRow([title]).eachCell((cell) => (cell.style = titleStyle));
 			worksheet.mergeCells(
@@ -1229,7 +1229,7 @@ export default function InstallarPayableReport() {
 		// Add data rows
 		tableData.forEach((item) => {
 			worksheet.addRow([
-				item.code,
+				item.Code,
 				item.Description,
 				item.Opening,
 				item.Debit,
@@ -1283,7 +1283,7 @@ export default function InstallarPayableReport() {
 		const blob = new Blob([buffer], {
 			type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 		});
-		saveAs(blob, "InstallarPayableReport.xlsx");
+		saveAs(blob, "DailyCashBankBalance.xlsx");
 	};
 	///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
@@ -1471,7 +1471,7 @@ export default function InstallarPayableReport() {
 						borderRadius: "9px",
 					}}
 				>
-					<NavComponent textdata="Installar Payable Report" />
+					<NavComponent textdata="Cash & Bank Balance" />
 					{/* <div
 						className="row "
 						style={{ height: "20px", marginTop: "6px", marginBottom: "10px" }}
@@ -2015,7 +2015,7 @@ export default function InstallarPayableReport() {
 														}}
 													>
 														<td className="text-center" style={firstColWidth}>
-															{item.code}
+															{item.Code}
 														</td>
 														<td className="text-start" style={secondColWidth}>
 															{item.Description}
@@ -2153,10 +2153,10 @@ export default function InstallarPayableReport() {
 							id="searchsubmit"
 							text="SELECT"
 							ref={input3Ref}
-							onClick={fetchInstallarPayableReport}
+							onClick={fetchDailyCashBankBalance}
 							style={{ backgroundColor: "#186DB7", width: "120px" }}
 						/>
-						{/* <button className="reportBtn" id="searchsubmit" ref={input3Ref}  onClick={fetchInstallarPayableReport}>
+						{/* <button className="reportBtn" id="searchsubmit" ref={input3Ref}  onClick={fetchDailyCashBankBalance}>
                     Select
                 </button>{" "} */}
 					</div>

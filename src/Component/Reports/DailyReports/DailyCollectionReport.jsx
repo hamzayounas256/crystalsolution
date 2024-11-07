@@ -19,7 +19,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { fetchGetUser } from "../../Redux/action";
 // import "./ledger.css";
 
-export default function InstallarPayableReport() {
+export default function DailyCollectionReport() {
 	const user = getUserData();
 	const organisation = getOrganisationData();
 
@@ -43,6 +43,7 @@ export default function InstallarPayableReport() {
 	const [totalDebit, setTotalDebit] = useState(0);
 	const [totalCredit, setTotalCredit] = useState(0);
 	const [closingBalance, setClosingBalance] = useState(0);
+	const [totalAmount, setTotalAmount] = useState(0);
 
 	// state for from DatePicker
 	const [selectedfromDate, setSelectedfromDate] = useState(null);
@@ -337,10 +338,10 @@ export default function InstallarPayableReport() {
 				toDateElement.style.border = `1px solid ${fontcolor}`; // Add red border to the input
 				settoInputDate(formattedInput);
 
-				if (input2Ref.current) {
+				if (input1Ref.current) {
 					e.preventDefault();
 					// console.log("Selected value:", input1Ref); // Log the select value
-					input2Ref.current.focus(); // Move focus to React Select
+					input1Ref.current.focus(); // Move focus to React Select
 				}
 			} else {
 				showAlertMessage(
@@ -434,7 +435,7 @@ export default function InstallarPayableReport() {
 	// Bind to window
 	window.closeAlert = closeAlert;
 
-	function fetchInstallarPayableReport() {
+	function fetchDailyCollectionReport() {
 		const fromDateElement = document.getElementById("fromdatevalidation");
 		const toDateElement = document.getElementById("todatevalidation");
 
@@ -643,17 +644,18 @@ export default function InstallarPayableReport() {
 			"todatevalidation"
 		).style.border = `1px solid ${fontcolor}`;
 
-		const apiUrl = apiLinks + "/InstallarPayableReport.php";
+		const apiUrl = apiLinks + "/DailyCollectionReport.php";
 		setIsLoading(true);
 		const formData = new URLSearchParams({
 			// code: organisation.code,
-			code: "AMRELEC",
+			code: "EMART",
 			// FLocCod: getLocationNumber,
 			FLocCod: "001",
 			// FYerDsc: getyeardescription,
 			FYerDsc: "2024-2024",
 			FIntDat: fromInputDate,
 			FFnlDat: toInputDate,
+			FTrnTyp: transectionType,
 			FSchTxt: "",
 		}).toString();
 
@@ -666,10 +668,7 @@ export default function InstallarPayableReport() {
 				console.log("Response:", response.data);
 
 				// Set total amount and quantity
-				setTotalOpening(response.data["Total Opening"]);
-				setTotalDebit(response.data["Total Debit"]);
-				setTotalCredit(response.data["Total Credit"]);
-				setClosingBalance(response.data["Total Balance"]);
+				setTotalAmount(response.data["Total Amount"]);
 
 				// Check if response.data.Detail exists and is an array
 				if (response.data && Array.isArray(response.data.Detail)) {
@@ -801,38 +800,31 @@ export default function InstallarPayableReport() {
 	///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
 	const exportPDFHandler = () => {
 		// Create a new jsPDF instance with landscape orientation
-		const doc = new jsPDF({ orientation: "portrait" });
+		const doc = new jsPDF({ orientation: "landscape" });
 
 		// Define table data (rows)
 		const rows = tableData.map((item) => [
-			item.code,
+			item.Date,
+			item["Trn#"],
+			item.Type,
+			item["A/C Description"],
 			item.Description,
-			item.Opening,
-			item.Debit,
-			item.Credit,
-			item.Balance,
+			item.Amount,
 		]);
 
 		// Add summary row to the table
-		rows.push([
-			"",
-			"Total",
-			String(totalOpening),
-			String(totalDebit),
-			String(totalCredit),
-			String(closingBalance),
-		]);
+		rows.push(["", "Total", "", "", "", totalAmount]);
 
 		// Define table column headers and individual column widths
 		const headers = [
 			"Date",
+			"Trn#",
+			"Type",
+			"A/C Description",
 			"Description",
-			"Opening",
-			"Debit",
-			"Credit",
-			"Balance",
+			"Amount",
 		];
-		const columnWidths = [18, 80, 20, 20, 20, 25];
+		const columnWidths = [18, 15, 10, 85, 85, 25];
 
 		// Calculate total table width
 		const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
@@ -930,12 +922,7 @@ export default function InstallarPayableReport() {
 					// Ensure the cell value is a string
 					const cellValue = String(cell);
 
-					if (
-						cellIndex === 2 ||
-						cellIndex === 3 ||
-						cellIndex === 4 ||
-						cellIndex === 5
-					) {
+					if (cellIndex === 1 || cellIndex === 5) {
 						const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
 						doc.text(cellValue, rightAlignX, cellY, {
 							align: "right",
@@ -997,7 +984,7 @@ export default function InstallarPayableReport() {
 		};
 
 		// Define the number of rows per page
-		const rowsPerPage = 46; // Adjust this value based on your requirements
+		const rowsPerPage = 29; // Adjust this value based on your requirements
 
 		// Function to handle pagination
 		const handlePagination = () => {
@@ -1057,7 +1044,7 @@ export default function InstallarPayableReport() {
 				// ); // Render sale report title with decreased font size, provide the time, and page number
 				// startY += 7;
 				addTitle(
-					`Installar Payable Report From: ${fromInputDate} To: ${toInputDate}`,
+					`Daily Collection Report From: ${fromInputDate} To: ${toInputDate}`,
 					"",
 					"",
 					pageNumber,
@@ -1125,7 +1112,7 @@ export default function InstallarPayableReport() {
 		handlePagination();
 
 		// Save the PDF file
-		doc.save("InstallarPayableReport.pdf");
+		doc.save("DailyCollectionReport.pdf");
 
 		const pdfBlob = doc.output("blob");
 		const pdfFile = new File([pdfBlob], "table_data.pdf", {
@@ -1150,11 +1137,11 @@ export default function InstallarPayableReport() {
 		};
 
 		const columnAlignments = [
-			"center",
 			"left",
 			"right",
-			"right",
-			"right",
+			"center",
+			"left",
+			"left",
 			"right",
 		];
 
@@ -1164,7 +1151,7 @@ export default function InstallarPayableReport() {
 		// Add title rows
 		[
 			comapnyname,
-			`Installar Payable Report From ${fromInputDate} To ${toInputDate}`,
+			`Daily Collection Report From ${fromInputDate} To ${toInputDate}`,
 		].forEach((title, index) => {
 			worksheet.addRow([title]).eachCell((cell) => (cell.style = titleStyle));
 			worksheet.mergeCells(
@@ -1214,12 +1201,12 @@ export default function InstallarPayableReport() {
 
 		// Add headers
 		const headers = [
-			"Code",
+			"Date",
+			"Trn#",
+			"Type",
+			"A/C Description",
 			"Description",
-			"Opening",
-			"Debit",
-			"Credit",
-			"Balance",
+			"Amount",
 		];
 		const headerRow = worksheet.addRow(headers);
 		headerRow.eachCell((cell) => {
@@ -1229,30 +1216,23 @@ export default function InstallarPayableReport() {
 		// Add data rows
 		tableData.forEach((item) => {
 			worksheet.addRow([
-				item.code,
+				item.Date,
+				item["Trn#"],
+				item.Type,
+				item["A/C Description"],
 				item.Description,
-				item.Opening,
-				item.Debit,
-				item.Credit,
-				item.Balance,
+				item.Amount,
 			]);
 		});
 
 		// Add total row and bold it
-		const totalRow = worksheet.addRow([
-			"",
-			"Total",
-			totalOpening,
-			totalDebit,
-			totalCredit,
-			closingBalance,
-		]);
+		const totalRow = worksheet.addRow(["", "Total", "", "", "", totalAmount]);
 		totalRow.eachCell((cell) => {
 			cell.font = { bold: true };
 		});
 
 		// Set column widths
-		[10, 45, 12, 12, 12, 15].forEach((width, index) => {
+		[10, 8, 6, 40, 40, 15].forEach((width, index) => {
 			worksheet.getColumn(index + 1).width = width;
 		});
 
@@ -1283,7 +1263,7 @@ export default function InstallarPayableReport() {
 		const blob = new Blob([buffer], {
 			type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 		});
-		saveAs(blob, "InstallarPayableReport.xlsx");
+		saveAs(blob, "DailyCollectionReport.xlsx");
 	};
 	///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
 
@@ -1327,22 +1307,22 @@ export default function InstallarPayableReport() {
 	};
 
 	const firstColWidth = {
-		width: "8%",
+		width: "9%",
 	};
 	const secondColWidth = {
-		width: "41%",
+		width: "6%",
 	};
 	const thirdColWidth = {
-		width: "12%",
+		width: "4%",
 	};
 	const forthColWidth = {
-		width: "12%",
+		width: "37%",
 	};
 	const fifthColWidth = {
-		width: "12%",
+		width: "34%",
 	};
 	const sixthColWidth = {
-		width: "15%",
+		width: "10%",
 	};
 
 	// Adjust the content width based on sidebar state
@@ -1471,7 +1451,7 @@ export default function InstallarPayableReport() {
 						borderRadius: "9px",
 					}}
 				>
-					<NavComponent textdata="Installar Payable Report" />
+					<NavComponent textdata="Daily Collection Report" />
 					{/* <div
 						className="row "
 						style={{ height: "20px", marginTop: "6px", marginBottom: "10px" }}
@@ -1737,7 +1717,7 @@ export default function InstallarPayableReport() {
 										value={toInputDate}
 										onChange={handleToInputChange}
 										// onKeyPress={handleToKeyPress}
-										onKeyDown={(e) => handleToKeyPress(e, input2Ref)}
+										onKeyDown={(e) => handleToKeyPress(e, "submitButton")}
 										// onKeyDown={(e) => handleKeyPressBoth(e, 'submitButton')}
 										id="toDatePicker"
 										autoComplete="off"
@@ -1807,7 +1787,7 @@ export default function InstallarPayableReport() {
 						</div>
 					</div>
 
-					{/* <div
+					<div
 						className="row "
 						style={{ height: "20px", marginTop: "6px", marginBottom: "10px" }}
 					>
@@ -1882,7 +1862,7 @@ export default function InstallarPayableReport() {
 								</select>
 							</div>
 						</div>
-					</div> */}
+					</div>
 
 					<div>
 						<div
@@ -1917,22 +1897,22 @@ export default function InstallarPayableReport() {
 										}}
 									>
 										<td className="border-dark" style={firstColWidth}>
-											Code
+											Date
 										</td>
 										<td className="border-dark" style={secondColWidth}>
-											Description
+											Trn#
 										</td>
 										<td className="border-dark" style={thirdColWidth}>
-											Opening
+											Type
 										</td>
 										<td className="border-dark" style={forthColWidth}>
-											Debit
+											A/C Description
 										</td>
 										<td className="border-dark" style={fifthColWidth}>
-											Credit
+											Description
 										</td>
 										<td className="border-dark" style={sixthColWidth}>
-											Balance
+											Amount
 										</td>
 									</tr>
 								</thead>
@@ -2015,22 +1995,22 @@ export default function InstallarPayableReport() {
 														}}
 													>
 														<td className="text-center" style={firstColWidth}>
-															{item.code}
+															{item.Date}
 														</td>
-														<td className="text-start" style={secondColWidth}>
+														<td className="text-end" style={secondColWidth}>
+															{item["Trn#"]}
+														</td>
+														<td className="text-center" style={thirdColWidth}>
+															{item.Type}
+														</td>
+														<td className="text-start" style={forthColWidth}>
+															{item["A/C Description"]}
+														</td>
+														<td className="text-start" style={fifthColWidth}>
 															{item.Description}
 														</td>
-														<td className="text-end" style={thirdColWidth}>
-															{item.Opening}
-														</td>
-														<td className="text-end" style={forthColWidth}>
-															{item.Debit}
-														</td>
-														<td className="text-end" style={fifthColWidth}>
-															{item.Credit}
-														</td>
 														<td className="text-end" style={sixthColWidth}>
-															{item.Balance}
+															{item.Amount}
 														</td>
 													</tr>
 												);
@@ -2096,27 +2076,21 @@ export default function InstallarPayableReport() {
 								background: getcolor,
 								borderRight: `1px solid ${fontcolor}`,
 							}}
-						>
-							<span className="mobileledger_total">{totalOpening}</span>
-						</div>
+						></div>
 						<div
 							style={{
 								...forthColWidth,
 								background: getcolor,
 								borderRight: `1px solid ${fontcolor}`,
 							}}
-						>
-							<span className="mobileledger_total">{totalDebit}</span>
-						</div>
+						></div>
 						<div
 							style={{
 								...fifthColWidth,
 								background: getcolor,
 								borderRight: `1px solid ${fontcolor}`,
 							}}
-						>
-							<span className="mobileledger_total">{totalCredit}</span>
-						</div>
+						></div>
 						<div
 							style={{
 								...sixthColWidth,
@@ -2124,7 +2098,7 @@ export default function InstallarPayableReport() {
 								borderRight: `1px solid ${fontcolor}`,
 							}}
 						>
-							<span className="mobileledger_total">{closingBalance}</span>
+							<span className="mobileledger_total">{totalAmount}</span>
 						</div>
 					</div>
 
@@ -2153,10 +2127,10 @@ export default function InstallarPayableReport() {
 							id="searchsubmit"
 							text="SELECT"
 							ref={input3Ref}
-							onClick={fetchInstallarPayableReport}
+							onClick={fetchDailyCollectionReport}
 							style={{ backgroundColor: "#186DB7", width: "120px" }}
 						/>
-						{/* <button className="reportBtn" id="searchsubmit" ref={input3Ref}  onClick={fetchInstallarPayableReport}>
+						{/* <button className="reportBtn" id="searchsubmit" ref={input3Ref}  onClick={fetchDailyCollectionReport}>
                     Select
                 </button>{" "} */}
 					</div>
