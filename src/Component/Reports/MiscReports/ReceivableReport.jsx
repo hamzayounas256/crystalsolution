@@ -1169,13 +1169,36 @@ export default function ReceivableReport() {
 		}
 	}, [selectedIndex]);
 
+	// const handleRadioChange = (days) => {
+	// 	const toDate = toInputDate ? new Date(toInputDate) : new Date();
+	// 	const fromDate = new Date(toDate);
+	// 	fromDate.setUTCDate(fromDate.getUTCDate() - days);
+	// 	setSelectedfromDate(fromDate);
+	// 	setfromInputDate(formatDate(fromDate));
+	// 	setSelectedRadio(days); // Update the selected radio button state
+	// 	console.log("To Date:", toDate);
+	// 	console.log("From Date before manipulation:", new Date(toDate));
+	// 	console.log("From Date after manipulation:", fromDate);
+	// 	console.log("Using To Date:", toInputDate ? toInputDate : new Date());
+
+	// };
+
+	const parseDate = (dateString) => {
+		const [day, month, year] = dateString.split("-").map(Number);
+		return new Date(year, month - 1, day);
+	};
+
 	const handleRadioChange = (days) => {
-		const toDate = new Date(toInputDate);
+		const toDate = parseDate(toInputDate);
 		const fromDate = new Date(toDate);
-		fromDate.setDate(fromDate.getDate() - days);
+		fromDate.setUTCDate(fromDate.getUTCDate() - days);
+
+		// console.log("To Date:", toDate);
+		// console.log("From Date after manipulation:", fromDate);
+
 		setSelectedfromDate(fromDate);
 		setfromInputDate(formatDate(fromDate));
-		setSelectedRadio(days); // Update the selected radio button state
+		setSelectedRadio(days);
 	};
 
 	useEffect(() => {
