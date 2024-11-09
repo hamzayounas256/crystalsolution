@@ -1259,6 +1259,12 @@ export default function ReceivableReport() {
 											alignItems: "center",
 											marginLeft: "10px",
 										}}
+										onFocus={(e) =>
+											(e.currentTarget.style.border = "2px solid red")
+										}
+										onBlur={(e) =>
+											(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+										}
 									/>
 								</div>
 								<div
@@ -1279,6 +1285,12 @@ export default function ReceivableReport() {
 												id="30"
 												disabled={!check}
 												onChange={() => handleRadioChange(30)}
+												onFocus={(e) =>
+													(e.currentTarget.style.border = "2px solid red")
+												}
+												onBlur={(e) =>
+													(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+												}
 											/>
 										</div>
 										<div className="d-flex align-items-baseline mx-2">
@@ -1289,6 +1301,12 @@ export default function ReceivableReport() {
 												id="60"
 												disabled={!check}
 												onChange={() => handleRadioChange(60)}
+												onFocus={(e) =>
+													(e.currentTarget.style.border = "2px solid red")
+												}
+												onBlur={(e) =>
+													(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+												}
 											/>
 										</div>
 										<div className="d-flex align-items-baseline mx-2">
@@ -1299,10 +1317,49 @@ export default function ReceivableReport() {
 												id="90"
 												disabled={!check}
 												onChange={() => handleRadioChange(90)}
+												onFocus={(e) =>
+													(e.currentTarget.style.border = "2px solid red")
+												}
+												onBlur={(e) =>
+													(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+												}
 											/>
 										</div>
 									</div>
 								</div>
+							</div>
+							<div id="lastDiv" style={{ marginRight: "1px" }}>
+								<label for="searchInput" style={{ marginRight: "15px" }}>
+									<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+										Search :
+									</span>{" "}
+								</label>
+								<input
+									ref={input2Ref}
+									onKeyDown={(e) => handleKeyPress(e, input3Ref)}
+									type="text"
+									id="searchsubmit"
+									placeholder="Item description"
+									value={searchQuery}
+									style={{
+										marginRight: "20px",
+										width: "200px",
+										height: "24px",
+										fontSize: "12px",
+										color: fontcolor,
+										backgroundColor: getcolor,
+										border: `1px solid ${fontcolor}`,
+										outline: "none",
+										paddingLeft: "10px",
+									}}
+									onFocus={(e) =>
+										(e.currentTarget.style.border = "2px solid red")
+									}
+									onBlur={(e) =>
+										(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+									}
+									onChange={(e) => setSearchQuery(e.target.value)}
+								/>
 							</div>
 						</div>
 					</div>
@@ -1346,6 +1403,12 @@ export default function ReceivableReport() {
 										marginLeft: "3px",
 										background: getcolor,
 									}}
+									onFocus={(e) =>
+										(e.currentTarget.style.border = "2px solid red")
+									}
+									onBlur={(e) =>
+										(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+									}
 								>
 									<input
 										style={{
@@ -1426,6 +1489,12 @@ export default function ReceivableReport() {
 										marginLeft: "15px",
 										background: getcolor,
 									}}
+									onFocus={(e) =>
+										(e.currentTarget.style.border = "2px solid red")
+									}
+									onBlur={(e) =>
+										(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+									}
 								>
 									<input
 										ref={toRef}
@@ -1499,6 +1568,12 @@ export default function ReceivableReport() {
 									onKeyDown={(e) => handleKeyPress(e, input2Ref)}
 									id="submitButton"
 									name="type"
+									onFocus={(e) =>
+										(e.currentTarget.style.border = "2px solid red")
+									}
+									onBlur={(e) =>
+										(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+									}
 									value={transectionType}
 									onChange={handleTransactionTypeChange}
 									style={{
@@ -1518,7 +1593,7 @@ export default function ReceivableReport() {
 							</div>
 						</div>
 					</div>
-					<div
+					{/* <div
 						className="row "
 						style={{ height: "20px", marginTop: "6px", marginBottom: "10px" }}
 					>
@@ -1556,11 +1631,17 @@ export default function ReceivableReport() {
 										outline: "none",
 										paddingLeft: "10px",
 									}}
+									onFocus={(e) =>
+										(e.currentTarget.style.border = "2px solid red")
+									}
+									onBlur={(e) =>
+										(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+									}
 									onChange={(e) => setSearchQuery(e.target.value)}
 								/>
 							</div>
 						</div>
-					</div>
+					</div> */}
 					<div>
 						<div
 							style={{
@@ -1813,16 +1894,28 @@ export default function ReceivableReport() {
 							to="/MainPage"
 							text="Return"
 							style={{ backgroundColor: "#186DB7", width: "120px" }}
+							onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
+							onBlur={(e) =>
+								(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+							}
 						/>
 						<SingleButton
 							text="PDF"
 							onClick={exportPDFHandler}
 							style={{ backgroundColor: "#186DB7", width: "120px" }}
+							onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
+							onBlur={(e) =>
+								(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+							}
 						/>
 						<SingleButton
 							text="Excel"
 							onClick={handleDownloadCSV}
 							style={{ backgroundColor: "#186DB7", width: "120px" }}
+							onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
+							onBlur={(e) =>
+								(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+							}
 						/>
 						<SingleButton
 							id="searchsubmit"
@@ -1830,6 +1923,10 @@ export default function ReceivableReport() {
 							ref={input3Ref}
 							onClick={fetchReceivableReport}
 							style={{ backgroundColor: "#186DB7", width: "120px" }}
+							onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
+							onBlur={(e) =>
+								(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+							}
 						/>
 					</div>
 				</div>
