@@ -70,7 +70,7 @@ export default function ReceivableReport() {
 
 	const comapnyname = organisation.description;
 
-	const [selectedRadio, setSelectedRadio] = useState(null); // State to track selected radio button
+	const [selectedRadio, setSelectedRadio] = useState("custom"); // State to track selected radio button
 
 	//////////////////////// CUSTOM DATE LIMITS ////////////////////////////
 
@@ -514,7 +514,7 @@ export default function ReceivableReport() {
 			FLocCod: "001",
 			FYerDsc: "2024-2024",
 		};
-		console.log(data);
+		// console.log(data);
 		document.getElementById(
 			"fromdatevalidation"
 		).style.border = `1px solid ${fontcolor}`;
@@ -538,7 +538,7 @@ export default function ReceivableReport() {
 			.post(apiUrl, formData)
 			.then((response) => {
 				setIsLoading(false);
-				console.log("Response:", response.data);
+				// console.log("Response:", response.data);
 				setTotalOpening(response.data["Total Opening"]);
 				setTotalDebit(response.data["Total Debit"]);
 				setTotalCredit(response.data["Total Credit"]);
@@ -1169,20 +1169,6 @@ export default function ReceivableReport() {
 		}
 	}, [selectedIndex]);
 
-	// const handleRadioChange = (days) => {
-	// 	const toDate = toInputDate ? new Date(toInputDate) : new Date();
-	// 	const fromDate = new Date(toDate);
-	// 	fromDate.setUTCDate(fromDate.getUTCDate() - days);
-	// 	setSelectedfromDate(fromDate);
-	// 	setfromInputDate(formatDate(fromDate));
-	// 	setSelectedRadio(days); // Update the selected radio button state
-	// 	console.log("To Date:", toDate);
-	// 	console.log("From Date before manipulation:", new Date(toDate));
-	// 	console.log("From Date after manipulation:", fromDate);
-	// 	console.log("Using To Date:", toInputDate ? toInputDate : new Date());
-
-	// };
-
 	const parseDate = (dateString) => {
 		const [day, month, year] = dateString.split("-").map(Number);
 		return new Date(year, month - 1, day);
@@ -1193,16 +1179,13 @@ export default function ReceivableReport() {
 		const fromDate = new Date(toDate);
 		fromDate.setUTCDate(fromDate.getUTCDate() - days);
 
-		// console.log("To Date:", toDate);
-		// console.log("From Date after manipulation:", fromDate);
-
 		setSelectedfromDate(fromDate);
 		setfromInputDate(formatDate(fromDate));
-		setSelectedRadio(days);
+		setSelectedRadio(days === 0 ? "custom" : `${days}days`);
 	};
 
 	useEffect(() => {
-		if (!selectedRadio) {
+		if (selectedRadio === "custom") {
 			const currentDate = new Date();
 			const firstDateOfCurrentMonth = new Date(
 				currentDate.getFullYear(),
@@ -1211,9 +1194,16 @@ export default function ReceivableReport() {
 			);
 			setSelectedfromDate(firstDateOfCurrentMonth);
 			setfromInputDate(formatDate(firstDateOfCurrentMonth));
+			setSelectedToDate(currentDate);
+			settoInputDate(formatDate(currentDate));
+		} else {
+			const days = parseInt(selectedRadio.replace("days", ""));
+			handleRadioChange(days);
 		}
 	}, [selectedRadio]);
 
+	console.log("GlobalfromDate" + GlobalfromDate);
+	console.log("GlobaltoDate" + GlobaltoDate);
 	return (
 		<>
 			<div id="someElementId"></div>
@@ -1282,9 +1272,8 @@ export default function ReceivableReport() {
 												type="radio"
 												name="dateRange"
 												id="custom"
-												disabled={!check}
-												onChange={() => setCheck(!check)}
-												checked={check}
+												checked={selectedRadio === "custom"}
+												onChange={() => handleRadioChange(0)}
 												onFocus={(e) =>
 													(e.currentTarget.style.border = "2px solid red")
 												}
@@ -1300,7 +1289,7 @@ export default function ReceivableReport() {
 												type="radio"
 												name="dateRange"
 												id="30"
-												disabled={!check}
+												checked={selectedRadio === "30days"}
 												onChange={() => handleRadioChange(30)}
 												onFocus={(e) =>
 													(e.currentTarget.style.border = "2px solid red")
@@ -1317,7 +1306,7 @@ export default function ReceivableReport() {
 												type="radio"
 												name="dateRange"
 												id="60"
-												disabled={!check}
+												checked={selectedRadio === "60days"}
 												onChange={() => handleRadioChange(60)}
 												onFocus={(e) =>
 													(e.currentTarget.style.border = "2px solid red")
@@ -1334,7 +1323,7 @@ export default function ReceivableReport() {
 												type="radio"
 												name="dateRange"
 												id="90"
-												disabled={!check}
+												checked={selectedRadio === "90days"}
 												onChange={() => handleRadioChange(90)}
 												onFocus={(e) =>
 													(e.currentTarget.style.border = "2px solid red")
@@ -1454,8 +1443,9 @@ export default function ReceivableReport() {
 											fontSize: "12px",
 											backgroundColor: getcolor,
 											color: fontcolor,
-											opacity: check ? 1 : 0.5,
-											pointerEvents: check ? "auto" : "none",
+											opacity: selectedRadio === "custom" ? 1 : 0.5,
+											pointerEvents:
+												selectedRadio === "custom" ? "auto" : "none",
 										}}
 										id="frominputid"
 										value={fromInputDate}
@@ -1465,7 +1455,7 @@ export default function ReceivableReport() {
 										autoComplete="off"
 										placeholder="dd-mm-yyyy"
 										aria-label="Date Input"
-										disabled={!check}
+										disabled={selectedRadio !== "custom"}
 									/>
 									<DatePicker
 										selected={selectedfromDate}
@@ -1480,17 +1470,20 @@ export default function ReceivableReport() {
 												<BsCalendar
 													onClick={toggleFromCalendar}
 													style={{
-														cursor: check ? "pointer" : "default",
+														cursor:
+															selectedRadio === "custom"
+																? "pointer"
+																: "default",
 														marginLeft: "18px",
 														fontSize: "12px",
 														color: fontcolor,
-														opacity: check ? 1 : 0.5,
+														opacity: selectedRadio === "custom" ? 1 : 0.5,
 													}}
-													disabled={!check}
+													disabled={selectedRadio !== "custom"}
 												/>
 											</div>
 										}
-										disabled={!check}
+										disabled={selectedRadio !== "custom"}
 									/>
 								</div>
 							</div>
@@ -1541,8 +1534,9 @@ export default function ReceivableReport() {
 											fontSize: "12px",
 											backgroundColor: getcolor,
 											color: fontcolor,
-											opacity: check ? 1 : 0.5,
-											pointerEvents: check ? "auto" : "none",
+											opacity: selectedRadio === "custom" ? 1 : 0.5,
+											pointerEvents:
+												selectedRadio === "custom" ? "auto" : "none",
 										}}
 										value={toInputDate}
 										onChange={handleToInputChange}
@@ -1551,7 +1545,7 @@ export default function ReceivableReport() {
 										autoComplete="off"
 										placeholder="dd-mm-yyyy"
 										aria-label="To Date Input"
-										disabled={!check}
+										disabled={selectedRadio !== "custom"}
 									/>
 									<DatePicker
 										selected={selectedToDate}
@@ -1566,17 +1560,20 @@ export default function ReceivableReport() {
 												<BsCalendar
 													onClick={toggleToCalendar}
 													style={{
-														cursor: check ? "pointer" : "default",
+														cursor:
+															selectedRadio === "custom"
+																? "pointer"
+																: "default",
 														marginLeft: "18px",
 														fontSize: "12px",
 														color: fontcolor,
-														opacity: check ? 1 : 0.5,
+														opacity: selectedRadio === "custom" ? 1 : 0.5,
 													}}
-													disabled={!check}
+													disabled={selectedRadio !== "custom"}
 												/>
 											</div>
 										}
-										disabled={!check}
+										disabled={selectedRadio !== "custom"}
 									/>
 								</div>
 							</div>
@@ -1615,55 +1612,6 @@ export default function ReceivableReport() {
 							</div>
 						</div>
 					</div>
-					{/* <div
-						className="row "
-						style={{ height: "20px", marginTop: "6px", marginBottom: "10px" }}
-					>
-						<div
-							style={{
-								display: "flex",
-								alignItems: "center",
-								justifyContent: "space-between",
-								margin: "0px",
-								padding: "0px",
-							}}
-						>
-							<div></div>
-							<div id="lastDiv" style={{ marginRight: "1px" }}>
-								<label for="searchInput" style={{ marginRight: "15px" }}>
-									<span style={{ fontSize: "15px", fontWeight: "bold" }}>
-										Search :
-									</span>{" "}
-								</label>
-								<input
-									ref={input2Ref}
-									onKeyDown={(e) => handleKeyPress(e, input3Ref)}
-									type="text"
-									id="searchsubmit"
-									placeholder="Item description"
-									value={searchQuery}
-									style={{
-										marginRight: "20px",
-										width: "200px",
-										height: "24px",
-										fontSize: "12px",
-										color: fontcolor,
-										backgroundColor: getcolor,
-										border: `1px solid ${fontcolor}`,
-										outline: "none",
-										paddingLeft: "10px",
-									}}
-									onFocus={(e) =>
-										(e.currentTarget.style.border = "2px solid red")
-									}
-									onBlur={(e) =>
-										(e.currentTarget.style.border = `1px solid ${fontcolor}`)
-									}
-									onChange={(e) => setSearchQuery(e.target.value)}
-								/>
-							</div>
-						</div>
-					</div> */}
 					<div>
 						<div
 							style={{
@@ -1916,28 +1864,17 @@ export default function ReceivableReport() {
 							to="/MainPage"
 							text="Return"
 							style={{ backgroundColor: "#186DB7", width: "120px" }}
-							onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
-							onBlur={(e) =>
-								(e.currentTarget.style.border = `1px solid ${fontcolor}`)
-							}
 						/>
 						<SingleButton
 							text="PDF"
 							onClick={exportPDFHandler}
 							style={{ backgroundColor: "#186DB7", width: "120px" }}
 							onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
-							onBlur={(e) =>
-								(e.currentTarget.style.border = `1px solid ${fontcolor}`)
-							}
 						/>
 						<SingleButton
 							text="Excel"
 							onClick={handleDownloadCSV}
 							style={{ backgroundColor: "#186DB7", width: "120px" }}
-							onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
-							onBlur={(e) =>
-								(e.currentTarget.style.border = `1px solid ${fontcolor}`)
-							}
 						/>
 						<SingleButton
 							id="searchsubmit"
@@ -1945,10 +1882,6 @@ export default function ReceivableReport() {
 							ref={input3Ref}
 							onClick={fetchReceivableReport}
 							style={{ backgroundColor: "#186DB7", width: "120px" }}
-							onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
-							onBlur={(e) =>
-								(e.currentTarget.style.border = `1px solid ${fontcolor}`)
-							}
 						/>
 					</div>
 				</div>

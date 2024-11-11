@@ -148,7 +148,7 @@ export default function ReceivableReport() {
 				if (GlobalfromDate && enteredDate < GlobalfromDate) {
 					showAlertMessage(
 						"someElementId",
-						"Date must be from",
+						"Date must be after",
 						GlobalfromDate1,
 						GlobaltoDate1,
 						fromDateElement,
@@ -159,7 +159,7 @@ export default function ReceivableReport() {
 				if (GlobalfromDate && enteredDate > GlobaltoDate) {
 					showAlertMessage(
 						"someElementId",
-						"Date must be from",
+						"Date must be before",
 						GlobalfromDate1,
 						GlobaltoDate1,
 						fromDateElement,
@@ -181,9 +181,9 @@ export default function ReceivableReport() {
 			} else {
 				showAlertMessage(
 					"someElementId",
-					"Date must be from",
-					GlobalfromDate1,
-					GlobaltoDate1,
+					"Date must be in the format",
+					"dd-mm-yyyy",
+					"",
 					fromDateElement,
 					"formvalidation"
 				);
@@ -221,7 +221,7 @@ export default function ReceivableReport() {
 				if (GlobaltoDate && enteredDate > GlobaltoDate) {
 					showAlertMessage(
 						"someElementId",
-						"Date must be from",
+						"Date must be before",
 						GlobalfromDate1,
 						GlobaltoDate1,
 						toDateElement,
@@ -233,7 +233,7 @@ export default function ReceivableReport() {
 				if (GlobaltoDate && enteredDate < GlobalfromDate) {
 					showAlertMessage(
 						"someElementId",
-						"Date must be from",
+						"Date must be after",
 						GlobalfromDate1,
 						GlobaltoDate1,
 						toDateElement,
@@ -249,9 +249,9 @@ export default function ReceivableReport() {
 					if (enteredDate <= fromDate) {
 						showAlertMessage(
 							"someElementId",
-							"Date must be from",
-							GlobalfromDate1,
-							GlobaltoDate1,
+							"To date must be after from date",
+							"",
+							"",
 							toDateElement,
 							"todatevalidation"
 						);
@@ -269,9 +269,9 @@ export default function ReceivableReport() {
 			} else {
 				showAlertMessage(
 					"someElementId",
-					"Date must be from",
-					GlobalfromDate1,
-					GlobaltoDate1,
+					"Date must be in the format",
+					"dd-mm-yyyy",
+					"",
 					toDateElement,
 					"todatevalidation"
 				);
@@ -414,9 +414,9 @@ export default function ReceivableReport() {
 			case "fromDate":
 				showAlertMessage(
 					"someElementId",
-					"Date must be from",
-					GlobalfromDate1,
-					GlobaltoDate1,
+					"From date is required",
+					"",
+					"",
 					fromDateElement,
 					"formvalidation"
 				);
@@ -424,39 +424,39 @@ export default function ReceivableReport() {
 			case "toDate":
 				showAlertMessage(
 					"someElementId",
-					"Date must be from",
-					GlobalfromDate1,
-					GlobaltoDate1,
+					"To date is required",
+					"",
+					"",
 					toDateElement,
 					"todatevalidation"
 				);
 				return;
-			case "fromDateInvalid":
-				showAlertMessage(
-					"someElementId",
-					"Date must be from",
-					GlobalfromDate1,
-					GlobaltoDate1,
-					fromDateElement,
-					"formvalidation"
-				);
-				return;
-			case "toDateInvalid":
-				showAlertMessage(
-					"someElementId",
-					"Date must be from",
-					GlobalfromDate1,
-					GlobaltoDate1,
-					toDateElement,
-					"todatevalidation"
-				);
-				return;
+			// case "fromDateInvalid":
+			// 	showAlertMessage(
+			// 		"someElementId",
+			// 		"From date must be in the format",
+			// 		"dd-mm-yyyy",
+			// 		"",
+			// 		fromDateElement,
+			// 		"formvalidation"
+			// 	);
+			// 	return;
+			// case "toDateInvalid":
+			// 	showAlertMessage(
+			// 		"someElementId",
+			// 		"To date must be in the format",
+			// 		"dd-mm-yyyy",
+			// 		"",
+			// 		toDateElement,
+			// 		"todatevalidation"
+			// 	);
+			// 	return;
 			case "fromDateBeforeGlobal":
 				showAlertMessage(
 					"someElementId",
-					"Date must be from",
+					"From date must be after",
 					GlobalfromDate1,
-					GlobaltoDate1,
+					"",
 					fromDateElement,
 					"formvalidation"
 				);
@@ -464,9 +464,9 @@ export default function ReceivableReport() {
 			case "fromDateAfterGlobal":
 				showAlertMessage(
 					"someElementId",
-					"Date must be from",
-					GlobalfromDate1,
+					"From date must be before",
 					GlobaltoDate1,
+					"",
 					fromDateElement,
 					"formvalidation"
 				);
@@ -474,9 +474,9 @@ export default function ReceivableReport() {
 			case "toDateAfterGlobal":
 				showAlertMessage(
 					"someElementId",
-					"Date must be from",
-					GlobalfromDate1,
+					"To date must be before",
 					GlobaltoDate1,
+					"",
 					toDateElement,
 					"todatevalidation"
 				);
@@ -484,9 +484,9 @@ export default function ReceivableReport() {
 			case "toDateBeforeGlobal":
 				showAlertMessage(
 					"someElementId",
-					"Date must be from",
+					"To date must be after",
 					GlobalfromDate1,
-					GlobaltoDate1,
+					"",
 					toDateElement,
 					"todatevalidation"
 				);
@@ -494,9 +494,9 @@ export default function ReceivableReport() {
 			case "toDateBeforeFromDate":
 				showAlertMessage(
 					"someElementId",
-					"Date must be from",
-					GlobalfromDate1,
-					GlobaltoDate1,
+					"To date must be after from date",
+					"",
+					"",
 					toDateElement,
 					"todatevalidation"
 				);
@@ -514,7 +514,7 @@ export default function ReceivableReport() {
 			FLocCod: "001",
 			FYerDsc: "2024-2024",
 		};
-		// console.log(data);
+		console.log(data);
 		document.getElementById(
 			"fromdatevalidation"
 		).style.border = `1px solid ${fontcolor}`;
@@ -538,7 +538,7 @@ export default function ReceivableReport() {
 			.post(apiUrl, formData)
 			.then((response) => {
 				setIsLoading(false);
-				// console.log("Response:", response.data);
+				console.log("Response:", response.data);
 				setTotalOpening(response.data["Total Opening"]);
 				setTotalDebit(response.data["Total Debit"]);
 				setTotalCredit(response.data["Total Credit"]);
@@ -1202,8 +1202,6 @@ export default function ReceivableReport() {
 		}
 	}, [selectedRadio]);
 
-	console.log("GlobalfromDate" + GlobalfromDate);
-	console.log("GlobaltoDate" + GlobaltoDate);
 	return (
 		<>
 			<div id="someElementId"></div>
@@ -1864,17 +1862,28 @@ export default function ReceivableReport() {
 							to="/MainPage"
 							text="Return"
 							style={{ backgroundColor: "#186DB7", width: "120px" }}
+							onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
+							onBlur={(e) =>
+								(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+							}
 						/>
 						<SingleButton
 							text="PDF"
 							onClick={exportPDFHandler}
 							style={{ backgroundColor: "#186DB7", width: "120px" }}
 							onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
+							onBlur={(e) =>
+								(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+							}
 						/>
 						<SingleButton
 							text="Excel"
 							onClick={handleDownloadCSV}
 							style={{ backgroundColor: "#186DB7", width: "120px" }}
+							onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
+							onBlur={(e) =>
+								(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+							}
 						/>
 						<SingleButton
 							id="searchsubmit"
@@ -1882,6 +1891,10 @@ export default function ReceivableReport() {
 							ref={input3Ref}
 							onClick={fetchReceivableReport}
 							style={{ backgroundColor: "#186DB7", width: "120px" }}
+							onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
+							onBlur={(e) =>
+								(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+							}
 						/>
 					</div>
 				</div>
