@@ -20,7 +20,7 @@ import { fetchGetUser } from "../../Redux/action";
 import { useHotkeys } from "react-hotkeys-hook";
 // import "./ledger.css";
 
-export default function InstallarPayableReport() {
+export default function ItemSaleReport() {
 	const navigate = useNavigate();
 	const user = getUserData();
 	const organisation = getOrganisationData();
@@ -45,6 +45,7 @@ export default function InstallarPayableReport() {
 	const [totalDebit, setTotalDebit] = useState(0);
 	const [totalCredit, setTotalCredit] = useState(0);
 	const [closingBalance, setClosingBalance] = useState(0);
+	const [totalAmount, setTotalAmount] = useState(0);
 
 	// state for from DatePicker
 	const [selectedfromDate, setSelectedfromDate] = useState(null);
@@ -355,7 +356,7 @@ export default function InstallarPayableReport() {
 	}
 	window.closeAlert = closeAlert;
 
-	function fetchInstallarPayableReport() {
+	function fetchItemSaleReport() {
 		const fromDateElement = document.getElementById("fromdatevalidation");
 		const toDateElement = document.getElementById("todatevalidation");
 
@@ -522,14 +523,15 @@ export default function InstallarPayableReport() {
 			"todatevalidation"
 		).style.border = `1px solid ${fontcolor}`;
 
-		const apiUrl = apiLinks + "/InstallarPayableReport.php";
+		const apiUrl = apiLinks + "/ItemSaleReport.php";
 		setIsLoading(true);
 		const formData = new URLSearchParams({
-			code: "AMRELEC",
+			code: "EMART",
 			FLocCod: "001",
 			FYerDsc: "2024-2024",
 			FIntDat: fromInputDate,
 			FFnlDat: toInputDate,
+			FTrnTyp: transectionType,
 			FSchTxt: "",
 		}).toString();
 
@@ -849,7 +851,7 @@ export default function InstallarPayableReport() {
 				addTitle(comapnyname, "", "", pageNumber, startY, 20, 10);
 				startY += 7;
 				addTitle(
-					`Installar Payable Report From: ${fromInputDate} To: ${toInputDate}`,
+					`Item Sale Report From: ${fromInputDate} To: ${toInputDate}`,
 					"",
 					"",
 					pageNumber,
@@ -902,7 +904,7 @@ export default function InstallarPayableReport() {
 		const time = getCurrentTime();
 
 		handlePagination();
-		doc.save("InstallarPayableReport.pdf");
+		doc.save("ItemSaleReport.pdf");
 
 		const pdfBlob = doc.output("blob");
 		const pdfFile = new File([pdfBlob], "table_data.pdf", {
@@ -929,7 +931,7 @@ export default function InstallarPayableReport() {
 		worksheet.addRow([]);
 		[
 			comapnyname,
-			`Installar Payable Report From ${fromInputDate} To ${toInputDate}`,
+			`Item Sale Report From ${fromInputDate} To ${toInputDate}`,
 		].forEach((title, index) => {
 			worksheet.addRow([title]).eachCell((cell) => (cell.style = titleStyle));
 			worksheet.mergeCells(
@@ -1009,7 +1011,7 @@ export default function InstallarPayableReport() {
 		const blob = new Blob([buffer], {
 			type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 		});
-		saveAs(blob, "InstallarPayableReport.xlsx");
+		saveAs(blob, "ItemSaleReport.xlsx");
 	};
 
 	const dispatch = useDispatch();
@@ -1043,25 +1045,22 @@ export default function InstallarPayableReport() {
 	};
 
 	const firstColWidth = {
-		width: "9%",
+		width: "20%",
 	};
 	const secondColWidth = {
-		width: "43%",
+		width: "45%",
 	};
 	const thirdColWidth = {
-		width: "12%",
+		width: "14%",
 	};
 	const forthColWidth = {
-		width: "12%",
+		width: "7%",
 	};
 	const fifthColWidth = {
-		width: "12%",
-	};
-	const sixthColWidth = {
-		width: "12%",
+		width: "14%",
 	};
 
-	useHotkeys("s", fetchInstallarPayableReport);
+	useHotkeys("s", fetchItemSaleReport);
 	useHotkeys("alt+p", exportPDFHandler);
 	useHotkeys("alt+e", handleDownloadCSV);
 	useHotkeys("esc", () => navigate("/MainPage"));
@@ -1082,7 +1081,7 @@ export default function InstallarPayableReport() {
 		backgroundColor: getcolor,
 		width: isSidebarVisible ? "calc(65vw - 0%)" : "65vw",
 		position: "relative",
-		top: "35%",
+		top: "30%",
 		left: isSidebarVisible ? "50%" : "50%",
 		transform: "translate(-50%, -50%)",
 		transition: isSidebarVisible
@@ -1095,7 +1094,7 @@ export default function InstallarPayableReport() {
 		overflowY: "hidden",
 		wordBreak: "break-word",
 		textAlign: "center",
-		maxWidth: "1000px",
+		maxWidth: "55%",
 		fontSize: "15px",
 		fontStyle: "normal",
 		fontWeight: "400",
@@ -1214,7 +1213,7 @@ export default function InstallarPayableReport() {
 						borderRadius: "9px",
 					}}
 				>
-					<NavComponent textdata="Installar Payable Report" />
+					<NavComponent textdata="Item Sale Report" />
 					<div
 						className="row"
 						style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
@@ -1377,8 +1376,8 @@ export default function InstallarPayableReport() {
 									}}
 								>
 									<option value="">All</option>
-									<option value="Receivable">Receivable</option>
-									<option value="Payable">Payable</option>
+									<option value="INV">Sale</option>
+									<option value="SRN">Sale Return</option>
 								</select>
 							</div>
 						</div>
@@ -1657,16 +1656,13 @@ export default function InstallarPayableReport() {
 											Description
 										</td>
 										<td className="border-dark" style={thirdColWidth}>
-											Opening
+											Rate
 										</td>
 										<td className="border-dark" style={forthColWidth}>
-											Debit
+											Qnty
 										</td>
 										<td className="border-dark" style={fifthColWidth}>
-											Credit
-										</td>
-										<td className="border-dark" style={sixthColWidth}>
-											Balance
+											Sale Amount
 										</td>
 									</tr>
 								</thead>
@@ -1700,7 +1696,7 @@ export default function InstallarPayableReport() {
 													backgroundColor: getcolor,
 												}}
 											>
-												<td colSpan="6" className="text-center">
+												<td colSpan="5" className="text-center">
 													<Spinner animation="border" variant="primary" />
 												</td>
 											</tr>
@@ -1713,7 +1709,7 @@ export default function InstallarPayableReport() {
 															color: fontcolor,
 														}}
 													>
-														{Array.from({ length: 6 }).map((_, colIndex) => (
+														{Array.from({ length: 5 }).map((_, colIndex) => (
 															<td key={`blank-${rowIndex}-${colIndex}`}>
 																&nbsp;
 															</td>
@@ -1727,7 +1723,6 @@ export default function InstallarPayableReport() {
 												<td style={thirdColWidth}></td>
 												<td style={forthColWidth}></td>
 												<td style={fifthColWidth}></td>
-												<td style={sixthColWidth}></td>
 											</tr>
 										</>
 									) : (
@@ -1747,23 +1742,20 @@ export default function InstallarPayableReport() {
 															color: fontcolor,
 														}}
 													>
-														<td className="text-center" style={firstColWidth}>
+														<td className="text-start" style={firstColWidth}>
 															{item.code}
 														</td>
 														<td className="text-start" style={secondColWidth}>
 															{item.Description}
 														</td>
 														<td className="text-end" style={thirdColWidth}>
-															{item.Opening}
+															{item.Rate}
 														</td>
-														<td className="text-end" style={forthColWidth}>
-															{item.Debit}
+														<td className="text-center" style={forthColWidth}>
+															{item.Qnty}
 														</td>
 														<td className="text-end" style={fifthColWidth}>
-															{item.Credit}
-														</td>
-														<td className="text-end" style={sixthColWidth}>
-															{item.Balance}
+															{item["Sale Amount"]}
 														</td>
 													</tr>
 												);
@@ -1778,7 +1770,7 @@ export default function InstallarPayableReport() {
 														color: fontcolor,
 													}}
 												>
-													{Array.from({ length: 6 }).map((_, colIndex) => (
+													{Array.from({ length: 5 }).map((_, colIndex) => (
 														<td key={`blank-${rowIndex}-${colIndex}`}>
 															&nbsp;
 														</td>
@@ -1791,7 +1783,6 @@ export default function InstallarPayableReport() {
 												<td style={thirdColWidth}></td>
 												<td style={forthColWidth}></td>
 												<td style={fifthColWidth}></td>
-												<td style={sixthColWidth}></td>
 											</tr>
 										</>
 									)}
@@ -1805,7 +1796,7 @@ export default function InstallarPayableReport() {
 							borderTop: `1px solid ${fontcolor}`,
 							height: "24px",
 							display: "flex",
-							paddingRight: "1.2%",
+							paddingRight: "1.4%",
 						}}
 					>
 						<div
@@ -1828,9 +1819,7 @@ export default function InstallarPayableReport() {
 								background: getcolor,
 								borderRight: `1px solid ${fontcolor}`,
 							}}
-						>
-							<span className="mobileledger_total">{totalOpening}</span>
-						</div>
+						></div>
 						<div
 							style={{
 								...forthColWidth,
@@ -1838,7 +1827,7 @@ export default function InstallarPayableReport() {
 								borderRight: `1px solid ${fontcolor}`,
 							}}
 						>
-							<span className="mobileledger_total">{totalDebit}</span>
+							<span className="mobileledger_total">{totalQnty}</span>
 						</div>
 						<div
 							style={{
@@ -1847,16 +1836,7 @@ export default function InstallarPayableReport() {
 								borderRight: `1px solid ${fontcolor}`,
 							}}
 						>
-							<span className="mobileledger_total">{totalCredit}</span>
-						</div>
-						<div
-							style={{
-								...sixthColWidth,
-								background: getcolor,
-								borderRight: `1px solid ${fontcolor}`,
-							}}
-						>
-							<span className="mobileledger_total">{closingBalance}</span>
+							<span className="mobileledger_total">{totalAmount}</span>
 						</div>
 					</div>
 					<div
@@ -1896,7 +1876,7 @@ export default function InstallarPayableReport() {
 							id="searchsubmit"
 							text="Select"
 							ref={input3Ref}
-							onClick={fetchInstallarPayableReport}
+							onClick={fetchItemSaleReport}
 							style={{ backgroundColor: "#186DB7", width: "120px" }}
 							onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
 							onBlur={(e) =>

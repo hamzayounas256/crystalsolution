@@ -1466,7 +1466,11 @@ export default function PayableReport() {
 										customInput={
 											<div>
 												<BsCalendar
-													onClick={toggleFromCalendar}
+													onClick={
+														selectedRadio === "custom"
+															? toggleFromCalendar
+															: undefined
+													}
 													style={{
 														cursor:
 															selectedRadio === "custom"
@@ -1556,7 +1560,11 @@ export default function PayableReport() {
 										customInput={
 											<div>
 												<BsCalendar
-													onClick={toggleToCalendar}
+													onClick={
+														selectedRadio === "custom"
+															? toggleToCalendar
+															: undefined
+													}
 													style={{
 														cursor:
 															selectedRadio === "custom"
