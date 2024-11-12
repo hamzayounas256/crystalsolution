@@ -525,28 +525,13 @@ export default function ItemSaleReport() {
 		const rows = tableData.map((item) => [
 			item.code,
 			item.Description,
-			item.Opening,
-			item.Debit,
-			item.Credit,
-			item.Balance,
+			item.Rate,
+			item.Qnty,
+			item["Sale Amount"],
 		]);
-		rows.push([
-			"",
-			"Total",
-			String(totalOpening),
-			String(totalDebit),
-			String(totalCredit),
-			String(closingBalance),
-		]);
-		const headers = [
-			"Date",
-			"Description",
-			"Opening",
-			"Debit",
-			"Credit",
-			"Balance",
-		];
-		const columnWidths = [18, 80, 20, 20, 20, 25];
+		rows.push(["", "Total", "", String(totalQnty), String(totalAmount)]);
+		const headers = ["Code", "Description", "Rate", "Qnty", "Amount"];
+		const columnWidths = [18, 80, 20, 20, 25];
 		const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
 		const pageHeight = doc.internal.pageSize.height;
 		const paddingTop = 15;
@@ -608,12 +593,7 @@ export default function ItemSaleReport() {
 					doc.setFont(fontName, "normal");
 					const cellValue = String(cell);
 
-					if (
-						cellIndex === 2 ||
-						cellIndex === 3 ||
-						cellIndex === 4 ||
-						cellIndex === 5
-					) {
+					if (cellIndex === 2 || cellIndex === 3 || cellIndex === 4) {
 						const rightAlignX = startX + columnWidths[cellIndex] - 2;
 						doc.text(cellValue, rightAlignX, cellY, {
 							align: "right",
@@ -953,7 +933,7 @@ export default function ItemSaleReport() {
 		overflowY: "hidden",
 		wordBreak: "break-word",
 		textAlign: "center",
-		maxWidth: "55%",
+		maxWidth: "60%",
 		fontSize: "15px",
 		fontStyle: "normal",
 		fontWeight: "400",
@@ -1235,8 +1215,8 @@ export default function ItemSaleReport() {
 									}}
 								>
 									<option value="">All</option>
-									<option value="Receivable">Receivable</option>
-									<option value="Payable">Payable</option>
+									<option value="INV">Sale</option>
+									<option value="SRN">Sale Return</option>
 								</select>
 							</div>
 						</div>

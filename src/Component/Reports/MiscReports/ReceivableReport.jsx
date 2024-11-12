@@ -538,7 +538,7 @@ export default function ReceivableReport() {
 			String(closingBalance),
 		]);
 		const headers = [
-			"Date",
+			"Code",
 			"Description",
 			"Opening",
 			"Debit",
