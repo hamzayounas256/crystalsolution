@@ -37,7 +37,16 @@ export default function ItemSaleReport() {
 	const [saleType, setSaleType] = useState("");
 	const [searchQuery, setSearchQuery] = useState("");
 	const [transectionType, settransectionType] = useState("");
-	const [supplierList, setSupplierList] = useState([]);
+
+	const [storeType, setStoreType] = useState("");
+	const [companyType, setCompanyType] = useState("");
+	const [categoryType, setCategoryType] = useState("");
+	const [capacityType, setCapacityType] = useState("");
+
+	const [storeList, setStoreList] = useState([]);
+	const [companyList, setCompanyList] = useState([]);
+	const [categoryList, setCategoryList] = useState([]);
+	const [capacityList, setCapacityList] = useState([]);
 
 	const [totalQnty, setTotalQnty] = useState(0);
 	const [totalOpening, setTotalOpening] = useState(0);
@@ -382,27 +391,30 @@ export default function ItemSaleReport() {
 			"todatevalidation"
 		).style.border = `1px solid ${fontcolor}`;
 
-		const apiUrl = apiLinks + "/ItemSaleReport.php";
+		const apiMainUrl = apiLinks + "/ItemSaleReport.php";
 		setIsLoading(true);
-		const formData = new URLSearchParams({
+		const formMainData = new URLSearchParams({
 			code: "EMART",
 			FLocCod: "001",
 			FYerDsc: "2024-2024",
 			FIntDat: fromInputDate,
 			FFnlDat: toInputDate,
-			FRepTyp: transectionType,
+			FTrnTyp: transectionType,
+			FStrCod: storeType,
+			FCapCod: capacityType,
+			FCmpCod: companyType,
+			FCtgCod: categoryType,
 			FSchTxt: "",
 		}).toString();
 
 		axios
-			.post(apiUrl, formData)
+			.post(apiMainUrl, formMainData)
 			.then((response) => {
 				setIsLoading(false);
 				console.log("Response:", response.data);
-				setTotalOpening(response.data["Total Opening"]);
-				setTotalDebit(response.data["Total Debit"]);
-				setTotalCredit(response.data["Total Credit"]);
-				setClosingBalance(response.data["Total Balance"]);
+
+				setTotalQnty(response.data["Total Qnty"]);
+				setTotalAmount(response.data["Total Amount"]);
 
 				if (response.data && Array.isArray(response.data.Detail)) {
 					setTableData(response.data.Detail);
@@ -449,24 +461,89 @@ export default function ItemSaleReport() {
 	}, []);
 
 	useEffect(() => {
-		const apiUrl = apiLinks + "/GetStore.php";
-		const formData = new URLSearchParams({
+		//----------------- store dropdown
+		const apiStoreUrl = apiLinks + "/GetStore.php";
+		const formStoreData = new URLSearchParams({
 			FLocCod: getLocationNumber,
 			code: organisation.code,
 		}).toString();
 		axios
-			.post(apiUrl, formData)
+			.post(apiStoreUrl, formStoreData)
 			.then((response) => {
-				console.log(response.data);
+				setStoreList(response.data);
+				// console.log("STORE"+response.data);
+			})
+			.catch((error) => {
+				console.error("Error fetching data:", error);
+			});
+
+		//-------------- capacity dropdown
+		const apiCapacityUrl = apiLinks + "/GetCapacity.php";
+		const formCapacityData = new URLSearchParams({
+			// FLocCod: getLocationNumber,
+			// code: organisation.code,
+			code: "EMART",
+		}).toString();
+		axios
+			.post(apiCapacityUrl, formCapacityData)
+			.then((response) => {
+				setCapacityList(response.data);
+				// console.log("CAPACITY" + response.data);
+			})
+			.catch((error) => {
+				console.error("Error fetching data:", error);
+			});
+
+		// ------------company dropdown
+		const apiCompanyUrl = apiLinks + "/GetCompany.php";
+		const formCompanyData = new URLSearchParams({
+			FLocCod: getLocationNumber,
+			code: organisation.code,
+		}).toString();
+		axios
+			.post(apiCompanyUrl, formCompanyData)
+			.then((response) => {
+				setCompanyList(response.data);
+				// console.log("COMPANY" + response.data);
+			})
+			.catch((error) => {
+				console.error("Error fetching data:", error);
+			});
+
+		// -----------category dropdown
+		const apiCategoryUrl = apiLinks + "/GetCatg.php";
+		const formCategoryData = new URLSearchParams({
+			// FLocCod: getLocationNumber,
+			// code: organisation.code,
+			code: "EMART",
+		}).toString();
+		axios
+			.post(apiCategoryUrl, formCategoryData)
+			.then((response) => {
+				setCategoryList(response.data);
+				// console.log("CATEGORY" + response.data);
 			})
 			.catch((error) => {
 				console.error("Error fetching data:", error);
 			});
 	}, []);
 
-	const options = supplierList.map((item) => ({
-		value: item.tacccod,
-		label: `${item.tacccod}-${item.taccdsc.trim()}`,
+	const optionStore = storeList.map((item) => ({
+		value: item.tstrcod,
+		label: `${item.tstrcod}-${item.tstrdsc.trim()}`,
+	}));
+	const optionCapacity = capacityList.map((item) => ({
+		value: item.tcapcod,
+		label: `${item.tcapcod}-${item.tcapdsc.trim()}`,
+	}));
+	const optionCompany = companyList.map((item) => ({
+		value: item.tcmpcod,
+		label: `${item.tcmpcod}-${item.tcmpdsc.trim()}`,
+	}));
+
+	const optionCategory = categoryList.map((item) => ({
+		value: item.tctgcod,
+		label: `${item.tctgcod}-${item.tctgdsc.trim()}`,
 	}));
 
 	const DropdownOption = (props) => {
@@ -486,24 +563,116 @@ export default function ItemSaleReport() {
 			</components.Option>
 		);
 	};
-	const customStyles1 = (hasError) => ({
+
+	// ------------ store style customization
+	const customStylesStore = () => ({
 		control: (base, state) => ({
 			...base,
 			height: "24px",
 			minHeight: "unset",
-			width: 418,
+			width: 275,
 			fontSize: "12px",
 			backgroundColor: getcolor,
 			color: fontcolor,
 			borderRadius: 0,
-			border: hasError ? "2px solid red" : `1px solid ${fontcolor}`,
+			// border: hasError ? "2px solid red" : `1px solid ${fontcolor}`,
 			transition: "border-color 0.15s ease-in-out",
 			"&:hover": {
 				borderColor: state.isFocused ? base.borderColor : "black",
 			},
 			padding: "0 8px",
 			display: "flex",
-			alignItems: "center",
+			// alignItems: "center",
+			justifyContent: "space-between",
+		}),
+		dropdownIndicator: (base) => ({
+			...base,
+			padding: 0,
+			fontSize: "18px",
+			display: "flex",
+			textAlign: "center !important",
+		}),
+	});
+
+	// ------------ capacity style customization
+	const customStylesCapacity = () => ({
+		control: (base, state) => ({
+			...base,
+			height: "24px",
+			minHeight: "unset",
+			width: 275,
+			fontSize: "12px",
+			backgroundColor: getcolor,
+			color: fontcolor,
+			borderRadius: 0,
+			// border: hasError ? "2px solid red" : `1px solid ${fontcolor}`,
+			transition: "border-color 0.15s ease-in-out",
+			"&:hover": {
+				borderColor: state.isFocused ? base.borderColor : "black",
+			},
+			padding: "0 8px",
+			display: "flex",
+			// alignItems: "center",
+			justifyContent: "space-between",
+		}),
+		dropdownIndicator: (base) => ({
+			...base,
+			padding: 0,
+			fontSize: "18px",
+			display: "flex",
+			textAlign: "center !important",
+		}),
+	});
+
+	// ------------ company style customization
+	const customStylesCompany = () => ({
+		control: (base, state) => ({
+			...base,
+			height: "24px",
+			minHeight: "unset",
+			width: 275,
+			fontSize: "12px",
+			backgroundColor: getcolor,
+			color: fontcolor,
+			borderRadius: 0,
+			// border: hasError ? "2px solid red" : `1px solid ${fontcolor}`,
+			transition: "border-color 0.15s ease-in-out",
+			"&:hover": {
+				borderColor: state.isFocused ? base.borderColor : "black",
+			},
+			padding: "0 8px",
+			display: "flex",
+			// alignItems: "center",
+			justifyContent: "space-between",
+		}),
+		dropdownIndicator: (base) => ({
+			...base,
+			padding: 0,
+			fontSize: "18px",
+			display: "flex",
+			textAlign: "center !important",
+		}),
+	});
+
+	// ------------ category style customization
+	const customStylesCategory = () => ({
+		control: (base, state) => ({
+			...base,
+			height: "24px",
+			minHeight: "unset",
+			width: 275,
+			fontSize: "12px",
+			backgroundColor: getcolor,
+			color: fontcolor,
+			borderRadius: 0,
+			// border: hasError ? "2px solid red" : `1px solid ${fontcolor}`,
+			transition: "border-color 0.15s ease-in-out",
+			"&:hover": {
+				borderColor: state.isFocused ? base.borderColor : "black",
+			},
+			padding: "0 8px",
+			display: "flex",
+			// alignItems: "center",
 			justifyContent: "space-between",
 		}),
 		dropdownIndicator: (base) => ({
@@ -531,7 +700,7 @@ export default function ItemSaleReport() {
 		]);
 		rows.push(["", "Total", "", String(totalQnty), String(totalAmount)]);
 		const headers = ["Code", "Description", "Rate", "Qnty", "Amount"];
-		const columnWidths = [18, 80, 20, 20, 25];
+		const columnWidths = [35, 80, 20, 10, 20];
 		const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
 		const pageHeight = doc.internal.pageSize.height;
 		const paddingTop = 15;
@@ -573,10 +742,10 @@ export default function ItemSaleReport() {
 				let textColor = [0, 0, 0];
 				let fontName = normalFont;
 
-				if (isRedRow) {
-					textColor = [255, 0, 0];
-					fontName = boldFont;
-				}
+				// if (isRedRow) {
+				// 	textColor = [255, 0, 0];
+				// 	fontName = boldFont;
+				// }
 
 				doc.setDrawColor(0);
 				doc.rect(
@@ -754,19 +923,12 @@ export default function ItemSaleReport() {
 	const handleDownloadCSV = async () => {
 		const workbook = new ExcelJS.Workbook();
 		const worksheet = workbook.addWorksheet("Sheet1");
-		const numColumns = 6;
+		const numColumns = 5;
 		const titleStyle = {
 			font: { bold: true, size: 12 },
 			alignment: { horizontal: "center" },
 		};
-		const columnAlignments = [
-			"center",
-			"left",
-			"right",
-			"right",
-			"right",
-			"right",
-		];
+		const columnAlignments = ["left", "left", "right", "center", "right"];
 		worksheet.addRow([]);
 		[
 			comapnyname,
@@ -793,14 +955,7 @@ export default function ItemSaleReport() {
 				right: { style: "thin" },
 			},
 		};
-		const headers = [
-			"Code",
-			"Description",
-			"Opening",
-			"Debit",
-			"Credit",
-			"Balance",
-		];
+		const headers = ["Code", "Description", "Rate", "Qnty", "Amount"];
 		const headerRow = worksheet.addRow(headers);
 		headerRow.eachCell((cell) => {
 			cell.style = { ...headerStyle, alignment: { horizontal: "center" } };
@@ -809,24 +964,22 @@ export default function ItemSaleReport() {
 			worksheet.addRow([
 				item.code,
 				item.Description,
-				item.Opening,
-				item.Debit,
-				item.Credit,
-				item.Balance,
+				item.Rate,
+				item.Qnty,
+				item["Sale Amount"],
 			]);
 		});
 		const totalRow = worksheet.addRow([
 			"",
 			"Total",
-			totalOpening,
-			totalDebit,
-			totalCredit,
-			closingBalance,
+			"",
+			totalQnty,
+			totalAmount,
 		]);
 		totalRow.eachCell((cell) => {
 			cell.font = { bold: true };
 		});
-		[10, 45, 12, 12, 12, 15].forEach((width, index) => {
+		[20, 45, 12, 7, 12].forEach((width, index) => {
 			worksheet.getColumn(index + 1).width = width;
 		});
 		worksheet.eachRow((row, rowNumber) => {
@@ -920,7 +1073,7 @@ export default function ItemSaleReport() {
 		backgroundColor: getcolor,
 		width: isSidebarVisible ? "calc(65vw - 0%)" : "65vw",
 		position: "relative",
-		top: "35%",
+		top: "40%",
 		left: isSidebarVisible ? "50%" : "50%",
 		transform: "translate(-50%, -50%)",
 		transition: isSidebarVisible
@@ -961,6 +1114,7 @@ export default function ItemSaleReport() {
 	const handleRowClick = (index) => {
 		setSelectedIndex(index);
 	};
+
 	useEffect(() => {
 		if (selectedRowId !== null) {
 			const newIndex = tableData.findIndex(
@@ -969,6 +1123,7 @@ export default function ItemSaleReport() {
 			setSelectedIndex(newIndex);
 		}
 	}, [tableData, selectedRowId]);
+
 	const handleKeyDown = (e) => {
 		if (selectedIndex === -1 || e.target.id === "searchInput") return;
 		if (e.key === "ArrowUp") {
@@ -983,6 +1138,7 @@ export default function ItemSaleReport() {
 			scrollToSelectedRow();
 		}
 	};
+
 	const scrollToSelectedRow = () => {
 		if (selectedIndex !== -1 && rowRefs.current[selectedIndex]) {
 			rowRefs.current[selectedIndex].scrollIntoView({
@@ -991,12 +1147,14 @@ export default function ItemSaleReport() {
 			});
 		}
 	};
+
 	useEffect(() => {
 		window.addEventListener("keydown", handleKeyDown);
 		return () => {
 			window.removeEventListener("keydown", handleKeyDown);
 		};
 	}, [selectedIndex]);
+
 	useEffect(() => {
 		if (selectedIndex !== -1 && rowRefs.current[selectedIndex]) {
 			rowRefs.current[selectedIndex].scrollIntoView({
@@ -1423,7 +1581,7 @@ export default function ItemSaleReport() {
 							<div id="lastDiv" style={{ marginRight: "1px" }}>
 								<label for="searchInput" style={{ marginRight: "15px" }}>
 									<span style={{ fontSize: "15px", fontWeight: "bold" }}>
-										Search :
+										Search:
 									</span>{" "}
 								</label>
 								<input
@@ -1452,6 +1610,198 @@ export default function ItemSaleReport() {
 									}
 									onChange={(e) => setSearchQuery(e.target.value)}
 								/>
+							</div>
+						</div>
+					</div>
+					<div
+						className="row"
+						style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+					>
+						<div
+							style={{
+								width: "100%",
+								display: "flex",
+								alignItems: "center",
+								margin: "0px",
+								padding: "0px",
+								justifyContent: "space-between",
+							}}
+						>
+							<div
+								className="d-flex align-items-center"
+								style={{ marginRight: "3px" }}
+							>
+								<div
+									style={{
+										width: "100px",
+										display: "flex",
+										justifyContent: "end",
+									}}
+								>
+									<label htmlFor="fromDatePicker">
+										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+											Store:&nbsp;&nbsp;
+										</span>{" "}
+										<br />
+									</label>
+								</div>
+								<div style={{ marginLeft: "3px" }}>
+									<Select
+										className="List-select-class "
+										ref={saleSelectRef}
+										options={optionStore}
+										onKeyDown={(e) => handleSaleKeypress(e, "frominputid")}
+										id="selectedsale"
+										onChange={(selectedOption) => {
+											if (selectedOption && selectedOption.value) {
+												setStoreType(selectedOption.value);
+											} else {
+												setStoreType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+											}
+										}}
+										components={{ Option: DropdownOption }}
+										// styles={customStylesStore}
+										styles={customStylesStore()}
+										isClearable
+										placeholder="Search or select..."
+									/>
+								</div>
+							</div>
+							<div
+								className="d-flex align-items-center  "
+								style={{ marginRight: "20px" }}
+							>
+								<div
+									style={{
+										width: "100px",
+										display: "flex",
+										justifyContent: "end",
+									}}
+								>
+									<label htmlFor="fromDatePicker">
+										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+											Capacity:&nbsp;&nbsp;
+										</span>{" "}
+										<br />
+									</label>
+								</div>
+								<div style={{ marginRight: "1px" }}>
+									<Select
+										className="List-select-class "
+										ref={saleSelectRef}
+										options={optionCapacity}
+										onKeyDown={(e) => handleSaleKeypress(e, "frominputid")}
+										id="selectedsale"
+										onChange={(selectedOption) => {
+											if (selectedOption && selectedOption.value) {
+												setCapacityType(selectedOption.value);
+											} else {
+												setCapacityType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+											}
+										}}
+										components={{ Option: DropdownOption }}
+										// styles={customStylesStore}
+										styles={customStylesCapacity()}
+										isClearable
+										placeholder="Search or select..."
+									/>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div
+						className="row"
+						style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+					>
+						<div
+							style={{
+								width: "100%",
+								display: "flex",
+								alignItems: "center",
+								margin: "0px",
+								padding: "0px",
+								justifyContent: "space-between",
+							}}
+						>
+							<div
+								className="d-flex align-items-center"
+								style={{ marginRight: "3px" }}
+							>
+								<div
+									style={{
+										width: "100px",
+										display: "flex",
+										justifyContent: "end",
+									}}
+								>
+									<label htmlFor="fromDatePicker">
+										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+											Company:&nbsp;&nbsp;
+										</span>{" "}
+										<br />
+									</label>
+								</div>
+								<div style={{ marginLeft: "3px" }}>
+									<Select
+										className="List-select-class "
+										ref={saleSelectRef}
+										options={optionCompany}
+										onKeyDown={(e) => handleSaleKeypress(e, "frominputid")}
+										id="selectedsale"
+										onChange={(selectedOption) => {
+											if (selectedOption && selectedOption.value) {
+												setCompanyType(selectedOption.value);
+											} else {
+												setCompanyType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+											}
+										}}
+										components={{ Option: DropdownOption }}
+										// styles={customStylesStore}
+										styles={customStylesCompany()}
+										isClearable
+										placeholder="Search or select..."
+									/>
+								</div>
+							</div>
+							<div
+								className="d-flex align-items-center  "
+								style={{ marginRight: "20px" }}
+							>
+								<div
+									style={{
+										width: "100px",
+										display: "flex",
+										justifyContent: "end",
+									}}
+								>
+									<label htmlFor="fromDatePicker">
+										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+											Category:&nbsp;&nbsp;
+										</span>{" "}
+										<br />
+									</label>
+								</div>
+								<div style={{ marginRight: "1px" }}>
+									<Select
+										className="List-select-class "
+										ref={saleSelectRef}
+										options={optionCategory}
+										onKeyDown={(e) => handleSaleKeypress(e, "frominputid")}
+										id="selectedsale"
+										onChange={(selectedOption) => {
+											if (selectedOption && selectedOption.value) {
+												setCategoryType(selectedOption.value);
+											} else {
+												setCategoryType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+											}
+										}}
+										components={{ Option: DropdownOption }}
+										// styles={customStylesStore}
+										styles={customStylesCategory()}
+										isClearable
+										placeholder="Search or select..."
+									/>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -1635,7 +1985,7 @@ export default function ItemSaleReport() {
 							borderTop: `1px solid ${fontcolor}`,
 							height: "24px",
 							display: "flex",
-							paddingRight: "1.2%",
+							paddingRight: "1.4%",
 						}}
 					>
 						<div
