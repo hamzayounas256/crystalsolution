@@ -34,8 +34,6 @@ export default function ReceivableReport() {
 	const toRef = useRef(null);
 	const fromRef = useRef(null);
 
-	const [check, setCheck] = useState(true);
-
 	const [saleType, setSaleType] = useState("");
 	const [searchQuery, setSearchQuery] = useState("");
 	const [transectionType, settransectionType] = useState("");

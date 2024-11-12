@@ -18,7 +18,8 @@ import "react-calendar/dist/Calendar.css";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchGetUser } from "../../Redux/action";
 import { useHotkeys } from "react-hotkeys-hook";
-// import "./ledger.css";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function ItemSaleReport() {
 	const navigate = useNavigate();
@@ -32,8 +33,6 @@ export default function ItemSaleReport() {
 
 	const toRef = useRef(null);
 	const fromRef = useRef(null);
-
-	const [check, setCheck] = useState(true);
 
 	const [saleType, setSaleType] = useState("");
 	const [searchQuery, setSearchQuery] = useState("");
@@ -133,13 +132,13 @@ export default function ItemSaleReport() {
 				const [day, month, year] = formattedInput.split("-").map(Number);
 
 				if (month > 12 || month === 0) {
-					alert("Please enter a valid month (MM) between 01 and 12");
+					toast.error("Please enter a valid month (MM) between 01 and 12");
 					return;
 				}
 
 				const daysInMonth = new Date(year, month, 0).getDate();
 				if (day > daysInMonth || day === 0) {
-					alert(`Please enter a valid day (DD) for month ${month}`);
+					toast.error(`Please enter a valid day (DD) for month ${month}`);
 					return;
 				}
 
@@ -147,24 +146,14 @@ export default function ItemSaleReport() {
 				const enteredDate = new Date(year, month - 1, day);
 
 				if (GlobalfromDate && enteredDate < GlobalfromDate) {
-					showAlertMessage(
-						"someElementId",
-						"Date must be after",
-						GlobalfromDate1,
-						GlobaltoDate1,
-						fromDateElement,
-						"formvalidation"
+					toast.error(
+						`Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
 					);
 					return;
 				}
 				if (GlobalfromDate && enteredDate > GlobaltoDate) {
-					showAlertMessage(
-						"someElementId",
-						"Date must be before",
-						GlobalfromDate1,
-						GlobaltoDate1,
-						fromDateElement,
-						"formvalidation"
+					toast.error(
+						`Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
 					);
 					return;
 				}
@@ -180,14 +169,7 @@ export default function ItemSaleReport() {
 					document.getElementById("submitButton").click();
 				}
 			} else {
-				showAlertMessage(
-					"someElementId",
-					"Date must be in the format",
-					"dd-mm-yyyy",
-					"",
-					fromDateElement,
-					"formvalidation"
-				);
+				toast.error("Date must be in the format dd-mm-yyyy");
 			}
 		}
 	};
@@ -206,13 +188,13 @@ export default function ItemSaleReport() {
 				const [day, month, year] = formattedInput.split("-").map(Number);
 
 				if (month > 12 || month === 0) {
-					alert("Please enter a valid month (MM) between 01 and 12");
+					toast.error("Please enter a valid month (MM) between 01 and 12");
 					return;
 				}
 
 				const daysInMonth = new Date(year, month, 0).getDate();
 				if (day > daysInMonth || day === 0) {
-					alert(`Please enter a valid day (DD) for month ${month}`);
+					toast.error(`Please enter a valid day (DD) for month ${month}`);
 					return;
 				}
 
@@ -220,25 +202,15 @@ export default function ItemSaleReport() {
 				const enteredDate = new Date(year, month - 1, day);
 
 				if (GlobaltoDate && enteredDate > GlobaltoDate) {
-					showAlertMessage(
-						"someElementId",
-						"Date must be before",
-						GlobalfromDate1,
-						GlobaltoDate1,
-						toDateElement,
-						"todatevalidation"
+					toast.error(
+						`Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
 					);
 					return;
 				}
 
 				if (GlobaltoDate && enteredDate < GlobalfromDate) {
-					showAlertMessage(
-						"someElementId",
-						"Date must be after",
-						GlobalfromDate1,
-						GlobaltoDate1,
-						toDateElement,
-						"todatevalidation"
+					toast.error(
+						`Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
 					);
 					return;
 				}
@@ -248,14 +220,7 @@ export default function ItemSaleReport() {
 						fromInputDate.split("-").reverse().join("-")
 					);
 					if (enteredDate <= fromDate) {
-						showAlertMessage(
-							"someElementId",
-							"To date must be after from date",
-							"",
-							"",
-							toDateElement,
-							"todatevalidation"
-						);
+						toast.error("To date must be after from date");
 						return;
 					}
 				}
@@ -268,14 +233,7 @@ export default function ItemSaleReport() {
 					input1Ref.current.focus();
 				}
 			} else {
-				showAlertMessage(
-					"someElementId",
-					"Date must be in the format",
-					"dd-mm-yyyy",
-					"",
-					toDateElement,
-					"todatevalidation"
-				);
+				toast.error("Date must be in the format dd-mm-yyyy");
 			}
 		}
 	};
@@ -311,50 +269,6 @@ export default function ItemSaleReport() {
 			}
 		}
 	};
-	const showAlertMessage = (
-		elementId,
-		message,
-		fromDate,
-		toDate,
-		fromDateElement,
-		errortype
-	) => {
-		document.getElementById(elementId).innerHTML = `
-		<div class="custom-message">
-			<svg class='alert_icon' xmlns="http://www.w3.org/2000/svg" class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger" fill="currentColor" viewBox="0 0 16 16">
-			    <path d="M8.982 1.566a1.13 1.13 0 0 0-1.965 0L.165 13.233c-.457.778.091 1.767.982 1.767h13.706c.89 0 1.438-.99.982-1.767L8.982 1.566zm-.982 4.905a.905.905 0 1 1 1.81 0l-.146 3.342a.759.759 0 0 1-1.518 0l-.146-3.342zm.002 6.295a1.057 1.057 0 1 1 2.114 0 1.057 1.057 0 0 1-2.114 0z"/>
-			</svg>
-			${message} <span style="font-size: 12px; font-weight: bold;">${fromDate}</span> 
-			To <span style="font-size: 12px; font-weight: bold;">${toDate}</span>
-			<button class='alert_button' id="close-btn" onclick="closeAlert('${errortype}')" style="cursor: pointer;">
-			    <i class="bi bi-x cross_icon_styling"></i>
-			</button>
-		</div>
-		`;
-
-		setTimeout(() => {
-			const closeButton = document.getElementById("close-btn");
-			if (closeButton) {
-				closeButton.click();
-			}
-		}, 3000);
-
-		fromDateElement.style.border = "2px solid red";
-	};
-	function closeAlert(errorType) {
-		const alertElement = document.getElementById("someElementId");
-		alertElement.innerHTML = "";
-		if (errorType === "saleType") {
-			saleSelectRef.current.focus();
-		}
-		if (errorType === "formvalidation") {
-			fromRef.current.select();
-		}
-		if (errorType === "todatevalidation") {
-			toRef.current.select();
-		}
-	}
-	window.closeAlert = closeAlert;
 
 	function fetchItemSaleReport() {
 		const fromDateElement = document.getElementById("fromdatevalidation");
@@ -413,94 +327,39 @@ export default function ItemSaleReport() {
 
 		switch (errorType) {
 			case "fromDate":
-				showAlertMessage(
-					"someElementId",
-					"From date is required",
-					"",
-					"",
-					fromDateElement,
-					"formvalidation"
-				);
+				toast.error("From date is required");
 				return;
 			case "toDate":
-				showAlertMessage(
-					"someElementId",
-					"To date is required",
-					"",
-					"",
-					toDateElement,
-					"todatevalidation"
-				);
+				toast.error("To date is required");
 				return;
-			// case "fromDateInvalid":
-			// 	showAlertMessage(
-			// 		"someElementId",
-			// 		"From date must be in the format",
-			// 		"dd-mm-yyyy",
-			// 		"",
-			// 		fromDateElement,
-			// 		"formvalidation"
-			// 	);
-			// 	return;
-			// case "toDateInvalid":
-			// 	showAlertMessage(
-			// 		"someElementId",
-			// 		"To date must be in the format",
-			// 		"dd-mm-yyyy",
-			// 		"",
-			// 		toDateElement,
-			// 		"todatevalidation"
-			// 	);
-			// 	return;
+			case "fromDateInvalid":
+				toast.error("From date must be in the format dd-mm-yyyy");
+				return;
+			case "toDateInvalid":
+				toast.error("To date must be in the format dd-mm-yyyy");
+				return;
 			case "fromDateBeforeGlobal":
-				showAlertMessage(
-					"someElementId",
-					"From date must be after",
-					GlobalfromDate1,
-					"",
-					fromDateElement,
-					"formvalidation"
+				toast.error(
+					`From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
 				);
 				return;
 			case "fromDateAfterGlobal":
-				showAlertMessage(
-					"someElementId",
-					"From date must be before",
-					GlobaltoDate1,
-					"",
-					fromDateElement,
-					"formvalidation"
+				toast.error(
+					`From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
 				);
 				return;
 			case "toDateAfterGlobal":
-				showAlertMessage(
-					"someElementId",
-					"To date must be before",
-					GlobaltoDate1,
-					"",
-					toDateElement,
-					"todatevalidation"
+				toast.error(
+					`To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
 				);
 				return;
 			case "toDateBeforeGlobal":
-				showAlertMessage(
-					"someElementId",
-					"To date must be after",
-					GlobalfromDate1,
-					"",
-					toDateElement,
-					"todatevalidation"
+				toast.error(
+					`To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
 				);
 				return;
 			case "toDateBeforeFromDate":
-				showAlertMessage(
-					"someElementId",
-					"To date must be after from date",
-					"",
-					"",
-					toDateElement,
-					"todatevalidation"
-				);
+				toast.error("To date must be after from date");
 				return;
 			default:
 				break;
@@ -531,7 +390,7 @@ export default function ItemSaleReport() {
 			FYerDsc: "2024-2024",
 			FIntDat: fromInputDate,
 			FFnlDat: toInputDate,
-			FTrnTyp: transectionType,
+			FRepTyp: transectionType,
 			FSchTxt: "",
 		}).toString();
 
@@ -590,7 +449,7 @@ export default function ItemSaleReport() {
 	}, []);
 
 	useEffect(() => {
-		const apiUrl = apiLinks + "/GetActiveAccounts.php";
+		const apiUrl = apiLinks + "/GetStore.php";
 		const formData = new URLSearchParams({
 			FLocCod: getLocationNumber,
 			code: organisation.code,
@@ -598,7 +457,7 @@ export default function ItemSaleReport() {
 		axios
 			.post(apiUrl, formData)
 			.then((response) => {
-				setSupplierList(response.data);
+				console.log(response.data);
 			})
 			.catch((error) => {
 				console.error("Error fetching data:", error);
@@ -1081,7 +940,7 @@ export default function ItemSaleReport() {
 		backgroundColor: getcolor,
 		width: isSidebarVisible ? "calc(65vw - 0%)" : "65vw",
 		position: "relative",
-		top: "30%",
+		top: "35%",
 		left: isSidebarVisible ? "50%" : "50%",
 		transform: "translate(-50%, -50%)",
 		transition: isSidebarVisible
@@ -1202,7 +1061,7 @@ export default function ItemSaleReport() {
 
 	return (
 		<>
-			<div id="someElementId"></div>
+			<ToastContainer />
 			<div style={contentStyle}>
 				<div
 					style={{
@@ -1376,8 +1235,8 @@ export default function ItemSaleReport() {
 									}}
 								>
 									<option value="">All</option>
-									<option value="INV">Sale</option>
-									<option value="SRN">Sale Return</option>
+									<option value="Receivable">Receivable</option>
+									<option value="Payable">Payable</option>
 								</select>
 							</div>
 						</div>
@@ -1662,7 +1521,7 @@ export default function ItemSaleReport() {
 											Qnty
 										</td>
 										<td className="border-dark" style={fifthColWidth}>
-											Sale Amount
+											Amount
 										</td>
 									</tr>
 								</thead>
@@ -1796,7 +1655,7 @@ export default function ItemSaleReport() {
 							borderTop: `1px solid ${fontcolor}`,
 							height: "24px",
 							display: "flex",
-							paddingRight: "1.4%",
+							paddingRight: "1.2%",
 						}}
 					>
 						<div
