@@ -464,7 +464,6 @@ export default function ItemSaleReport() {
 		//----------------- store dropdown
 		const apiStoreUrl = apiLinks + "/GetStore.php";
 		const formStoreData = new URLSearchParams({
-			FLocCod: getLocationNumber,
 			code: organisation.code,
 		}).toString();
 		axios
@@ -497,7 +496,6 @@ export default function ItemSaleReport() {
 		// ------------company dropdown
 		const apiCompanyUrl = apiLinks + "/GetCompany.php";
 		const formCompanyData = new URLSearchParams({
-			FLocCod: getLocationNumber,
 			code: organisation.code,
 		}).toString();
 		axios
@@ -576,7 +574,7 @@ export default function ItemSaleReport() {
 			...base,
 			height: "24px",
 			minHeight: "unset",
-			width: 275,
+			width: "275px",
 			fontSize: "12px",
 			backgroundColor: getcolor,
 			color: fontcolor,
@@ -1046,16 +1044,16 @@ export default function ItemSaleReport() {
 		width: "20%",
 	};
 	const secondColWidth = {
-		width: "45%",
+		width: "49%",
 	};
 	const thirdColWidth = {
-		width: "14%",
+		width: "12%",
 	};
 	const forthColWidth = {
 		width: "7%",
 	};
 	const fifthColWidth = {
-		width: "14%",
+		width: "12%",
 	};
 
 	useHotkeys("s", fetchItemSaleReport);
@@ -1092,7 +1090,7 @@ export default function ItemSaleReport() {
 		overflowY: "hidden",
 		wordBreak: "break-word",
 		textAlign: "center",
-		maxWidth: "60%",
+		maxWidth: "800px",
 		fontSize: "15px",
 		fontStyle: "normal",
 		fontWeight: "400",
@@ -1329,10 +1327,7 @@ export default function ItemSaleReport() {
 							</div>
 
 							{/* To Date */}
-							<div
-								className="d-flex align-items-center"
-								// style={{ marginLeft: "15px" }}
-							>
+							<div className="d-flex align-items-center">
 								<div
 									style={{
 										width: "60px",
@@ -1342,7 +1337,7 @@ export default function ItemSaleReport() {
 								>
 									<label htmlFor="toDatePicker">
 										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
-											To:
+											To:&nbsp;&nbsp;
 										</span>
 									</label>
 								</div>
@@ -1355,7 +1350,6 @@ export default function ItemSaleReport() {
 										alignItems: "center",
 										height: "24px",
 										justifyContent: "center",
-										marginLeft: "15px",
 										background: getcolor,
 									}}
 									onFocus={(e) =>
@@ -1450,7 +1444,9 @@ export default function ItemSaleReport() {
 											}
 										/>
 										&nbsp;
-										<label htmlFor="custom">Custom</label>
+										<label htmlFor="custom" style={{ fontSize: "14px" }}>
+											Custom
+										</label>
 									</div>
 									<div className="d-flex align-items-baseline mx-2">
 										<input
@@ -1467,7 +1463,9 @@ export default function ItemSaleReport() {
 											}
 										/>
 										&nbsp;
-										<label htmlFor="30">30 Days</label>
+										<label htmlFor="30" style={{ fontSize: "14px" }}>
+											30 Days
+										</label>
 									</div>
 									<div className="d-flex align-items-baseline mx-2">
 										<input
@@ -1484,7 +1482,9 @@ export default function ItemSaleReport() {
 											}
 										/>
 										&nbsp;
-										<label htmlFor="60">60 Days</label>
+										<label htmlFor="60" style={{ fontSize: "14px" }}>
+											60 Days
+										</label>
 									</div>
 									<div className="d-flex align-items-baseline mx-2">
 										<input
@@ -1501,7 +1501,9 @@ export default function ItemSaleReport() {
 											}
 										/>
 										&nbsp;
-										<label htmlFor="90">90 Days</label>
+										<label htmlFor="90" style={{ fontSize: "14px" }}>
+											90 Days
+										</label>
 									</div>
 								</div>
 							</div>
@@ -1694,7 +1696,7 @@ export default function ItemSaleReport() {
 									value={transectionType}
 									onChange={handleTransactionTypeChange}
 									style={{
-										width: "200px",
+										width: "275px",
 										height: "24px",
 										// marginLeft: "15px",
 										backgroundColor: getcolor,
@@ -1789,7 +1791,7 @@ export default function ItemSaleReport() {
 										placeholder="Item description"
 										value={searchQuery}
 										style={{
-											width: "200px",
+											width: "275px",
 											height: "24px",
 											fontSize: "12px",
 											color: fontcolor,
@@ -1811,6 +1813,7 @@ export default function ItemSaleReport() {
 						</div>
 					</div>
 					<div>
+						{/* Table Head */}
 						<div
 							style={{
 								overflowY: "auto",
@@ -1862,6 +1865,7 @@ export default function ItemSaleReport() {
 								</thead>
 							</table>
 						</div>
+						{/* Table Body */}
 						<div
 							className="table-scroll"
 							style={{
@@ -1984,6 +1988,7 @@ export default function ItemSaleReport() {
 							</table>
 						</div>
 					</div>
+					{/* Table Footer */}
 					<div
 						style={{
 							borderBottom: `1px solid ${fontcolor}`,
@@ -2033,6 +2038,7 @@ export default function ItemSaleReport() {
 							<span className="mobileledger_total">{totalAmount}</span>
 						</div>
 					</div>
+					{/* Action Buttons */}
 					<div
 						style={{
 							margin: "5px",
