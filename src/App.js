@@ -45,6 +45,7 @@ import InstallarPayableReport from "./Component/Reports/InstallationReports/Inst
 import DailyCashBankBalance from "./Component/Reports/DailyReports/DailyCashBankBalance.jsx";
 import DailyCollectionReport from "./Component/Reports/DailyReports/DailyCollectionReport.jsx";
 import ItemSaleReport from "./Component/Reports/ItemReports/ItemSaleReport.jsx";
+import ItemPurchaseReport from "./Component/Reports/ItemReports/ItemPurchaseReport.jsx";
 
 function App() {
 	const queryClient = new QueryClient();
@@ -184,6 +185,11 @@ function App() {
 									exact
 									path="/ItemSaleReport"
 									element={<ItemSaleReport />}
+								/>
+								<Route
+									exact
+									path="/ItemPurchaseReport"
+									element={<ItemPurchaseReport />}
 								/>
 							</Route>
 						</Routes>

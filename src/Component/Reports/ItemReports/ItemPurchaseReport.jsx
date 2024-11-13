@@ -22,7 +22,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./ItemReports.css";
 
-export default function ItemSaleReport() {
+export default function ItemPurchaseReport() {
 	const navigate = useNavigate();
 	const user = getUserData();
 	const organisation = getOrganisationData();
@@ -291,7 +291,7 @@ export default function ItemSaleReport() {
 		}
 	};
 
-	function fetchItemSaleReport() {
+	function fetchItemPurchaseReport() {
 		const fromDateElement = document.getElementById("fromdatevalidation");
 		const toDateElement = document.getElementById("todatevalidation");
 
@@ -403,7 +403,7 @@ export default function ItemSaleReport() {
 			"todatevalidation"
 		).style.border = `1px solid ${fontcolor}`;
 
-		const apiMainUrl = apiLinks + "/ItemSaleReport.php";
+		const apiMainUrl = apiLinks + "/ItemPurchaseReport.php";
 		setIsLoading(true);
 		const formMainData = new URLSearchParams({
 			code: "EMART",
@@ -712,7 +712,7 @@ export default function ItemSaleReport() {
 			item.Description,
 			item.Rate,
 			item.Qnty,
-			item["Sale Amount"],
+			item["Pur Amount"],
 		]);
 		rows.push(["", "Total", "", String(totalQnty), String(totalAmount)]);
 		const headers = ["Code", "Description", "Rate", "Qnty", "Amount"];
@@ -875,7 +875,7 @@ export default function ItemSaleReport() {
 				addTitle(comapnyname, "", "", pageNumber, startY, 20, 10);
 				startY += 7;
 				addTitle(
-					`Item Sale Report From: ${fromInputDate} To: ${toInputDate}`,
+					`Item Purchase Report From: ${fromInputDate} To: ${toInputDate}`,
 					"",
 					"",
 					pageNumber,
@@ -928,7 +928,7 @@ export default function ItemSaleReport() {
 		const time = getCurrentTime();
 
 		handlePagination();
-		doc.save("ItemSaleReport.pdf");
+		doc.save("ItemPurchaseReport.pdf");
 
 		const pdfBlob = doc.output("blob");
 		const pdfFile = new File([pdfBlob], "table_data.pdf", {
@@ -948,7 +948,7 @@ export default function ItemSaleReport() {
 		worksheet.addRow([]);
 		[
 			comapnyname,
-			`Item Sale Report From ${fromInputDate} To ${toInputDate}`,
+			`Item Purchase Report From ${fromInputDate} To ${toInputDate}`,
 		].forEach((title, index) => {
 			worksheet.addRow([title]).eachCell((cell) => (cell.style = titleStyle));
 			worksheet.mergeCells(
@@ -982,7 +982,7 @@ export default function ItemSaleReport() {
 				item.Description,
 				item.Rate,
 				item.Qnty,
-				item["Sale Amount"],
+				item["Pur Amount"],
 			]);
 		});
 		const totalRow = worksheet.addRow([
@@ -1019,7 +1019,7 @@ export default function ItemSaleReport() {
 		const blob = new Blob([buffer], {
 			type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 		});
-		saveAs(blob, "ItemSaleReport.xlsx");
+		saveAs(blob, "ItemPurchaseReport.xlsx");
 	};
 
 	const dispatch = useDispatch();
@@ -1068,7 +1068,7 @@ export default function ItemSaleReport() {
 		width: "12%",
 	};
 
-	useHotkeys("s", fetchItemSaleReport);
+	useHotkeys("s", fetchItemPurchaseReport);
 	useHotkeys("alt+p", exportPDFHandler);
 	useHotkeys("alt+e", handleDownloadCSV);
 	useHotkeys("esc", () => navigate("/MainPage"));
@@ -1294,7 +1294,7 @@ export default function ItemSaleReport() {
 						borderRadius: "9px",
 					}}
 				>
-					<NavComponent textdata="Item Sale Report" />
+					<NavComponent textdata="Item Purchase Report" />
 
 					{/* ------------1st row */}
 					<div
@@ -2045,7 +2045,7 @@ export default function ItemSaleReport() {
 															{item.Qnty}
 														</td>
 														<td className="text-end" style={fifthColWidth}>
-															{item["Sale Amount"]}
+															{item["Pur Amount"]}
 														</td>
 													</tr>
 												);
@@ -2168,7 +2168,7 @@ export default function ItemSaleReport() {
 							id="searchsubmit"
 							text="Select"
 							ref={selectButtonRef}
-							onClick={fetchItemSaleReport}
+							onClick={fetchItemPurchaseReport}
 							style={{ backgroundColor: "#186DB7", width: "120px" }}
 							onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
 							onBlur={(e) =>

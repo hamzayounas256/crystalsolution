@@ -237,7 +237,7 @@ background: transparent !important;
 }
 .table-scroll::-webkit-scrollbar-track {
 	/* background: #fff; */
-	background: #021a33;
+	/* background: #021a33; */
 }
 .table-scroll::-webkit-scrollbar-thumb {
 	background-color: #3368b5;
