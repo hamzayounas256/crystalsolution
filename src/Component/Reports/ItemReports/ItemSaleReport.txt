@@ -1217,8 +1217,150 @@ export default function ItemSaleReport() {
 					}}
 				>
 					<NavComponent textdata="Item Sale Report" />
+					<div
+						className="row"
+						style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+					>
+						<div
+							style={{
+								width: "100%",
+								display: "flex",
+								alignItems: "center",
+								margin: "0px",
+								padding: "0px",
+								justifyContent: "space-between",
+							}}
+						>
+							{/* radio checks */}
+							<div
+								className="d-flex align-items-center"
+								// style={{ marginRight: "15px" }}
+							>
+								<div
+									style={{
+										display: "flex",
+										justifyContent: "evenly",
+									}}
+								>
+									<div className="d-flex align-items-baseline mx-2">
+										<input
+											type="radio"
+											name="dateRange"
+											id="custom"
+											checked={selectedRadio === "custom"}
+											onChange={() => handleRadioChange(0)}
+											onFocus={(e) =>
+												(e.currentTarget.style.border = "2px solid red")
+											}
+											onBlur={(e) =>
+												(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+											}
+										/>
+										&nbsp;
+										<label htmlFor="custom">Custom</label>
+									</div>
+									<div className="d-flex align-items-baseline mx-2">
+										<input
+											type="radio"
+											name="dateRange"
+											id="30"
+											checked={selectedRadio === "30days"}
+											onChange={() => handleRadioChange(30)}
+											onFocus={(e) =>
+												(e.currentTarget.style.border = "2px solid red")
+											}
+											onBlur={(e) =>
+												(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+											}
+										/>
+										&nbsp;
+										<label htmlFor="30">30 Days</label>
+									</div>
+									<div className="d-flex align-items-baseline mx-2">
+										<input
+											type="radio"
+											name="dateRange"
+											id="60"
+											checked={selectedRadio === "60days"}
+											onChange={() => handleRadioChange(60)}
+											onFocus={(e) =>
+												(e.currentTarget.style.border = "2px solid red")
+											}
+											onBlur={(e) =>
+												(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+											}
+										/>
+										&nbsp;
+										<label htmlFor="60">60 Days</label>
+									</div>
+									<div className="d-flex align-items-baseline mx-2">
+										<input
+											type="radio"
+											name="dateRange"
+											id="90"
+											checked={selectedRadio === "90days"}
+											onChange={() => handleRadioChange(90)}
+											onFocus={(e) =>
+												(e.currentTarget.style.border = "2px solid red")
+											}
+											onBlur={(e) =>
+												(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+											}
+										/>
+										&nbsp;
+										<label htmlFor="90">90 Days</label>
+									</div>
+								</div>
+							</div>
 
-					{/* ------------1st row */}
+							{/* Type */}
+							<div
+								className="d-flex align-items-center"
+								// style={{ marginRight: "21px" }}
+							>
+								<div
+									style={{
+										width: "60px",
+										display: "flex",
+										justifyContent: "end",
+									}}
+								>
+									<label htmlFor="transactionType">
+										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+											Type:
+										</span>
+									</label>
+								</div>
+								<select
+									ref={input1Ref}
+									onKeyDown={(e) => handleKeyPress(e, input2Ref)}
+									id="submitButton"
+									name="type"
+									onFocus={(e) =>
+										(e.currentTarget.style.border = "4px solid red")
+									}
+									onBlur={(e) =>
+										(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+									}
+									value={transectionType}
+									onChange={handleTransactionTypeChange}
+									style={{
+										width: "200px",
+										height: "24px",
+										marginLeft: "15px",
+										backgroundColor: getcolor,
+										border: `1px solid ${fontcolor}`,
+										fontSize: "12px",
+										color: fontcolor,
+									}}
+								>
+									<option value="">All</option>
+									<option value="INV">Sale</option>
+									<option value="SRN">Sale Return</option>
+								</select>
+							</div>
+						</div>
+					</div>
 					<div
 						className="row"
 						style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
@@ -1234,10 +1376,7 @@ export default function ItemSaleReport() {
 							}}
 						>
 							{/* From Date */}
-							<div
-								className="d-flex align-items-center"
-								style={{ marginLeft: "20px" }}
-							>
+							<div className="d-flex align-items-center">
 								<div
 									style={{
 										width: "80px",
@@ -1247,7 +1386,7 @@ export default function ItemSaleReport() {
 								>
 									<label htmlFor="fromDatePicker">
 										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
-											From:&nbsp;&nbsp;
+											From:
 										</span>
 									</label>
 								</div>
@@ -1260,6 +1399,7 @@ export default function ItemSaleReport() {
 										alignItems: "center",
 										height: "24px",
 										justifyContent: "center",
+										marginLeft: "3px",
 										background: getcolor,
 									}}
 									onFocus={(e) =>
@@ -1424,90 +1564,152 @@ export default function ItemSaleReport() {
 								</div>
 							</div>
 
-							{/* radio checks */}
-							<div
-								className="d-flex align-items-center"
-								style={{ marginRight: "15px" }}
-							>
+							{/* Search */}
+							<div className="d-flex align-items-center">
 								<div
-									style={{
-										display: "flex",
-										justifyContent: "evenly",
-									}}
+
+								// style={{ marginRight: "1px" }}
 								>
-									<div className="d-flex align-items-baseline mx-2">
-										<input
-											type="radio"
-											name="dateRange"
-											id="custom"
-											checked={selectedRadio === "custom"}
-											onChange={() => handleRadioChange(0)}
-											onFocus={(e) =>
-												(e.currentTarget.style.border = "2px solid red")
-											}
-											onBlur={(e) =>
-												(e.currentTarget.style.border = `1px solid ${fontcolor}`)
-											}
-										/>
-										&nbsp;
-										<label htmlFor="custom">Custom</label>
-									</div>
-									<div className="d-flex align-items-baseline mx-2">
-										<input
-											type="radio"
-											name="dateRange"
-											id="30"
-											checked={selectedRadio === "30days"}
-											onChange={() => handleRadioChange(30)}
-											onFocus={(e) =>
-												(e.currentTarget.style.border = "2px solid red")
-											}
-											onBlur={(e) =>
-												(e.currentTarget.style.border = `1px solid ${fontcolor}`)
-											}
-										/>
-										&nbsp;
-										<label htmlFor="30">30 Days</label>
-									</div>
-									<div className="d-flex align-items-baseline mx-2">
-										<input
-											type="radio"
-											name="dateRange"
-											id="60"
-											checked={selectedRadio === "60days"}
-											onChange={() => handleRadioChange(60)}
-											onFocus={(e) =>
-												(e.currentTarget.style.border = "2px solid red")
-											}
-											onBlur={(e) =>
-												(e.currentTarget.style.border = `1px solid ${fontcolor}`)
-											}
-										/>
-										&nbsp;
-										<label htmlFor="60">60 Days</label>
-									</div>
-									<div className="d-flex align-items-baseline mx-2">
-										<input
-											type="radio"
-											name="dateRange"
-											id="90"
-											checked={selectedRadio === "90days"}
-											onChange={() => handleRadioChange(90)}
-											onFocus={(e) =>
-												(e.currentTarget.style.border = "2px solid red")
-											}
-											onBlur={(e) =>
-												(e.currentTarget.style.border = `1px solid ${fontcolor}`)
-											}
-										/>
-										&nbsp;
-										<label htmlFor="90">90 Days</label>
-									</div>
+									<label
+										for="searchInput"
+										// style={{ marginRight: "15px" }}
+									>
+										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+											Search:
+										</span>{" "}
+									</label>
+								</div>
+								<div>
+									<input
+										ref={input2Ref}
+										onKeyDown={(e) => handleKeyPress(e, input3Ref)}
+										type="text"
+										id="searchsubmit"
+										placeholder="Item description"
+										value={searchQuery}
+										style={{
+											marginRight: "20px",
+											width: "200px",
+											height: "24px",
+											fontSize: "12px",
+											color: fontcolor,
+											backgroundColor: getcolor,
+											border: `1px solid ${fontcolor}`,
+											outline: "none",
+											paddingLeft: "10px",
+										}}
+										onFocus={(e) =>
+											(e.currentTarget.style.border = "2px solid red")
+										}
+										onBlur={(e) =>
+											(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+										}
+										onChange={(e) => setSearchQuery(e.target.value)}
+									/>
 								</div>
 							</div>
 						</div>
 					</div>
-					{/* --------2nd row */}
+					<div
+						className="row"
+						style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+					>
+						<div
+							style={{
+								width: "100%",
+								display: "flex",
+								alignItems: "center",
+								margin: "0px",
+								padding: "0px",
+								justifyContent: "space-between",
+							}}
+						>
+							{/* Store Select */}
+							<div
+								className="d-flex align-items-center"
+								// style={{ marginRight: "3px" }}
+							>
+								<div
+									style={{
+										width: "100px",
+										display: "flex",
+										justifyContent: "end",
+									}}
+								>
+									<label htmlFor="fromDatePicker">
+										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+											Store:&nbsp;&nbsp;
+										</span>{" "}
+										<br />
+									</label>
+								</div>
+								<div style={{ marginLeft: "3px" }}>
+									<Select
+										className="List-select-class "
+										ref={saleSelectRef}
+										options={optionStore}
+										onKeyDown={(e) => handleSaleKeypress(e, "frominputid")}
+										id="selectedsale"
+										onChange={(selectedOption) => {
+											if (selectedOption && selectedOption.value) {
+												setStoreType(selectedOption.value);
+											} else {
+												setStoreType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+											}
+										}}
+										components={{ Option: DropdownOption }}
+										// styles={customStylesStore}
+										styles={customStylesStore()}
+										isClearable
+										placeholder="Search or select..."
+									/>
+								</div>
+							</div>
+
+							{/* Capacity Select */}
+							<div
+								className="d-flex align-items-center  "
+								// style={{ marginRight: "20px" }}
+							>
+								<div
+									style={{
+										width: "100px",
+										display: "flex",
+										justifyContent: "end",
+									}}
+								>
+									<label htmlFor="fromDatePicker">
+										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+											Capacity:&nbsp;&nbsp;
+										</span>{" "}
+										<br />
+									</label>
+								</div>
+								<div style={{ marginRight: "1px" }}>
+									<Select
+										className="List-select-class "
+										ref={saleSelectRef}
+										options={optionCapacity}
+										onKeyDown={(e) => handleSaleKeypress(e, "frominputid")}
+										id="selectedsale"
+										onChange={(selectedOption) => {
+											if (selectedOption && selectedOption.value) {
+												setCapacityType(selectedOption.value);
+											} else {
+												setCapacityType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+											}
+										}}
+										components={{ Option: DropdownOption }}
+										// styles={customStylesStore}
+										styles={customStylesCapacity()}
+										isClearable
+										placeholder="Search or select..."
+									/>
+								</div>
+							</div>
+						</div>
+					</div>
+
 					<div
 						className="row"
 						style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
@@ -1523,7 +1725,10 @@ export default function ItemSaleReport() {
 							}}
 						>
 							{/* Company Select */}
-							<div className="d-flex align-items-center">
+							<div
+								className="d-flex align-items-center"
+								// style={{ marginRight: "3px" }}
+							>
 								<div
 									style={{
 										width: "100px",
@@ -1538,7 +1743,7 @@ export default function ItemSaleReport() {
 										<br />
 									</label>
 								</div>
-								<div>
+								<div style={{ marginLeft: "3px" }}>
 									<Select
 										className="List-select-class "
 										ref={saleSelectRef}
@@ -1561,65 +1766,6 @@ export default function ItemSaleReport() {
 								</div>
 							</div>
 
-							{/* Store Select */}
-							<div
-								className="d-flex align-items-center"
-								style={{ marginRight: "20px" }}
-							>
-								<div
-									style={{
-										width: "100px",
-										display: "flex",
-										justifyContent: "end",
-									}}
-								>
-									<label htmlFor="fromDatePicker">
-										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
-											Store:&nbsp;&nbsp;
-										</span>{" "}
-										<br />
-									</label>
-								</div>
-								<div>
-									<Select
-										className="List-select-class "
-										ref={saleSelectRef}
-										options={optionStore}
-										onKeyDown={(e) => handleSaleKeypress(e, "frominputid")}
-										id="selectedsale"
-										onChange={(selectedOption) => {
-											if (selectedOption && selectedOption.value) {
-												setStoreType(selectedOption.value);
-											} else {
-												setStoreType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
-											}
-										}}
-										components={{ Option: DropdownOption }}
-										// styles={customStylesStore}
-										styles={customStylesStore()}
-										isClearable
-										placeholder="Search or select..."
-									/>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					{/* ------------3rd row */}
-					<div
-						className="row"
-						style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-					>
-						<div
-							style={{
-								width: "100%",
-								display: "flex",
-								alignItems: "center",
-								margin: "0px",
-								padding: "0px",
-								justifyContent: "space-between",
-							}}
-						>
 							{/* Category Select  */}
 							<div
 								className="d-flex align-items-center  "
@@ -1639,7 +1785,7 @@ export default function ItemSaleReport() {
 										<br />
 									</label>
 								</div>
-								<div>
+								<div style={{ marginRight: "1px" }}>
 									<Select
 										className="List-select-class "
 										ref={saleSelectRef}
@@ -1658,153 +1804,6 @@ export default function ItemSaleReport() {
 										styles={customStylesCategory()}
 										isClearable
 										placeholder="Search or select..."
-									/>
-								</div>
-							</div>
-
-							{/* Type */}
-							<div
-								className="d-flex align-items-center"
-								style={{ marginRight: "20px" }}
-							>
-								<div
-									style={{
-										width: "60px",
-										display: "flex",
-										justifyContent: "end",
-									}}
-								>
-									<label htmlFor="transactionType">
-										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
-											Type:&nbsp;&nbsp;
-										</span>
-									</label>
-								</div>
-								<select
-									ref={input1Ref}
-									onKeyDown={(e) => handleKeyPress(e, input2Ref)}
-									id="submitButton"
-									name="type"
-									onFocus={(e) =>
-										(e.currentTarget.style.border = "4px solid red")
-									}
-									onBlur={(e) =>
-										(e.currentTarget.style.border = `1px solid ${fontcolor}`)
-									}
-									value={transectionType}
-									onChange={handleTransactionTypeChange}
-									style={{
-										width: "200px",
-										height: "24px",
-										// marginLeft: "15px",
-										backgroundColor: getcolor,
-										border: `1px solid ${fontcolor}`,
-										fontSize: "12px",
-										color: fontcolor,
-									}}
-								>
-									<option value="">All</option>
-									<option value="INV">Sale</option>
-									<option value="SRN">Sale Return</option>
-								</select>
-							</div>
-						</div>
-					</div>
-
-					{/* ------------4th row */}
-					<div
-						className="row"
-						style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-					>
-						<div
-							style={{
-								width: "100%",
-								display: "flex",
-								alignItems: "center",
-								margin: "0px",
-								padding: "0px",
-								justifyContent: "space-between",
-							}}
-						>
-							{/* Capacity Select */}
-							<div
-								className="d-flex align-items-center  "
-								// style={{ marginRight: "20px" }}
-							>
-								<div
-									style={{
-										width: "100px",
-										display: "flex",
-										justifyContent: "end",
-									}}
-								>
-									<label htmlFor="fromDatePicker">
-										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
-											Capacity:&nbsp;&nbsp;
-										</span>{" "}
-										<br />
-									</label>
-								</div>
-								<div>
-									<Select
-										className="List-select-class "
-										ref={saleSelectRef}
-										options={optionCapacity}
-										onKeyDown={(e) => handleSaleKeypress(e, "frominputid")}
-										id="selectedsale"
-										onChange={(selectedOption) => {
-											if (selectedOption && selectedOption.value) {
-												setCapacityType(selectedOption.value);
-											} else {
-												setCapacityType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
-											}
-										}}
-										components={{ Option: DropdownOption }}
-										// styles={customStylesStore}
-										styles={customStylesCapacity()}
-										isClearable
-										placeholder="Search or select..."
-									/>
-								</div>
-							</div>
-
-							{/* Search */}
-							<div
-								className="d-flex align-items-center"
-								style={{ marginRight: "20px" }}
-							>
-								<div>
-									<label for="searchInput">
-										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
-											Search:&nbsp;&nbsp;
-										</span>
-									</label>
-								</div>
-								<div>
-									<input
-										ref={input2Ref}
-										onKeyDown={(e) => handleKeyPress(e, input3Ref)}
-										type="text"
-										id="searchsubmit"
-										placeholder="Item description"
-										value={searchQuery}
-										style={{
-											width: "200px",
-											height: "24px",
-											fontSize: "12px",
-											color: fontcolor,
-											backgroundColor: getcolor,
-											border: `1px solid ${fontcolor}`,
-											outline: "none",
-											paddingLeft: "10px",
-										}}
-										onFocus={(e) =>
-											(e.currentTarget.style.border = "2px solid red")
-										}
-										onBlur={(e) =>
-											(e.currentTarget.style.border = `1px solid ${fontcolor}`)
-										}
-										onChange={(e) => setSearchQuery(e.target.value)}
 									/>
 								</div>
 							</div>
