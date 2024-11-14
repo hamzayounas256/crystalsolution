@@ -1226,15 +1226,87 @@ export default function ItemSaleReport() {
 	};
 
 	const handleFromDateEnter = (e) => {
-		if (e.key === "Enter") {
-			e.preventDefault();
-			focusNextElement(fromRef, toRef);
+		if (e.key !== "Enter") return;
+		e.preventDefault();
+
+		const inputDate = e.target.value;
+		const formattedDate = inputDate.replace(
+			/^(\d{2})(\d{2})(\d{4})$/,
+			"$1-$2-$3"
+		);
+
+		// Basic format validation (dd-mm-yyyy)
+		if (
+			!/^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/.test(formattedDate)
+		) {
+			toast.error("Date must be in the format dd-mm-yyyy");
+			return;
 		}
+
+		const [day, month, year] = formattedDate.split("-").map(Number);
+		const enteredDate = new Date(year, month - 1, day);
+		const daysInMonth = new Date(year, month, 0).getDate();
+
+		// Validate month, day, and date range
+		if (month < 1 || month > 12 || day < 1 || day > daysInMonth) {
+			toast.error("Invalid date. Please check the day and month.");
+			return;
+		}
+		if (enteredDate < GlobalfromDate || enteredDate > GlobaltoDate) {
+			toast.error(
+				`Date must be between ${GlobalfromDate1} and ${GlobaltoDate1}`
+			);
+			return;
+		}
+
+		// Update input value and state
+		e.target.value = formattedDate;
+		setfromInputDate(formattedDate); // Update the state with formatted date
+
+		// Move focus to the next element
+		focusNextElement(fromRef, toRef);
 	};
 
 	const handleToDateEnter = (e) => {
 		if (e.key === "Enter") {
+			if (e.key !== "Enter") return;
 			e.preventDefault();
+
+			const inputDate = e.target.value;
+			const formattedDate = inputDate.replace(
+				/^(\d{2})(\d{2})(\d{4})$/,
+				"$1-$2-$3"
+			);
+
+			// Basic format validation (dd-mm-yyyy)
+			if (
+				!/^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/.test(formattedDate)
+			) {
+				toast.error("Date must be in the format dd-mm-yyyy");
+				return;
+			}
+
+			const [day, month, year] = formattedDate.split("-").map(Number);
+			const enteredDate = new Date(year, month - 1, day);
+			const daysInMonth = new Date(year, month, 0).getDate();
+
+			// Validate month, day, and date range
+			if (month < 1 || month > 12 || day < 1 || day > daysInMonth) {
+				toast.error("Invalid date. Please check the day and month.");
+				return;
+			}
+			if (enteredDate < GlobalfromDate || enteredDate > GlobaltoDate) {
+				toast.error(
+					`Date must be between ${GlobalfromDate1} and ${GlobaltoDate1}`
+				);
+				return;
+			}
+
+			// Update input value and state
+			e.target.value = formattedDate;
+			settoInputDate(formattedDate); // Update the state with formatted date
+
+			// Move focus to the next element
 			focusNextElement(toRef, companyRef);
 		}
 	};

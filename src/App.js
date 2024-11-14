@@ -46,6 +46,7 @@ import DailyCashBankBalance from "./Component/Reports/DailyReports/DailyCashBank
 import DailyCollectionReport from "./Component/Reports/DailyReports/DailyCollectionReport.jsx";
 import ItemSaleReport from "./Component/Reports/ItemReports/ItemSaleReport.jsx";
 import ItemPurchaseReport from "./Component/Reports/ItemReports/ItemPurchaseReport.jsx";
+import DailySaleReport from "./Component/Reports/DailyReports/DailySaleReport.jsx";
 
 function App() {
 	const queryClient = new QueryClient();
@@ -160,6 +161,7 @@ function App() {
 									path="/Cash&BankBalance"
 									element={<DailyCashBankBalance />}
 								/>
+								<Route exact path="/SaleReport" element={<DailySaleReport />} />
 
 								{/* Misc Reports */}
 								<Route

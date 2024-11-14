@@ -20,9 +20,9 @@ import { fetchGetUser } from "../../Redux/action";
 import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import "./ItemReports.css";
+// import "./ItemReports.css";
 
-export default function ItemPurchaseReport() {
+export default function DailySaleReport() {
 	const navigate = useNavigate();
 	const user = getUserData();
 	const organisation = getOrganisationData();
@@ -267,31 +267,31 @@ export default function ItemPurchaseReport() {
 	const handleToInputChange = (e) => {
 		settoInputDate(e.target.value);
 	};
-	const handleSaleKeypress = (event, inputId) => {
-		if (event.key === "Enter") {
-			const selectedOption = saleSelectRef.current.state.selectValue;
-			if (selectedOption && selectedOption.value) {
-				setSaleType(selectedOption.value);
-			}
-			const nextInput = document.getElementById(inputId);
-			if (nextInput) {
-				nextInput.focus();
-				nextInput.select();
-			} else {
-				document.getElementById("submitButton").click();
-			}
-		}
-	};
-	const handleKeyPress = (e, nextInputRef) => {
-		if (e.key === "Enter") {
-			e.preventDefault();
-			if (nextInputRef.current) {
-				nextInputRef.current.focus();
-			}
-		}
-	};
+	// const handleSaleKeypress = (event, inputId) => {
+	// 	if (event.key === "Enter") {
+	// 		const selectedOption = saleSelectRef.current.state.selectValue;
+	// 		if (selectedOption && selectedOption.value) {
+	// 			setSaleType(selectedOption.value);
+	// 		}
+	// 		const nextInput = document.getElementById(inputId);
+	// 		if (nextInput) {
+	// 			nextInput.focus();
+	// 			nextInput.select();
+	// 		} else {
+	// 			document.getElementById("submitButton").click();
+	// 		}
+	// 	}
+	// };
+	// const handleKeyPress = (e, nextInputRef) => {
+	// 	if (e.key === "Enter") {
+	// 		e.preventDefault();
+	// 		if (nextInputRef.current) {
+	// 			nextInputRef.current.focus();
+	// 		}
+	// 	}
+	// };
 
-	function fetchItemPurchaseReport() {
+	function fetchDailySaleReport() {
 		const fromDateElement = document.getElementById("fromdatevalidation");
 		const toDateElement = document.getElementById("todatevalidation");
 
@@ -386,16 +386,6 @@ export default function ItemPurchaseReport() {
 				break;
 		}
 
-		const data = {
-			FIntDat: fromInputDate,
-			FFnlDat: toInputDate,
-			FTrnTyp: transectionType,
-			FAccCod: saleType,
-			code: "EMART",
-			FLocCod: "001",
-			FYerDsc: "2024-2024",
-		};
-		// console.log(data);
 		document.getElementById(
 			"fromdatevalidation"
 		).style.border = `1px solid ${fontcolor}`;
@@ -403,7 +393,7 @@ export default function ItemPurchaseReport() {
 			"todatevalidation"
 		).style.border = `1px solid ${fontcolor}`;
 
-		const apiMainUrl = apiLinks + "/ItemPurchaseReport.php";
+		const apiMainUrl = apiLinks + "/DailySaleReport.php";
 		setIsLoading(true);
 		const formMainData = new URLSearchParams({
 			code: "EMART",
@@ -413,9 +403,6 @@ export default function ItemPurchaseReport() {
 			FFnlDat: toInputDate,
 			FTrnTyp: transectionType,
 			FStrCod: storeType,
-			FCapCod: capacityType,
-			FCmpCod: companyType,
-			FCtgCod: categoryType,
 			FSchTxt: "",
 		}).toString();
 
@@ -487,79 +474,12 @@ export default function ItemPurchaseReport() {
 			.catch((error) => {
 				console.error("Error fetching data:", error);
 			});
-
-		//-------------- capacity dropdown
-		const apiCapacityUrl = apiLinks + "/GetCapacity.php";
-		const formCapacityData = new URLSearchParams({
-			// FLocCod: getLocationNumber,
-			// code: organisation.code,
-			code: "EMART",
-		}).toString();
-		axios
-			.post(apiCapacityUrl, formCapacityData)
-			.then((response) => {
-				setCapacityList(response.data);
-				// console.log("CAPACITY" + response.data);
-			})
-			.catch((error) => {
-				console.error("Error fetching data:", error);
-			});
-
-		// ------------company dropdown
-		const apiCompanyUrl = apiLinks + "/GetCompany.php";
-		const formCompanyData = new URLSearchParams({
-			code: organisation.code,
-		}).toString();
-		axios
-			.post(apiCompanyUrl, formCompanyData)
-			.then((response) => {
-				setCompanyList(response.data);
-				// console.log("COMPANY" + response.data);
-			})
-			.catch((error) => {
-				console.error("Error fetching data:", error);
-			});
-
-		// -----------category dropdown
-		const apiCategoryUrl = apiLinks + "/GetCatg.php";
-		const formCategoryData = new URLSearchParams({
-			// FLocCod: getLocationNumber,
-			// code: organisation.code,
-			code: "EMART",
-		}).toString();
-		axios
-			.post(apiCategoryUrl, formCategoryData)
-			.then((response) => {
-				setCategoryList(response.data);
-				// console.log("CATEGORY" + response.data);
-			})
-			.catch((error) => {
-				console.error("Error fetching data:", error);
-			});
 	}, []);
 
 	// Store List array
 	const optionStore = storeList.map((item) => ({
 		value: item.tstrcod,
 		label: `${item.tstrcod}-${item.tstrdsc.trim()}`,
-	}));
-
-	// Capacity List array
-	const optionCapacity = capacityList.map((item) => ({
-		value: item.tcapcod,
-		label: `${item.tcapcod}-${item.tcapdsc.trim()}`,
-	}));
-
-	// Company List array
-	const optionCompany = companyList.map((item) => ({
-		value: item.tcmpcod,
-		label: `${item.tcmpcod}-${item.tcmpdsc.trim()}`,
-	}));
-
-	// Category List array
-	const optionCategory = categoryList.map((item) => ({
-		value: item.tctgcod,
-		label: `${item.tctgcod}-${item.tctgdsc.trim()}`,
 	}));
 
 	const DropdownOption = (props) => {
@@ -610,113 +530,47 @@ export default function ItemPurchaseReport() {
 		}),
 	});
 
-	// ------------ capacity style customization
-	const customStylesCapacity = () => ({
-		control: (base, state) => ({
-			...base,
-			height: "24px",
-			minHeight: "unset",
-			width: 275,
-			fontSize: "12px",
-			backgroundColor: getcolor,
-			color: fontcolor,
-			borderRadius: 0,
-			// border: hasError ? "2px solid red" : `1px solid ${fontcolor}`,
-			transition: "border-color 0.15s ease-in-out",
-			"&:hover": {
-				borderColor: state.isFocused ? base.borderColor : "black",
-			},
-			padding: "0 8px",
-			display: "flex",
-			// alignItems: "center",
-			justifyContent: "space-between",
-		}),
-		dropdownIndicator: (base) => ({
-			...base,
-			padding: 0,
-			fontSize: "18px",
-			display: "flex",
-			textAlign: "center !important",
-		}),
-	});
-
-	// ------------ company style customization
-	const customStylesCompany = () => ({
-		control: (base, state) => ({
-			...base,
-			height: "24px",
-			minHeight: "unset",
-			width: 275,
-			fontSize: "12px",
-			backgroundColor: getcolor,
-			color: fontcolor,
-			borderRadius: 0,
-			// border: hasError ? "2px solid red" : `1px solid ${fontcolor}`,
-			transition: "border-color 0.15s ease-in-out",
-			"&:hover": {
-				borderColor: state.isFocused ? base.borderColor : "black",
-			},
-			padding: "0 8px",
-			display: "flex",
-			// alignItems: "center",
-			justifyContent: "space-between",
-		}),
-		dropdownIndicator: (base) => ({
-			...base,
-			padding: 0,
-			fontSize: "18px",
-			display: "flex",
-			textAlign: "center !important",
-		}),
-	});
-
-	// ------------ category style customization
-	const customStylesCategory = () => ({
-		control: (base, state) => ({
-			...base,
-			height: "24px",
-			minHeight: "unset",
-			width: 275,
-			fontSize: "12px",
-			backgroundColor: getcolor,
-			color: fontcolor,
-			borderRadius: 0,
-			// border: hasError ? "2px solid red" : `1px solid ${fontcolor}`,
-			transition: "border-color 0.15s ease-in-out",
-			"&:hover": {
-				borderColor: state.isFocused ? base.borderColor : "black",
-			},
-			padding: "0 8px",
-			display: "flex",
-			// alignItems: "center",
-			justifyContent: "space-between",
-		}),
-		dropdownIndicator: (base) => ({
-			...base,
-			padding: 0,
-			fontSize: "18px",
-			display: "flex",
-			textAlign: "center !important",
-		}),
-	});
-
 	const handleTransactionTypeChange = (event) => {
 		const selectedTransactionType = event.target.value;
 		settransectionType(selectedTransactionType);
 	};
 
 	const exportPDFHandler = () => {
-		const doc = new jsPDF({ orientation: "portrait" });
+		const doc = new jsPDF({ orientation: "landscape" });
 		const rows = tableData.map((item) => [
-			item.code,
+			item.Date,
+			item["Trn #"],
+			item.Type,
 			item.Description,
+			item.Customer,
+			item.Mobile,
 			item.Rate,
 			item.Qnty,
-			item["Pur Amount"],
+			item["Sale Amount"],
 		]);
-		rows.push(["", "Total", "", String(totalQnty), String(totalAmount)]);
-		const headers = ["Code", "Description", "Rate", "Qnty", "Amount"];
-		const columnWidths = [35, 80, 20, 10, 20];
+		rows.push([
+			"",
+			"",
+			"",
+			"Total",
+			"",
+			"",
+			"",
+			String(totalQnty),
+			String(totalAmount),
+		]);
+		const headers = [
+			"Date",
+			"Trn#",
+			"Type",
+			"Description",
+			"Customer",
+			"Mobile",
+			"Rate",
+			"Qnty",
+			"Amount",
+		];
+		const columnWidths = [18, 13, 10, 75, 75, 22, 18, 10, 18];
 		const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
 		const pageHeight = doc.internal.pageSize.height;
 		const paddingTop = 15;
@@ -778,7 +632,13 @@ export default function ItemPurchaseReport() {
 					doc.setFont(fontName, "normal");
 					const cellValue = String(cell);
 
-					if (cellIndex === 2 || cellIndex === 3 || cellIndex === 4) {
+					if (
+						cellIndex === 1 ||
+						cellIndex === 5 ||
+						cellIndex === 6 ||
+						cellIndex === 7 ||
+						cellIndex === 8
+					) {
 						const rightAlignX = startX + columnWidths[cellIndex] - 2;
 						doc.text(cellValue, rightAlignX, cellY, {
 							align: "right",
@@ -832,7 +692,8 @@ export default function ItemPurchaseReport() {
 			return paddingTop;
 		};
 
-		const rowsPerPage = 46;
+		// const rowsPerPage = 46; //portrait
+		const rowsPerPage = 29; //landscape
 
 		const handlePagination = () => {
 			const addTitle = (
@@ -875,7 +736,7 @@ export default function ItemPurchaseReport() {
 				addTitle(comapnyname, "", "", pageNumber, startY, 20, 10);
 				startY += 7;
 				addTitle(
-					`Item Purchase Report From: ${fromInputDate} To: ${toInputDate}`,
+					`Daily Sale Report From: ${fromInputDate} To: ${toInputDate}`,
 					"",
 					"",
 					pageNumber,
@@ -928,7 +789,7 @@ export default function ItemPurchaseReport() {
 		const time = getCurrentTime();
 
 		handlePagination();
-		doc.save("ItemPurchaseReport.pdf");
+		doc.save("DailySaleReport.pdf");
 
 		const pdfBlob = doc.output("blob");
 		const pdfFile = new File([pdfBlob], "table_data.pdf", {
@@ -939,16 +800,26 @@ export default function ItemPurchaseReport() {
 	const handleDownloadCSV = async () => {
 		const workbook = new ExcelJS.Workbook();
 		const worksheet = workbook.addWorksheet("Sheet1");
-		const numColumns = 5;
+		const numColumns = 9;
 		const titleStyle = {
 			font: { bold: true, size: 12 },
 			alignment: { horizontal: "center" },
 		};
-		const columnAlignments = ["left", "left", "right", "center", "right"];
+		const columnAlignments = [
+			"left",
+			"right",
+			"center",
+			"left",
+			"left",
+			"right",
+			"right",
+			"right",
+			"right",
+		];
 		worksheet.addRow([]);
 		[
 			comapnyname,
-			`Item Purchase Report From ${fromInputDate} To ${toInputDate}`,
+			`Daily Sale Report From ${fromInputDate} To ${toInputDate}`,
 		].forEach((title, index) => {
 			worksheet.addRow([title]).eachCell((cell) => (cell.style = titleStyle));
 			worksheet.mergeCells(
@@ -971,31 +842,49 @@ export default function ItemPurchaseReport() {
 				right: { style: "thin" },
 			},
 		};
-		const headers = ["Code", "Description", "Rate", "Qnty", "Amount"];
+		const headers = [
+			"Date",
+			"Trn#",
+			"Type",
+			"Description",
+			"Customer",
+			"Mobile",
+			"Rate",
+			"Qnty",
+			"Amount",
+		];
 		const headerRow = worksheet.addRow(headers);
 		headerRow.eachCell((cell) => {
 			cell.style = { ...headerStyle, alignment: { horizontal: "center" } };
 		});
 		tableData.forEach((item) => {
 			worksheet.addRow([
-				item.code,
+				item.Date,
+				item["Trn #"],
+				item.Type,
 				item.Description,
+				item.Customer,
+				item.Mobile,
 				item.Rate,
 				item.Qnty,
-				item["Pur Amount"],
+				item["Sale Amount"],
 			]);
 		});
 		const totalRow = worksheet.addRow([
 			"",
+			"",
+			"",
 			"Total",
 			"",
-			totalQnty,
-			totalAmount,
+			"",
+			"",
+			String(totalQnty),
+			String(totalAmount),
 		]);
 		totalRow.eachCell((cell) => {
 			cell.font = { bold: true };
 		});
-		[20, 45, 12, 7, 12].forEach((width, index) => {
+		[18, 13, 10, 75, 75, 22, 18, 10, 18].forEach((width, index) => {
 			worksheet.getColumn(index + 1).width = width;
 		});
 		worksheet.eachRow((row, rowNumber) => {
@@ -1019,7 +908,7 @@ export default function ItemPurchaseReport() {
 		const blob = new Blob([buffer], {
 			type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 		});
-		saveAs(blob, "ItemPurchaseReport.xlsx");
+		saveAs(blob, "DailySaleReport.xlsx");
 	};
 
 	const dispatch = useDispatch();
@@ -1053,22 +942,34 @@ export default function ItemPurchaseReport() {
 	};
 
 	const firstColWidth = {
-		width: "20%",
-	};
-	const secondColWidth = {
-		width: "49%",
-	};
-	const thirdColWidth = {
-		width: "12%",
-	};
-	const forthColWidth = {
 		width: "7%",
 	};
+	const secondColWidth = {
+		width: "5%",
+	};
+	const thirdColWidth = {
+		width: "4%",
+	};
+	const forthColWidth = {
+		width: "31%",
+	};
 	const fifthColWidth = {
-		width: "12%",
+		width: "27%",
+	};
+	const sixthColWidth = {
+		width: "8%",
+	};
+	const seventhColWidth = {
+		width: "6%",
+	};
+	const eighthColWidth = {
+		width: "4%",
+	};
+	const ninthColWidth = {
+		width: "8%",
 	};
 
-	useHotkeys("s", fetchItemPurchaseReport);
+	useHotkeys("s", fetchDailySaleReport);
 	useHotkeys("alt+p", exportPDFHandler);
 	useHotkeys("alt+e", handleDownloadCSV);
 	useHotkeys("esc", () => navigate("/MainPage"));
@@ -1089,7 +990,7 @@ export default function ItemPurchaseReport() {
 		backgroundColor: getcolor,
 		width: isSidebarVisible ? "calc(65vw - 0%)" : "65vw",
 		position: "relative",
-		top: "40%",
+		top: "35%",
 		left: isSidebarVisible ? "50%" : "50%",
 		transform: "translate(-50%, -50%)",
 		transition: isSidebarVisible
@@ -1102,7 +1003,7 @@ export default function ItemPurchaseReport() {
 		overflowY: "hidden",
 		wordBreak: "break-word",
 		textAlign: "center",
-		maxWidth: "800px",
+		maxWidth: "2000px",
 		fontSize: "15px",
 		fontStyle: "normal",
 		fontWeight: "400",
@@ -1180,6 +1081,8 @@ export default function ItemPurchaseReport() {
 		}
 	}, [selectedIndex]);
 
+	// Radio Functionality
+
 	const parseDate = (dateString) => {
 		const [day, month, year] = dateString.split("-").map(Number);
 		return new Date(year, month - 1, day);
@@ -1213,9 +1116,6 @@ export default function ItemPurchaseReport() {
 		}
 	}, [selectedRadio]);
 
-	const [menuCompanyIsOpen, setMenuCompanyIsOpen] = useState(false);
-	const [menuCategoryIsOpen, setMenuCategoryIsOpen] = useState(false);
-	const [menuCapacityIsOpen, setMenuCapacityIsOpen] = useState(false);
 	const [menuStoreIsOpen, setMenuStoreIsOpen] = useState(false);
 
 	const focusNextElement = (currentRef, nextRef) => {
@@ -1307,28 +1207,7 @@ export default function ItemPurchaseReport() {
 			settoInputDate(formattedDate); // Update the state with formatted date
 
 			// Move focus to the next element
-			focusNextElement(toRef, companyRef);
-		}
-	};
-
-	const handleCompanyEnter = (e) => {
-		if (e.key === "Enter" && !menuCompanyIsOpen) {
-			e.preventDefault();
-			focusNextElement(companyRef, categoryRef);
-		}
-	};
-
-	const handleCategoryEnter = (e) => {
-		if (e.key === "Enter" && !menuCategoryIsOpen) {
-			e.preventDefault();
-			focusNextElement(categoryRef, capacityRef);
-		}
-	};
-
-	const handleCapacityEnter = (e) => {
-		if (e.key === "Enter" && !menuCapacityIsOpen) {
-			e.preventDefault();
-			focusNextElement(capacityRef, storeRef);
+			focusNextElement(toRef, storeRef);
 		}
 	};
 
@@ -1366,7 +1245,7 @@ export default function ItemPurchaseReport() {
 						borderRadius: "9px",
 					}}
 				>
-					<NavComponent textdata="Item Purchase Report" />
+					<NavComponent textdata="Daily Sale Report" />
 
 					{/* ------------1st row */}
 					<div
@@ -1386,11 +1265,11 @@ export default function ItemPurchaseReport() {
 							{/* From Date */}
 							<div
 								className="d-flex align-items-center"
-								style={{ marginLeft: "20px" }}
+								// style={{ marginLeft: "20px" }}
 							>
 								<div
 									style={{
-										width: "80px",
+										width: "100px",
 										display: "flex",
 										justifyContent: "end",
 									}}
@@ -1581,7 +1460,7 @@ export default function ItemPurchaseReport() {
 										justifyContent: "evenly",
 									}}
 								>
-									<div className="d-flex align-items-baseline mx-2">
+									<div className="d-flex align-items-baseline mx-1">
 										<input
 											type="radio"
 											name="dateRange"
@@ -1600,7 +1479,7 @@ export default function ItemPurchaseReport() {
 											Custom
 										</label>
 									</div>
-									<div className="d-flex align-items-baseline mx-2">
+									<div className="d-flex align-items-baseline mx-1">
 										<input
 											type="radio"
 											name="dateRange"
@@ -1619,7 +1498,7 @@ export default function ItemPurchaseReport() {
 											30 Days
 										</label>
 									</div>
-									<div className="d-flex align-items-baseline mx-2">
+									<div className="d-flex align-items-baseline mx-1">
 										<input
 											type="radio"
 											name="dateRange"
@@ -1638,7 +1517,7 @@ export default function ItemPurchaseReport() {
 											60 Days
 										</label>
 									</div>
-									<div className="d-flex align-items-baseline mx-2">
+									<div className="d-flex align-items-baseline mx-1">
 										<input
 											type="radio"
 											name="dateRange"
@@ -1676,52 +1555,10 @@ export default function ItemPurchaseReport() {
 								justifyContent: "space-between",
 							}}
 						>
-							{/* Company Select */}
-							<div className="d-flex align-items-center">
-								<div
-									style={{
-										width: "100px",
-										display: "flex",
-										justifyContent: "end",
-									}}
-								>
-									<label htmlFor="fromDatePicker">
-										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
-											Company:&nbsp;&nbsp;
-										</span>{" "}
-										<br />
-									</label>
-								</div>
-								<div>
-									<Select
-										className="List-select-class "
-										ref={companyRef}
-										options={optionCompany}
-										onKeyDown={handleCompanyEnter}
-										id="selectedsale"
-										onChange={(selectedOption) => {
-											if (selectedOption && selectedOption.value) {
-												setCompanyType(selectedOption.value);
-											} else {
-												setCompanyType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
-											}
-										}}
-										components={{ Option: DropdownOption }}
-										// styles={customStylesStore}
-										styles={customStylesCompany()}
-										isClearable
-										placeholder="Search or select..."
-										menuIsOpen={menuCompanyIsOpen}
-										onMenuOpen={() => setMenuCompanyIsOpen(true)}
-										onMenuClose={() => setMenuCompanyIsOpen(false)}
-									/>
-								</div>
-							</div>
-
 							{/* Store Select */}
 							<div
 								className="d-flex align-items-center"
-								style={{ marginRight: "20px" }}
+								// style={{ marginRight: "20px" }}
 							>
 								<div
 									style={{
@@ -1762,6 +1599,8 @@ export default function ItemPurchaseReport() {
 									/>
 								</div>
 							</div>
+
+							<div></div>
 						</div>
 					</div>
 
@@ -1780,59 +1619,14 @@ export default function ItemPurchaseReport() {
 								justifyContent: "space-between",
 							}}
 						>
-							{/* Category Select  */}
+							{/* Type */}
 							<div
-								className="d-flex align-items-center  "
-								style={{ marginRight: "20px" }}
+								className="d-flex align-items-center"
+								// style={{ marginLeft: "20px" }}
 							>
 								<div
 									style={{
 										width: "100px",
-										display: "flex",
-										justifyContent: "end",
-									}}
-								>
-									<label htmlFor="fromDatePicker">
-										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
-											Category:&nbsp;&nbsp;
-										</span>{" "}
-										<br />
-									</label>
-								</div>
-								<div>
-									<Select
-										className="List-select-class "
-										ref={categoryRef}
-										options={optionCategory}
-										onKeyDown={handleCategoryEnter}
-										id="selectedsale"
-										onChange={(selectedOption) => {
-											if (selectedOption && selectedOption.value) {
-												setCategoryType(selectedOption.value);
-											} else {
-												setCategoryType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
-											}
-										}}
-										components={{ Option: DropdownOption }}
-										// styles={customStylesStore}
-										styles={customStylesCategory()}
-										isClearable
-										placeholder="Search or select..."
-										menuIsOpen={menuCategoryIsOpen}
-										onMenuOpen={() => setMenuCategoryIsOpen(true)}
-										onMenuClose={() => setMenuCategoryIsOpen(false)}
-									/>
-								</div>
-							</div>
-
-							{/* Type */}
-							<div
-								className="d-flex align-items-center"
-								style={{ marginRight: "20px" }}
-							>
-								<div
-									style={{
-										width: "60px",
 										display: "flex",
 										justifyContent: "end",
 									}}
@@ -1870,68 +1664,6 @@ export default function ItemPurchaseReport() {
 									<option value="INV">Sale</option>
 									<option value="SRN">Sale Return</option>
 								</select>
-							</div>
-						</div>
-					</div>
-
-					{/* ------------4th row */}
-					<div
-						className="row"
-						style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-					>
-						<div
-							style={{
-								width: "100%",
-								display: "flex",
-								alignItems: "center",
-								margin: "0px",
-								padding: "0px",
-								justifyContent: "space-between",
-							}}
-						>
-							{/* Capacity Select */}
-							<div
-								className="d-flex align-items-center  "
-								// style={{ marginRight: "20px" }}
-							>
-								<div
-									style={{
-										width: "100px",
-										display: "flex",
-										justifyContent: "end",
-									}}
-								>
-									<label htmlFor="fromDatePicker">
-										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
-											Capacity:&nbsp;&nbsp;
-										</span>{" "}
-										<br />
-									</label>
-								</div>
-								<div>
-									<Select
-										className="List-select-class "
-										ref={capacityRef}
-										options={optionCapacity}
-										onKeyDown={handleCapacityEnter}
-										id="selectedsale"
-										onChange={(selectedOption) => {
-											if (selectedOption && selectedOption.value) {
-												setCapacityType(selectedOption.value);
-											} else {
-												setCapacityType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
-											}
-										}}
-										components={{ Option: DropdownOption }}
-										// styles={customStylesStore}
-										styles={customStylesCapacity()}
-										isClearable
-										placeholder="Search or select..."
-										menuIsOpen={menuCapacityIsOpen}
-										onMenuOpen={() => setMenuCapacityIsOpen(true)}
-										onMenuClose={() => setMenuCapacityIsOpen(false)}
-									/>
-								</div>
 							</div>
 
 							{/* Search */}
@@ -1976,6 +1708,7 @@ export default function ItemPurchaseReport() {
 							</div>
 						</div>
 					</div>
+
 					<div>
 						{/* Table Head */}
 						<div
@@ -2011,18 +1744,30 @@ export default function ItemPurchaseReport() {
 										}}
 									>
 										<td className="border-dark" style={firstColWidth}>
-											Code
+											Date
 										</td>
 										<td className="border-dark" style={secondColWidth}>
-											Description
+											Trn#
 										</td>
 										<td className="border-dark" style={thirdColWidth}>
-											Rate
+											Type
 										</td>
 										<td className="border-dark" style={forthColWidth}>
-											Qnty
+											Description
 										</td>
 										<td className="border-dark" style={fifthColWidth}>
+											Customer
+										</td>
+										<td className="border-dark" style={sixthColWidth}>
+											Mobile
+										</td>
+										<td className="border-dark" style={seventhColWidth}>
+											Rate
+										</td>
+										<td className="border-dark" style={eighthColWidth}>
+											Qnty
+										</td>
+										<td className="border-dark" style={ninthColWidth}>
 											Amount
 										</td>
 									</tr>
@@ -2058,7 +1803,7 @@ export default function ItemPurchaseReport() {
 													backgroundColor: getcolor,
 												}}
 											>
-												<td colSpan="5" className="text-center">
+												<td colSpan="9" className="text-center">
 													<Spinner animation="border" variant="primary" />
 												</td>
 											</tr>
@@ -2071,7 +1816,7 @@ export default function ItemPurchaseReport() {
 															color: fontcolor,
 														}}
 													>
-														{Array.from({ length: 5 }).map((_, colIndex) => (
+														{Array.from({ length: 9 }).map((_, colIndex) => (
 															<td key={`blank-${rowIndex}-${colIndex}`}>
 																&nbsp;
 															</td>
@@ -2085,6 +1830,10 @@ export default function ItemPurchaseReport() {
 												<td style={thirdColWidth}></td>
 												<td style={forthColWidth}></td>
 												<td style={fifthColWidth}></td>
+												<td style={sixthColWidth}></td>
+												<td style={seventhColWidth}></td>
+												<td style={eighthColWidth}></td>
+												<td style={ninthColWidth}></td>
 											</tr>
 										</>
 									) : (
@@ -2105,19 +1854,31 @@ export default function ItemPurchaseReport() {
 														}}
 													>
 														<td className="text-start" style={firstColWidth}>
-															{item.code}
+															{item.Date}
 														</td>
-														<td className="text-start" style={secondColWidth}>
+														<td className="text-end" style={secondColWidth}>
+															{item["Trn #"]}
+														</td>
+														<td className="text-center" style={thirdColWidth}>
+															{item.Type}
+														</td>
+														<td className="text-start" style={forthColWidth}>
 															{item.Description}
 														</td>
-														<td className="text-end" style={thirdColWidth}>
+														<td className="text-start" style={fifthColWidth}>
+															{item.Customer}
+														</td>
+														<td className="text-end" style={sixthColWidth}>
+															{item.Mobile}
+														</td>
+														<td className="text-end" style={seventhColWidth}>
 															{item.Rate}
 														</td>
-														<td className="text-center" style={forthColWidth}>
+														<td className="text-center" style={eighthColWidth}>
 															{item.Qnty}
 														</td>
-														<td className="text-end" style={fifthColWidth}>
-															{item["Pur Amount"]}
+														<td className="text-end" style={ninthColWidth}>
+															{item["Sale Amount"]}
 														</td>
 													</tr>
 												);
@@ -2132,7 +1893,7 @@ export default function ItemPurchaseReport() {
 														color: fontcolor,
 													}}
 												>
-													{Array.from({ length: 5 }).map((_, colIndex) => (
+													{Array.from({ length: 9 }).map((_, colIndex) => (
 														<td key={`blank-${rowIndex}-${colIndex}`}>
 															&nbsp;
 														</td>
@@ -2145,6 +1906,10 @@ export default function ItemPurchaseReport() {
 												<td style={thirdColWidth}></td>
 												<td style={forthColWidth}></td>
 												<td style={fifthColWidth}></td>
+												<td style={sixthColWidth}></td>
+												<td style={seventhColWidth}></td>
+												<td style={eighthColWidth}></td>
+												<td style={ninthColWidth}></td>
 											</tr>
 										</>
 									)}
@@ -2189,12 +1954,40 @@ export default function ItemPurchaseReport() {
 								background: getcolor,
 								borderRight: `1px solid ${fontcolor}`,
 							}}
+						></div>
+						<div
+							style={{
+								...fifthColWidth,
+								background: getcolor,
+								borderRight: `1px solid ${fontcolor}`,
+							}}
+						></div>
+						<div
+							style={{
+								...sixthColWidth,
+								background: getcolor,
+								borderRight: `1px solid ${fontcolor}`,
+							}}
+						></div>
+						<div
+							style={{
+								...seventhColWidth,
+								background: getcolor,
+								borderRight: `1px solid ${fontcolor}`,
+							}}
+						></div>
+						<div
+							style={{
+								...eighthColWidth,
+								background: getcolor,
+								borderRight: `1px solid ${fontcolor}`,
+							}}
 						>
 							<span className="mobileledger_total">{totalQnty}</span>
 						</div>
 						<div
 							style={{
-								...fifthColWidth,
+								...ninthColWidth,
 								background: getcolor,
 								borderRight: `1px solid ${fontcolor}`,
 							}}
@@ -2240,7 +2033,7 @@ export default function ItemPurchaseReport() {
 							id="searchsubmit"
 							text="Select"
 							ref={selectButtonRef}
-							onClick={fetchItemPurchaseReport}
+							onClick={fetchDailySaleReport}
 							style={{ backgroundColor: "#186DB7", width: "120px" }}
 							onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
 							onBlur={(e) =>
