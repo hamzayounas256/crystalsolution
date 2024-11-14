@@ -21,7 +21,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-export default function DailyCashBankBalance() {
+export default function DailyPaymentReport() {
 	const navigate = useNavigate();
 	const user = getUserData();
 	const organisation = getOrganisationData();
@@ -44,6 +44,7 @@ export default function DailyCashBankBalance() {
 	const [totalDebit, setTotalDebit] = useState(0);
 	const [totalCredit, setTotalCredit] = useState(0);
 	const [closingBalance, setClosingBalance] = useState(0);
+	const [totalAmount, setTotalAmount] = useState(0);
 
 	// state for from DatePicker
 	const [selectedfromDate, setSelectedfromDate] = useState(null);
@@ -227,9 +228,9 @@ export default function DailyCashBankBalance() {
 				toDateElement.style.border = `1px solid ${fontcolor}`;
 				settoInputDate(formattedInput);
 
-				if (input2Ref.current) {
+				if (input1Ref.current) {
 					e.preventDefault();
-					input2Ref.current.focus();
+					input1Ref.current.focus();
 				}
 			} else {
 				toast.error("Date must be in the format dd-mm-yyyy");
@@ -269,7 +270,7 @@ export default function DailyCashBankBalance() {
 		}
 	};
 
-	function fetchDailyCashBankBalance() {
+	function fetchDailyPaymentReport() {
 		const fromDateElement = document.getElementById("fromdatevalidation");
 		const toDateElement = document.getElementById("todatevalidation");
 
@@ -364,16 +365,6 @@ export default function DailyCashBankBalance() {
 				break;
 		}
 
-		const data = {
-			FIntDat: fromInputDate,
-			FFnlDat: toInputDate,
-			FTrnTyp: transectionType,
-			FAccCod: saleType,
-			code: "EMART",
-			FLocCod: "001",
-			FYerDsc: "2024-2024",
-		};
-		console.log(data);
 		document.getElementById(
 			"fromdatevalidation"
 		).style.border = `1px solid ${fontcolor}`;
@@ -381,7 +372,7 @@ export default function DailyCashBankBalance() {
 			"todatevalidation"
 		).style.border = `1px solid ${fontcolor}`;
 
-		const apiUrl = apiLinks + "/DailyCashBankBalance.php";
+		const apiUrl = apiLinks + "/DailyPaymentReport.php";
 		setIsLoading(true);
 		const formData = new URLSearchParams({
 			code: "EMART",
@@ -389,6 +380,7 @@ export default function DailyCashBankBalance() {
 			FYerDsc: "2024-2024",
 			FIntDat: fromInputDate,
 			FFnlDat: toInputDate,
+			FTrnTyp: transectionType,
 			FSchTxt: "",
 		}).toString();
 
@@ -397,10 +389,8 @@ export default function DailyCashBankBalance() {
 			.then((response) => {
 				setIsLoading(false);
 				console.log("Response:", response.data);
-				setTotalOpening(response.data["Total Opening"]);
-				setTotalDebit(response.data["Total Debit"]);
-				setTotalCredit(response.data["Total Credit"]);
-				setClosingBalance(response.data["Total Balance"]);
+
+				setTotalAmount(response.data["Total Amount"]);
 
 				if (response.data && Array.isArray(response.data.Detail)) {
 					setTableData(response.data.Detail);
@@ -446,73 +436,6 @@ export default function DailyCashBankBalance() {
 		setfromInputDate(formatDate(firstDateOfCurrentMonth));
 	}, []);
 
-	useEffect(() => {
-		const apiUrl = apiLinks + "/GetActiveAccounts.php";
-		const formData = new URLSearchParams({
-			FLocCod: getLocationNumber,
-			code: organisation.code,
-		}).toString();
-		axios
-			.post(apiUrl, formData)
-			.then((response) => {
-				setSupplierList(response.data);
-			})
-			.catch((error) => {
-				console.error("Error fetching data:", error);
-			});
-	}, []);
-
-	const options = supplierList.map((item) => ({
-		value: item.tacccod,
-		label: `${item.tacccod}-${item.taccdsc.trim()}`,
-	}));
-
-	const DropdownOption = (props) => {
-		return (
-			<components.Option {...props}>
-				<div
-					style={{
-						fontSize: "12px",
-						paddingBottom: "5px",
-						lineHeight: "3px",
-						color: "black",
-						textAlign: "start",
-					}}
-				>
-					{props.data.label}
-				</div>
-			</components.Option>
-		);
-	};
-	const customStyles1 = (hasError) => ({
-		control: (base, state) => ({
-			...base,
-			height: "24px",
-			minHeight: "unset",
-			width: 418,
-			fontSize: "12px",
-			backgroundColor: getcolor,
-			color: fontcolor,
-			borderRadius: 0,
-			border: hasError ? "2px solid red" : `1px solid ${fontcolor}`,
-			transition: "border-color 0.15s ease-in-out",
-			"&:hover": {
-				borderColor: state.isFocused ? base.borderColor : "black",
-			},
-			padding: "0 8px",
-			display: "flex",
-			alignItems: "center",
-			justifyContent: "space-between",
-		}),
-		dropdownIndicator: (base) => ({
-			...base,
-			padding: 0,
-			fontSize: "18px",
-			display: "flex",
-			textAlign: "center !important",
-		}),
-	});
-
 	const handleTransactionTypeChange = (event) => {
 		const selectedTransactionType = event.target.value;
 		settransectionType(selectedTransactionType);
@@ -521,30 +444,23 @@ export default function DailyCashBankBalance() {
 	const exportPDFHandler = () => {
 		const doc = new jsPDF({ orientation: "portrait" });
 		const rows = tableData.map((item) => [
-			item.Code,
+			item.Date,
+			item["Trn#"],
+			item.Type,
+			item["A/C Description"],
 			item.Description,
-			item.Opening,
-			item.Debit,
-			item.Credit,
-			item.Balance,
+			item.Amount,
 		]);
-		rows.push([
-			"",
-			"Total",
-			String(totalOpening),
-			String(totalDebit),
-			String(totalCredit),
-			String(closingBalance),
-		]);
+		rows.push(["", "", "", "", "Total", String(totalAmount)]);
 		const headers = [
-			"Code",
+			"Date",
+			"Trn#",
+			"Type",
+			"A/C Description",
 			"Description",
-			"Opening",
-			"Debit",
-			"Credit",
-			"Balance",
+			"Amount",
 		];
-		const columnWidths = [18, 80, 20, 20, 20, 25];
+		const columnWidths = [18, 12, 10, 70, 65, 18];
 		const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
 		const pageHeight = doc.internal.pageSize.height;
 		const paddingTop = 15;
@@ -586,10 +502,10 @@ export default function DailyCashBankBalance() {
 				let textColor = [0, 0, 0];
 				let fontName = normalFont;
 
-				if (isRedRow) {
-					textColor = [255, 0, 0];
-					fontName = boldFont;
-				}
+				// if (isRedRow) {
+				// 	textColor = [255, 0, 0];
+				// 	fontName = boldFont;
+				// }
 
 				doc.setDrawColor(0);
 				doc.rect(
@@ -606,12 +522,7 @@ export default function DailyCashBankBalance() {
 					doc.setFont(fontName, "normal");
 					const cellValue = String(cell);
 
-					if (
-						cellIndex === 2 ||
-						cellIndex === 3 ||
-						cellIndex === 4 ||
-						cellIndex === 5
-					) {
+					if (cellIndex === 1 || cellIndex === 5) {
 						const rightAlignX = startX + columnWidths[cellIndex] - 2;
 						doc.text(cellValue, rightAlignX, cellY, {
 							align: "right",
@@ -708,7 +619,7 @@ export default function DailyCashBankBalance() {
 				addTitle(comapnyname, "", "", pageNumber, startY, 20, 10);
 				startY += 7;
 				addTitle(
-					`Daily Cash Bank Balance Report From: ${fromInputDate} To: ${toInputDate}`,
+					`Daily Payment Report From: ${fromInputDate} To: ${toInputDate}`,
 					"",
 					"",
 					pageNumber,
@@ -761,7 +672,7 @@ export default function DailyCashBankBalance() {
 		const time = getCurrentTime();
 
 		handlePagination();
-		doc.save("DailyCashBankBalance.pdf");
+		doc.save("DailyPaymentReport.pdf");
 
 		const pdfBlob = doc.output("blob");
 		const pdfFile = new File([pdfBlob], "table_data.pdf", {
@@ -778,17 +689,17 @@ export default function DailyCashBankBalance() {
 			alignment: { horizontal: "center" },
 		};
 		const columnAlignments = [
-			"center",
 			"left",
 			"right",
-			"right",
-			"right",
+			"center",
+			"left",
+			"left",
 			"right",
 		];
 		worksheet.addRow([]);
 		[
 			comapnyname,
-			`Daily Cash Bank Balance Report From ${fromInputDate} To ${toInputDate}`,
+			`Daily Payment Report From ${fromInputDate} To ${toInputDate}`,
 		].forEach((title, index) => {
 			worksheet.addRow([title]).eachCell((cell) => (cell.style = titleStyle));
 			worksheet.mergeCells(
@@ -812,12 +723,12 @@ export default function DailyCashBankBalance() {
 			},
 		};
 		const headers = [
-			"Code",
+			"Date",
+			"Trn#",
+			"Type",
+			"A/C Description",
 			"Description",
-			"Opening",
-			"Debit",
-			"Credit",
-			"Balance",
+			"Amount",
 		];
 		const headerRow = worksheet.addRow(headers);
 		headerRow.eachCell((cell) => {
@@ -825,26 +736,26 @@ export default function DailyCashBankBalance() {
 		});
 		tableData.forEach((item) => {
 			worksheet.addRow([
-				item.Code,
+				item.Date,
+				item["Trn#"],
+				item.Type,
+				item["A/C Description"],
 				item.Description,
-				item.Opening,
-				item.Debit,
-				item.Credit,
-				item.Balance,
+				item.Amount,
 			]);
 		});
 		const totalRow = worksheet.addRow([
 			"",
+			"",
+			"",
+			"",
 			"Total",
-			totalOpening,
-			totalDebit,
-			totalCredit,
-			closingBalance,
+			String(totalAmount),
 		]);
 		totalRow.eachCell((cell) => {
 			cell.font = { bold: true };
 		});
-		[10, 45, 12, 12, 12, 15].forEach((width, index) => {
+		[12, 7, 5, 40, 40, 12].forEach((width, index) => {
 			worksheet.getColumn(index + 1).width = width;
 		});
 		worksheet.eachRow((row, rowNumber) => {
@@ -868,7 +779,7 @@ export default function DailyCashBankBalance() {
 		const blob = new Blob([buffer], {
 			type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 		});
-		saveAs(blob, "DailyCashBankBalance.xlsx");
+		saveAs(blob, "DailyPaymentReport.xlsx");
 	};
 
 	const dispatch = useDispatch();
@@ -905,22 +816,22 @@ export default function DailyCashBankBalance() {
 		width: "9%",
 	};
 	const secondColWidth = {
-		width: "43%",
+		width: "7%",
 	};
 	const thirdColWidth = {
-		width: "12%",
+		width: "5%",
 	};
 	const forthColWidth = {
-		width: "12%",
+		width: "34.5%",
 	};
 	const fifthColWidth = {
-		width: "12%",
+		width: "34.5%",
 	};
 	const sixthColWidth = {
-		width: "12%",
+		width: "10%",
 	};
 
-	useHotkeys("s", fetchDailyCashBankBalance);
+	useHotkeys("s", fetchDailyPaymentReport);
 	useHotkeys("alt+p", exportPDFHandler);
 	useHotkeys("alt+e", handleDownloadCSV);
 	useHotkeys("esc", () => navigate("/MainPage"));
@@ -1073,7 +984,7 @@ export default function DailyCashBankBalance() {
 						borderRadius: "9px",
 					}}
 				>
-					<NavComponent textdata="Daily Cash Bank Balance Report" />
+					<NavComponent textdata="Daily Payment Report" />
 					<div
 						className="row"
 						style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
@@ -1195,7 +1106,7 @@ export default function DailyCashBankBalance() {
 								</div>
 							</div>
 							{/* ------ */}
-							{/* <div
+							<div
 								className="d-flex align-items-center"
 								style={{ marginRight: "21px" }}
 							>
@@ -1239,8 +1150,7 @@ export default function DailyCashBankBalance() {
 									<option value="Receivable">Receivable</option>
 									<option value="Payable">Payable</option>
 								</select>
-							</div> */}
-							<div></div>
+							</div>
 						</div>
 					</div>
 					<div
@@ -1401,7 +1311,7 @@ export default function DailyCashBankBalance() {
 										}}
 										value={toInputDate}
 										onChange={handleToInputChange}
-										onKeyDown={(e) => handleToKeyPress(e, "input2Ref")}
+										onKeyDown={(e) => handleToKeyPress(e, "submitButton")}
 										id="toDatePicker"
 										autoComplete="off"
 										placeholder="dd-mm-yyyy"
@@ -1481,7 +1391,7 @@ export default function DailyCashBankBalance() {
 						<div
 							style={{
 								overflowY: "auto",
-								width: "98.8%",
+								width: "98.5%",
 							}}
 						>
 							<table
@@ -1491,7 +1401,6 @@ export default function DailyCashBankBalance() {
 									fontSize: "12px",
 									width: "100%",
 									position: "relative",
-									paddingRight: "2%",
 								}}
 							>
 								<thead
@@ -1511,22 +1420,22 @@ export default function DailyCashBankBalance() {
 										}}
 									>
 										<td className="border-dark" style={firstColWidth}>
-											Code
+											Date
 										</td>
 										<td className="border-dark" style={secondColWidth}>
-											Description
+											Trn#
 										</td>
 										<td className="border-dark" style={thirdColWidth}>
-											Opening
+											Type
 										</td>
 										<td className="border-dark" style={forthColWidth}>
-											Debit
+											A/C Description
 										</td>
 										<td className="border-dark" style={fifthColWidth}>
-											Credit
+											Description
 										</td>
 										<td className="border-dark" style={sixthColWidth}>
-											Balance
+											Amount
 										</td>
 									</tr>
 								</thead>
@@ -1607,23 +1516,23 @@ export default function DailyCashBankBalance() {
 															color: fontcolor,
 														}}
 													>
-														<td className="text-center" style={firstColWidth}>
-															{item.Code}
+														<td className="text-start" style={firstColWidth}>
+															{item.Date}
 														</td>
-														<td className="text-start" style={secondColWidth}>
+														<td className="text-end" style={secondColWidth}>
+															{item["Trn#"]}
+														</td>
+														<td className="text-center" style={thirdColWidth}>
+															{item.Type}
+														</td>
+														<td className="text-start" style={forthColWidth}>
+															{item["A/C Description"]}
+														</td>
+														<td className="text-start" style={fifthColWidth}>
 															{item.Description}
 														</td>
-														<td className="text-end" style={thirdColWidth}>
-															{item.Opening}
-														</td>
-														<td className="text-end" style={forthColWidth}>
-															{item.Debit}
-														</td>
-														<td className="text-end" style={fifthColWidth}>
-															{item.Credit}
-														</td>
 														<td className="text-end" style={sixthColWidth}>
-															{item.Balance}
+															{item.Amount}
 														</td>
 													</tr>
 												);
@@ -1665,7 +1574,7 @@ export default function DailyCashBankBalance() {
 							borderTop: `1px solid ${fontcolor}`,
 							height: "24px",
 							display: "flex",
-							paddingRight: "1.2%",
+							paddingRight: "1.5%",
 						}}
 					>
 						<div
@@ -1688,27 +1597,21 @@ export default function DailyCashBankBalance() {
 								background: getcolor,
 								borderRight: `1px solid ${fontcolor}`,
 							}}
-						>
-							<span className="mobileledger_total">{totalOpening}</span>
-						</div>
+						></div>
 						<div
 							style={{
 								...forthColWidth,
 								background: getcolor,
 								borderRight: `1px solid ${fontcolor}`,
 							}}
-						>
-							<span className="mobileledger_total">{totalDebit}</span>
-						</div>
+						></div>
 						<div
 							style={{
 								...fifthColWidth,
 								background: getcolor,
 								borderRight: `1px solid ${fontcolor}`,
 							}}
-						>
-							<span className="mobileledger_total">{totalCredit}</span>
-						</div>
+						></div>
 						<div
 							style={{
 								...sixthColWidth,
@@ -1716,7 +1619,7 @@ export default function DailyCashBankBalance() {
 								borderRight: `1px solid ${fontcolor}`,
 							}}
 						>
-							<span className="mobileledger_total">{closingBalance}</span>
+							<span className="mobileledger_total">{totalAmount}</span>
 						</div>
 					</div>
 					<div
@@ -1756,7 +1659,7 @@ export default function DailyCashBankBalance() {
 							id="searchsubmit"
 							text="Select"
 							ref={input3Ref}
-							onClick={fetchDailyCashBankBalance}
+							onClick={fetchDailyPaymentReport}
 							style={{ backgroundColor: "#186DB7", width: "120px" }}
 							onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
 							onBlur={(e) =>

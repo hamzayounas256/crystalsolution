@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Container, Spinner, Nav } from "react-bootstrap";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../../../ThemeContext";
 import { getUserData, getOrganisationData } from "../../Auth";
 import NavComponent from "../../MainComponent/Navform/navbarform";
@@ -17,9 +17,12 @@ import { saveAs } from "file-saver";
 import "react-calendar/dist/Calendar.css";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchGetUser } from "../../Redux/action";
-// import "./ledger.css";
+import { useHotkeys } from "react-hotkeys-hook";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function DailyCollectionReport() {
+	const navigate = useNavigate();
 	const user = getUserData();
 	const organisation = getOrganisationData();
 
@@ -35,8 +38,6 @@ export default function DailyCollectionReport() {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [transectionType, settransectionType] = useState("");
 	const [supplierList, setSupplierList] = useState([]);
-
-	// console.log("accountlist data: " + supplierList);
 
 	const [totalQnty, setTotalQnty] = useState(0);
 	const [totalOpening, setTotalOpening] = useState(0);
@@ -67,65 +68,31 @@ export default function DailyCollectionReport() {
 		gettodate,
 	} = useTheme();
 
-	// console.log("year limitation", getyeardescription);
-	// console.log('Locatin number', getLocationNumber )
-	// console.log("from date", getfromdate);
-	// console.log("to date", gettodate);
+	const comapnyname = organisation.description;
+
+	const [selectedRadio, setSelectedRadio] = useState("custom"); // State to track selected radio button
 
 	//////////////////////// CUSTOM DATE LIMITS ////////////////////////////
 
-	// const fromdatevalidate= getfromdate;
-	// const todatevaliadete=gettodate;
+	const fromdatevalidate = getfromdate;
+	const todatevaliadete = gettodate;
 
-	// const GlobalfromDate = new Date(2024, 0, 1);
-	// const GlobalfromDate1 = `${String(GlobalfromDate.getDate()).padStart(2, '0')}-${String(GlobalfromDate.getMonth() + 1).padStart(2, '0')}-${GlobalfromDate.getFullYear()}`;
-
-	// const GlobaltoDate = new Date(2024, 11, 31);
-	// const GlobaltoDate1 = `${String(GlobaltoDate.getDate()).padStart(2, '0')}-${String(GlobaltoDate.getMonth() + 1).padStart(2, '0')}-${GlobaltoDate.getFullYear()}`;
-
-	// Assume getfromdate and gettodate are dynamic and fetched from context or state
-	const fromdatevalidate = getfromdate; // e.g., "01-01-2023"
-	const todatevaliadete = gettodate; // e.g., "31-12-2023"
-
-	// Function to convert "DD-MM-YYYY" string to Date object
 	const convertToDate = (dateString) => {
-		const [day, month, year] = dateString.split("-"); // Split string into day, month, year
-		return new Date(year, month - 1, day); // Create Date object (Month is zero-indexed)
+		const [day, month, year] = dateString.split("-");
+		return new Date(year, month - 1, day);
 	};
 
-	// Convert dynamic date strings to Date objects
-	const GlobalfromDate = convertToDate(fromdatevalidate); // "01-01-2023" -> Date object
-	const GlobaltoDate = convertToDate(todatevaliadete); // "31-12-2023" -> Date object
+	const GlobalfromDate = convertToDate(fromdatevalidate);
+	const GlobaltoDate = convertToDate(todatevaliadete);
 
-	// If you want to format the Date object back to 'DD-MM-YYYY' format (optional)
 	const formatDate1 = (date) => {
 		return `${String(date.getDate()).padStart(2, "0")}-${String(
 			date.getMonth() + 1
 		).padStart(2, "0")}-${date.getFullYear()}`;
 	};
 
-	// Optionally format the Date objects back to string if needed
-	const GlobalfromDate1 = formatDate1(GlobalfromDate); // '01-01-2023'
-	const GlobaltoDate1 = formatDate1(GlobaltoDate); // '31-12-2023'
-
-	// console.log("Global From Date:", GlobalfromDate); // Date object for 01-01-2023
-	// console.log("Global To Date:", GlobaltoDate); // Date object for 31-12-2023
-	// console.log("Formatted From Date:", GlobalfromDate1); // '01-01-2023'
-	// console.log("Formatted To Date:", GlobaltoDate1); // '31-12-2023'
-
-	// const GlobalfromDate = getfromdate
-	// const GlobalfromDate1 = getfromdate;
-
-	// const GlobaltoDate = gettodate
-	// const GlobaltoDate1 = gettodate;
-
-	// console.log("GlobalfromDate", fromdatevalidate);
-	// console.log("GlobalfromDate1", todatevaliadete);
-
-	// console.log('GlobaltoDate', GlobaltoDate)
-	// console.log('GlobaltoDate1', GlobaltoDate1)
-
-	const comapnyname = organisation.description;
+	const GlobalfromDate1 = formatDate1(GlobalfromDate);
+	const GlobaltoDate1 = formatDate1(GlobaltoDate);
 
 	//////////////////////// CUSTOM DATE LIMITS ////////////////////////////
 
@@ -151,47 +118,6 @@ export default function DailyCollectionReport() {
 		setfromInputDate(e.target.value);
 	};
 
-	// const handlefromKeyPress = (e) => {
-	//     const input = e.target;
-	//     let inputValue = input.value.replace(/\D/g, ''); // Remove non-numeric characters
-
-	//     if (inputValue.length > 8) {
-	//         inputValue = inputValue.substring(0, 8); // Limit to 8 digits
-	//     }
-
-	//     // Automatically add dashes after 2nd and 4th digits for the format dd-mm-yyyy
-	//     if (inputValue.length > 2 && inputValue.length <= 4) {
-	//         inputValue = `${inputValue.slice(0, 2)}-${inputValue.slice(2)}`;
-	//     } else if (inputValue.length > 4) {
-	//         inputValue = `${inputValue.slice(0, 2)}-${inputValue.slice(2, 4)}-${inputValue.slice(4)}`;
-	//     }
-
-	//     input.value = inputValue; // Set formatted value
-
-	//     // Perform validation only when the full date is entered
-	//     if (inputValue.length === 10) {
-	//         const [day, month, year] = inputValue.split('-').map(Number);
-	//         const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
-
-	//         if (!datePattern.test(inputValue)) {
-	//             alert("Please enter a valid date format: dd-mm-yyyy.");
-	//             input.style.border = "2px solid red";
-	//             return;
-	//         }
-
-	//         const daysInMonth = new Date(year, month, 0).getDate();
-	//         if (day > daysInMonth || day === 0) {
-	//             alert(`Please enter a valid day for month ${month}.`);
-	//             input.style.border = "2px solid red";
-	//             return;
-	//         }
-
-	//         input.style.border = "1px solid black"; // Reset border on valid input
-
-	//         // You can now handle the date logic as needed (e.g., submit form, compare dates, etc.)
-	//     }
-	// };
-
 	const handlefromKeyPress = (e, inputId) => {
 		if (e.key === "Enter") {
 			e.preventDefault();
@@ -206,45 +132,33 @@ export default function DailyCollectionReport() {
 				const [day, month, year] = formattedInput.split("-").map(Number);
 
 				if (month > 12 || month === 0) {
-					alert("Please enter a valid month (MM) between 01 and 12");
+					toast.error("Please enter a valid month (MM) between 01 and 12");
 					return;
 				}
 
 				const daysInMonth = new Date(year, month, 0).getDate();
 				if (day > daysInMonth || day === 0) {
-					alert(`Please enter a valid day (DD) for month ${month}`);
+					toast.error(`Please enter a valid day (DD) for month ${month}`);
 					return;
 				}
 
-				const currentDate = new Date(); // Get the current date
-				const enteredDate = new Date(year, month - 1, day); // Month in JavaScript Date starts from 0 (0 - January, 1 - February, ...)
-				// Ensure GlobalfromDate is a Date object
+				const currentDate = new Date();
+				const enteredDate = new Date(year, month - 1, day);
 
-				// Check if the entered date is less than GlobaltoDate
 				if (GlobalfromDate && enteredDate < GlobalfromDate) {
-					showAlertMessage(
-						"someElementId",
-						"Date must be from",
-						GlobalfromDate1,
-						GlobaltoDate1,
-						fromDateElement,
-						"formvalidation"
+					toast.error(
+						`Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
 					);
 					return;
 				}
 				if (GlobalfromDate && enteredDate > GlobaltoDate) {
-					showAlertMessage(
-						"someElementId",
-						"Date must be from",
-						GlobalfromDate1,
-						GlobaltoDate1,
-						fromDateElement,
-						"formvalidation"
+					toast.error(
+						`Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
 					);
 					return;
 				}
 
-				fromDateElement.style.border = `1px solid ${fontcolor}`; // Clear the red border
+				fromDateElement.style.border = `1px solid ${fontcolor}`;
 				setfromInputDate(formattedInput);
 
 				const nextInput = document.getElementById(inputId);
@@ -252,17 +166,10 @@ export default function DailyCollectionReport() {
 					nextInput.focus();
 					nextInput.select();
 				} else {
-					document.getElementById("submitButton").click(); // Trigger form submission
+					document.getElementById("submitButton").click();
 				}
 			} else {
-				showAlertMessage(
-					"someElementId",
-					"Date must be from",
-					GlobalfromDate1,
-					GlobaltoDate1,
-					fromDateElement,
-					"formvalidation"
-				);
+				toast.error("Date must be in the format dd-mm-yyyy");
 			}
 		}
 	};
@@ -281,39 +188,29 @@ export default function DailyCollectionReport() {
 				const [day, month, year] = formattedInput.split("-").map(Number);
 
 				if (month > 12 || month === 0) {
-					alert("Please enter a valid month (MM) between 01 and 12");
+					toast.error("Please enter a valid month (MM) between 01 and 12");
 					return;
 				}
 
 				const daysInMonth = new Date(year, month, 0).getDate();
 				if (day > daysInMonth || day === 0) {
-					alert(`Please enter a valid day (DD) for month ${month}`);
+					toast.error(`Please enter a valid day (DD) for month ${month}`);
 					return;
 				}
 
-				const currentDate = new Date(); // Get the current date
-				const enteredDate = new Date(year, month - 1, day); // Month in JavaScript Date starts from 0 (0 - January, 1 - February, ...)
+				const currentDate = new Date();
+				const enteredDate = new Date(year, month - 1, day);
 
 				if (GlobaltoDate && enteredDate > GlobaltoDate) {
-					showAlertMessage(
-						"someElementId",
-						"Date must be from",
-						GlobalfromDate1,
-						GlobaltoDate1,
-						toDateElement,
-						"todatevalidation"
+					toast.error(
+						`Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
 					);
 					return;
 				}
 
 				if (GlobaltoDate && enteredDate < GlobalfromDate) {
-					showAlertMessage(
-						"someElementId",
-						"Date must be from",
-						GlobalfromDate1,
-						GlobaltoDate1,
-						toDateElement,
-						"todatevalidation"
+					toast.error(
+						`Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
 					);
 					return;
 				}
@@ -323,35 +220,20 @@ export default function DailyCollectionReport() {
 						fromInputDate.split("-").reverse().join("-")
 					);
 					if (enteredDate <= fromDate) {
-						showAlertMessage(
-							"someElementId",
-							"Date must be from",
-							GlobalfromDate1,
-							GlobaltoDate1,
-							toDateElement,
-							"todatevalidation"
-						);
+						toast.error("To date must be after from date");
 						return;
 					}
 				}
 
-				toDateElement.style.border = `1px solid ${fontcolor}`; // Add red border to the input
+				toDateElement.style.border = `1px solid ${fontcolor}`;
 				settoInputDate(formattedInput);
 
 				if (input1Ref.current) {
 					e.preventDefault();
-					// console.log("Selected value:", input1Ref); // Log the select value
-					input1Ref.current.focus(); // Move focus to React Select
+					input1Ref.current.focus();
 				}
 			} else {
-				showAlertMessage(
-					"someElementId",
-					"Date must be from",
-					GlobalfromDate1,
-					GlobaltoDate1,
-					toDateElement,
-					"todatevalidation"
-				);
+				toast.error("Date must be in the format dd-mm-yyyy");
 			}
 		}
 	};
@@ -368,72 +250,25 @@ export default function DailyCollectionReport() {
 		if (event.key === "Enter") {
 			const selectedOption = saleSelectRef.current.state.selectValue;
 			if (selectedOption && selectedOption.value) {
-				setSaleType(selectedOption.value); // Set the selected value only if an option is selected
+				setSaleType(selectedOption.value);
 			}
 			const nextInput = document.getElementById(inputId);
 			if (nextInput) {
-				nextInput.focus(); // Move focus to the next input
+				nextInput.focus();
 				nextInput.select();
 			} else {
-				document.getElementById("submitButton").click(); // Trigger form submission
+				document.getElementById("submitButton").click();
 			}
 		}
 	};
-	// Function to handle keypress and move focus
 	const handleKeyPress = (e, nextInputRef) => {
 		if (e.key === "Enter") {
-			e.preventDefault(); // Prevent form submission
+			e.preventDefault();
 			if (nextInputRef.current) {
-				nextInputRef.current.focus(); // Move focus to next input
+				nextInputRef.current.focus();
 			}
 		}
 	};
-	const showAlertMessage = (
-		elementId,
-		message,
-		fromDate,
-		toDate,
-		fromDateElement,
-		errortype
-	) => {
-		document.getElementById(elementId).innerHTML = `
-		<div class="custom-message">
-			<svg class='alert_icon' xmlns="http://www.w3.org/2000/svg" class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger" fill="currentColor" viewBox="0 0 16 16">
-			    <path d="M8.982 1.566a1.13 1.13 0 0 0-1.965 0L.165 13.233c-.457.778.091 1.767.982 1.767h13.706c.89 0 1.438-.99.982-1.767L8.982 1.566zm-.982 4.905a.905.905 0 1 1 1.81 0l-.146 3.342a.759.759 0 0 1-1.518 0l-.146-3.342zm.002 6.295a1.057 1.057 0 1 1 2.114 0 1.057 1.057 0 0 1-2.114 0z"/>
-			</svg>
-			${message} <span style="font-size: 12px; font-weight: bold;">${fromDate}</span> 
-			To <span style="font-size: 12px; font-weight: bold;">${toDate}</span>
-			<button class='alert_button' id="close-btn" onclick="closeAlert('${errortype}')" style="cursor: pointer;">
-			    <i class="bi bi-x cross_icon_styling"></i>
-			</button>
-		</div>
-		`;
-
-		// Focus the button after it is added to the DOM
-		setTimeout(() => {
-			const closeButton = document.getElementById("close-btn");
-			if (closeButton) {
-				closeButton.click();
-			}
-		}, 3000);
-
-		fromDateElement.style.border = "2px solid red"; // Add red border to the input
-	};
-	function closeAlert(errorType) {
-		const alertElement = document.getElementById("someElementId");
-		alertElement.innerHTML = ""; // Clears the alert content
-		if (errorType === "saleType") {
-			saleSelectRef.current.focus();
-		}
-		if (errorType === "formvalidation") {
-			fromRef.current.select();
-		}
-		if (errorType === "todatevalidation") {
-			toRef.current.select();
-		}
-	}
-	// Bind to window
-	window.closeAlert = closeAlert;
 
 	function fetchDailyCollectionReport() {
 		const fromDateElement = document.getElementById("fromdatevalidation");
@@ -444,11 +279,7 @@ export default function DailyCollectionReport() {
 		let hasError = false;
 		let errorType = "";
 
-		// Handle saleType, fromInputDate, and toInputDate errors first
 		switch (true) {
-			// case !saleType:
-			// 	errorType = "saleType";
-			// 	break;
 			case !fromInputDate:
 				errorType = "fromDate";
 				break;
@@ -460,13 +291,11 @@ export default function DailyCollectionReport() {
 				break;
 		}
 
-		// Handle date format validation separately
 		if (!dateRegex.test(fromInputDate)) {
 			errorType = "fromDateInvalid";
 		} else if (!dateRegex.test(toInputDate)) {
 			errorType = "toDateInvalid";
 		} else {
-			// Format and compare dates if both pass the regex validation
 			const formattedFromInput = fromInputDate.replace(
 				/^(\d{2})(\d{2})(\d{4})$/,
 				"$1-$2-$3"
@@ -483,7 +312,6 @@ export default function DailyCollectionReport() {
 			const [toDay, toMonth, toYear] = formattedToInput.split("-").map(Number);
 			const enteredToDate = new Date(toYear, toMonth - 1, toDay);
 
-			// Now handle date range validation
 			if (GlobalfromDate && enteredFromDate < GlobalfromDate) {
 				errorType = "fromDateBeforeGlobal";
 			} else if (GlobaltoDate && enteredFromDate > GlobaltoDate) {
@@ -497,146 +325,46 @@ export default function DailyCollectionReport() {
 			}
 		}
 
-		// Handle errors using a separate switch based on errorType
 		switch (errorType) {
-			// 	case "saleType":
-			// 		document.getElementById("someElementId").innerHTML = `
-			//   <div class="custom-message">
-			//   <svg class='alert_icon' xmlns="http://www.w3.org/2000/svg" class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger" fill="currentColor" viewBox="0 0 16 16">
-			// 			<path d="M8.982 1.566a1.13 1.13 0 0 0-1.965 0L.165 13.233c-.457.778.091 1.767.982 1.767h13.706c.89 0 1.438-.99.982-1.767L8.982 1.566zm-.982 4.905a.905.905 0 1 1 1.81 0l-.146 3.342a.759.759 0 0 1-1.518 0l-.146-3.342zm.002 6.295a1.057 1.057 0 1 1 2.114 0 1.057 1.057 0 0 1-2.114 0z"/>
-			// 		</svg>
-			//     <p>Please Select a Account Code</p>
-			//     <button class='alert_button'  id="close-btn" onclick="closeAlert('saleType')"  cursor: pointer;">
-
-			// 		<i class="bi bi-x  cross_icon_styling"></i>
-			//     </button>
-			// </div>
-			//   `;
-			// 		setTimeout(() => {
-			// 			const closeButton = document.getElementById("close-btn");
-			// 			if (closeButton) {
-			// 				closeButton.click();
-			// 			}
-			// 		}, 3000);
-
-			// 		hasError = true;
-			// 		return customStyles1(hasError);
-
 			case "fromDate":
-				showAlertMessage(
-					"someElementId",
-					"Date must be from",
-					GlobalfromDate1,
-					GlobaltoDate1,
-					fromDateElement,
-					"formvalidation"
-				);
-
+				toast.error("From date is required");
 				return;
 			case "toDate":
-				showAlertMessage(
-					"someElementId",
-					"Date must be from",
-					GlobalfromDate1,
-					GlobaltoDate1,
-					toDateElement,
-					"todatevalidation"
-				);
-
+				toast.error("To date is required");
 				return;
 			case "fromDateInvalid":
-				showAlertMessage(
-					"someElementId",
-					"Date must be from",
-					GlobalfromDate1,
-					GlobaltoDate1,
-					fromDateElement,
-					"formvalidation"
-				);
-
+				toast.error("From date must be in the format dd-mm-yyyy");
 				return;
 			case "toDateInvalid":
-				showAlertMessage(
-					"someElementId",
-					"Date must be from",
-					GlobalfromDate1,
-					GlobaltoDate1,
-					toDateElement,
-					"todatevalidation"
-				);
-
+				toast.error("To date must be in the format dd-mm-yyyy");
 				return;
 			case "fromDateBeforeGlobal":
-				showAlertMessage(
-					"someElementId",
-					"Date must be from",
-					GlobalfromDate1,
-					GlobaltoDate1,
-					fromDateElement,
-					"formvalidation"
+				toast.error(
+					`From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
 				);
-
 				return;
 			case "fromDateAfterGlobal":
-				showAlertMessage(
-					"someElementId",
-					"Date must be from",
-					GlobalfromDate1,
-					GlobaltoDate1,
-					fromDateElement,
-					"formvalidation"
+				toast.error(
+					`From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
 				);
 				return;
 			case "toDateAfterGlobal":
-				showAlertMessage(
-					"someElementId",
-					"Date must be from",
-					GlobalfromDate1,
-					GlobaltoDate1,
-					toDateElement,
-					"todatevalidation"
+				toast.error(
+					`To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
 				);
-
 				return;
 			case "toDateBeforeGlobal":
-				showAlertMessage(
-					"someElementId",
-					"Date must be from",
-					GlobalfromDate1,
-					GlobaltoDate1,
-					toDateElement,
-					"todatevalidation"
+				toast.error(
+					`To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
 				);
-
 				return;
 			case "toDateBeforeFromDate":
-				showAlertMessage(
-					"someElementId",
-					"Date must be from",
-					GlobalfromDate1,
-					GlobaltoDate1,
-					toDateElement,
-					"todatevalidation"
-				);
-
+				toast.error("To date must be after from date");
 				return;
 			default:
 				break;
 		}
-		////////////////////////////////////////////
-		const data = {
-			FIntDat: fromInputDate,
-			FFnlDat: toInputDate,
-			FTrnTyp: transectionType,
-			FAccCod: saleType,
-			// code: organisation.code,
-			code: "EMART",
-			// FLocCod: getLocationNumber,
-			FLocCod: "001",
-			// FYerDsc: getyeardescription,
-			FYerDsc: "2024-2024",
-		};
-		console.log(data);
+
 		document.getElementById(
 			"fromdatevalidation"
 		).style.border = `1px solid ${fontcolor}`;
@@ -647,11 +375,8 @@ export default function DailyCollectionReport() {
 		const apiUrl = apiLinks + "/DailyCollectionReport.php";
 		setIsLoading(true);
 		const formData = new URLSearchParams({
-			// code: organisation.code,
 			code: "EMART",
-			// FLocCod: getLocationNumber,
 			FLocCod: "001",
-			// FYerDsc: getyeardescription,
 			FYerDsc: "2024-2024",
 			FIntDat: fromInputDate,
 			FFnlDat: toInputDate,
@@ -663,23 +388,18 @@ export default function DailyCollectionReport() {
 			.post(apiUrl, formData)
 			.then((response) => {
 				setIsLoading(false);
-
-				// Log the entire response for debugging
 				console.log("Response:", response.data);
 
-				// Set total amount and quantity
 				setTotalAmount(response.data["Total Amount"]);
 
-				// Check if response.data.Detail exists and is an array
 				if (response.data && Array.isArray(response.data.Detail)) {
-					// Update the table data state with Detail array
 					setTableData(response.data.Detail);
 				} else {
 					console.warn(
 						"Response data structure is not as expected:",
 						response.data
 					);
-					setTableData([]); // Clear table data if Detail is not found
+					setTableData([]);
 				}
 			})
 			.catch((error) => {
@@ -691,22 +411,14 @@ export default function DailyCollectionReport() {
 	useEffect(() => {
 		const hasComponentMountedPreviously =
 			sessionStorage.getItem("componentMounted");
-		// If it hasn't mounted before or on refresh, select the 'from date' input
 		if (!hasComponentMountedPreviously || (fromRef && fromRef.current)) {
 			if (fromRef && fromRef.current) {
 				setTimeout(() => {
-					fromRef.current.focus(); // Focus on the input field
-					fromRef.current.select(); // Select the text within the input field
+					fromRef.current.focus();
+					fromRef.current.select();
 				}, 0);
 			}
-			sessionStorage.setItem("componentMounted", "true"); // Set the flag indicating mount
-			// const storedData = localStorage.getItem('globaldata');
-
-			// if (storedData) {
-			//     // Parse the JSON string back to an object
-			//     const parsedData = JSON.parse(storedData);
-			//     setApiData(parsedData);
-			// }
+			sessionStorage.setItem("componentMounted", "true");
 		}
 	}, []);
 
@@ -724,85 +436,13 @@ export default function DailyCollectionReport() {
 		setfromInputDate(formatDate(firstDateOfCurrentMonth));
 	}, []);
 
-	useEffect(() => {
-		const apiUrl = apiLinks + "/GetActiveAccounts.php";
-		const formData = new URLSearchParams({
-			FLocCod: getLocationNumber,
-			code: organisation.code,
-		}).toString();
-		axios
-			.post(apiUrl, formData)
-			.then((response) => {
-				setSupplierList(response.data);
-			})
-			.catch((error) => {
-				console.error("Error fetching data:", error);
-			});
-	}, []);
-
-	// Transforming fetched data into options array
-	const options = supplierList.map((item) => ({
-		value: item.tacccod,
-		label: `${item.tacccod}-${item.taccdsc.trim()}`,
-	}));
-
-	const DropdownOption = (props) => {
-		return (
-			<components.Option {...props}>
-				<div
-					style={{
-						fontSize: "12px",
-						paddingBottom: "5px",
-						lineHeight: "3px",
-						color: "black",
-						textAlign: "start",
-					}}
-				>
-					{props.data.label}
-				</div>
-			</components.Option>
-		);
-	};
-	const customStyles1 = (hasError) => ({
-		control: (base, state) => ({
-			...base,
-			height: "24px",
-			minHeight: "unset",
-			width: 418,
-			fontSize: "12px",
-			backgroundColor: getcolor,
-			color: fontcolor,
-			borderRadius: 0,
-			border: hasError ? "2px solid red" : `1px solid ${fontcolor}`, // Conditionally change border color
-			transition: "border-color 0.15s ease-in-out",
-			"&:hover": {
-				borderColor: state.isFocused ? base.borderColor : "black",
-			},
-			padding: "0 8px",
-			display: "flex",
-			alignItems: "center",
-			justifyContent: "space-between",
-		}),
-		dropdownIndicator: (base) => ({
-			...base,
-			padding: 0,
-			fontSize: "18px",
-			display: "flex",
-			textAlign: "center !important",
-		}),
-	});
-
 	const handleTransactionTypeChange = (event) => {
 		const selectedTransactionType = event.target.value;
 		settransectionType(selectedTransactionType);
 	};
 
-	///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
 	const exportPDFHandler = () => {
-		// Create a new jsPDF instance with landscape orientation
-		const doc = new jsPDF({ orientation: "landscape" });
-
-		// Define table data (rows)
+		const doc = new jsPDF({ orientation: "portrait" });
 		const rows = tableData.map((item) => [
 			item.Date,
 			item["Trn#"],
@@ -811,11 +451,7 @@ export default function DailyCollectionReport() {
 			item.Description,
 			item.Amount,
 		]);
-
-		// Add summary row to the table
-		rows.push(["", "Total", "", "", "", totalAmount]);
-
-		// Define table column headers and individual column widths
+		rows.push(["", "", "", "", "Total", String(totalAmount)]);
 		const headers = [
 			"Date",
 			"Trn#",
@@ -824,85 +460,54 @@ export default function DailyCollectionReport() {
 			"Description",
 			"Amount",
 		];
-		const columnWidths = [18, 15, 10, 85, 85, 25];
-
-		// Calculate total table width
+		const columnWidths = [18, 12, 10, 65, 65, 18];
 		const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
-
-		// Define page height and padding
 		const pageHeight = doc.internal.pageSize.height;
 		const paddingTop = 15;
-
-		// Set font properties for the table
 		doc.setFont("verdana");
 		doc.setFontSize(10);
 
-		// Function to add table headers
 		const addTableHeaders = (startX, startY) => {
-			// Set font style and size for headers
-			doc.setFont("bold"); // Set font to bold
-			doc.setFontSize(10); // Set font size for headers
-
+			doc.setFont("bold");
+			doc.setFontSize(10);
 			headers.forEach((header, index) => {
 				const cellWidth = columnWidths[index];
-				const cellHeight = 6; // Height of the header row
-				const cellX = startX + cellWidth / 2; // Center the text horizontally
-				const cellY = startY + cellHeight / 2 + 1.5; // Center the text vertically
-
-				// Draw the grey background for the header
-				doc.setFillColor(200, 200, 200); // Grey color
-				doc.rect(startX, startY, cellWidth, cellHeight, "F"); // Fill the rectangle
-
-				// Draw the outer border
-				doc.setLineWidth(0.2); // Set the width of the outer border
+				const cellHeight = 6;
+				const cellX = startX + cellWidth / 2;
+				const cellY = startY + cellHeight / 2 + 1.5;
+				doc.setFillColor(200, 200, 200);
+				doc.rect(startX, startY, cellWidth, cellHeight, "F");
+				doc.setLineWidth(0.2);
 				doc.rect(startX, startY, cellWidth, cellHeight);
-
-				// Set text alignment to center
-				doc.setTextColor(0); // Set text color to black
-				doc.text(header, cellX, cellY, { align: "center" }); // Center the text
-				startX += columnWidths[index]; // Move to the next column
+				doc.setTextColor(0);
+				doc.text(header, cellX, cellY, { align: "center" });
+				startX += columnWidths[index];
 			});
-
-			// Reset font style and size after adding headers
 			doc.setFont("verdana");
 			doc.setFontSize(10);
 		};
 
 		const addTableRows = (startX, startY, startIndex, endIndex) => {
-			const rowHeight = 5; // Adjust this value to decrease row height
-			const fontSize = 8; // Adjust this value to decrease font size
-			const boldFont = "verdana"; // Bold font
-			const normalFont = "verdana"; // Default font
-			const tableWidth = getTotalTableWidth(); // Calculate total table width
-
+			const rowHeight = 5;
+			const fontSize = 8;
+			const boldFont = "verdana";
+			const normalFont = "verdana";
+			const tableWidth = getTotalTableWidth();
 			doc.setFontSize(fontSize);
 
 			for (let i = startIndex; i < endIndex; i++) {
 				const row = rows[i];
-				const isOddRow = i % 2 !== 0; // Check if the row index is odd
-				const isRedRow = row[0] && parseInt(row[0]) > 100; // Check if tctgcod is greater than 100
-				let textColor = [0, 0, 0]; // Default text color
-				let fontName = normalFont; // Default font
+				const isOddRow = i % 2 !== 0;
+				const isRedRow = row[0] && parseInt(row[0]) > 100;
+				let textColor = [0, 0, 0];
+				let fontName = normalFont;
 
-				if (isRedRow) {
-					textColor = [255, 0, 0]; // Red color
-					fontName = boldFont; // Set bold font for red-colored row
-				}
-
-				// Set background color for odd-numbered rows
-				// if (isOddRow) {
-				// 	doc.setFillColor(240); // Light background color
-				// 	doc.rect(
-				// 		startX,
-				// 		startY + (i - startIndex + 2) * rowHeight,
-				// 		tableWidth,
-				// 		rowHeight,
-				// 		"F"
-				// 	);
+				// if (isRedRow) {
+				// 	textColor = [255, 0, 0];
+				// 	fontName = boldFont;
 				// }
 
-				// Draw row borders
-				doc.setDrawColor(0); // Set color for borders
+				doc.setDrawColor(0);
 				doc.rect(
 					startX,
 					startY + (i - startIndex + 2) * rowHeight,
@@ -913,17 +518,12 @@ export default function DailyCollectionReport() {
 				row.forEach((cell, cellIndex) => {
 					const cellY = startY + (i - startIndex + 2) * rowHeight + 3;
 					const cellX = startX + 2;
-
-					// Set text color
 					doc.setTextColor(textColor[0], textColor[1], textColor[2]);
-					// Set font
 					doc.setFont(fontName, "normal");
-
-					// Ensure the cell value is a string
 					const cellValue = String(cell);
 
 					if (cellIndex === 1 || cellIndex === 5) {
-						const rightAlignX = startX + columnWidths[cellIndex] - 2; // Adjust for right alignment
+						const rightAlignX = startX + columnWidths[cellIndex] - 2;
 						doc.text(cellValue, rightAlignX, cellY, {
 							align: "right",
 							baseline: "middle",
@@ -932,7 +532,6 @@ export default function DailyCollectionReport() {
 						doc.text(cellValue, cellX, cellY, { baseline: "middle" });
 					}
 
-					// Draw column borders (excluding the last column)
 					if (cellIndex < row.length - 1) {
 						doc.rect(
 							startX,
@@ -944,51 +543,42 @@ export default function DailyCollectionReport() {
 					}
 				});
 
-				// Draw border for the last column
 				doc.rect(
 					startX,
 					startY + (i - startIndex + 2) * rowHeight,
 					columnWidths[row.length - 1],
 					rowHeight
 				);
-				startX = (doc.internal.pageSize.width - tableWidth) / 2; // Adjusted for center alignment
+				startX = (doc.internal.pageSize.width - tableWidth) / 2;
 			}
 
-			// Draw line at the bottom of the page with padding
-			const lineWidth = tableWidth; // Match line width with table width
-			const lineX = (doc.internal.pageSize.width - tableWidth) / 2; // Center line
-			const lineY = pageHeight - 15; // Position the line 20 units from the bottom
+			const lineWidth = tableWidth;
+			const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
+			const lineY = pageHeight - 15;
 			doc.setLineWidth(0.3);
-			doc.line(lineX, lineY, lineX + lineWidth, lineY); // Draw line
-			const headingFontSize = 12; // Adjust as needed
-
-			// Add heading "Crystal Solution" aligned left bottom of the line
-			const headingX = lineX + 2; // Padding from left
-			const headingY = lineY + 5; // Padding from bottom
-			doc.setFontSize(headingFontSize); // Set the font size for the heading
-			doc.setTextColor(0); // Reset text color to default
+			doc.line(lineX, lineY, lineX + lineWidth, lineY);
+			const headingFontSize = 12;
+			const headingX = lineX + 2;
+			const headingY = lineY + 5;
+			doc.setFontSize(headingFontSize);
+			doc.setTextColor(0);
 			doc.text(`Crystal Solution \t ${date} \t ${time}`, headingX, headingY);
 		};
 
-		// Function to calculate total table width
 		const getTotalTableWidth = () => {
 			let totalWidth = 0;
 			columnWidths.forEach((width) => (totalWidth += width));
 			return totalWidth;
 		};
 
-		// Function to add a new page and reset startY
 		const addNewPage = (startY) => {
 			doc.addPage();
-			return paddingTop; // Set startY for each new page
+			return paddingTop;
 		};
 
-		// Define the number of rows per page
-		const rowsPerPage = 29; // Adjust this value based on your requirements
+		const rowsPerPage = 46;
 
-		// Function to handle pagination
 		const handlePagination = () => {
-			// Define the addTitle function
 			const addTitle = (
 				title,
 				date,
@@ -999,24 +589,19 @@ export default function DailyCollectionReport() {
 				dateTimeFontSize = 8,
 				pageNumberFontSize = 8
 			) => {
-				doc.setFontSize(titleFontSize); // Set the font size for the title
+				doc.setFontSize(titleFontSize);
 				doc.text(title, doc.internal.pageSize.width / 2, startY, {
 					align: "center",
 				});
-
-				// Calculate the x-coordinate for the right corner
 				const rightX = doc.internal.pageSize.width - 10;
-
 				if (date) {
-					doc.setFontSize(dateTimeFontSize); // Set the font size for the date and time
+					doc.setFontSize(dateTimeFontSize);
 					if (time) {
 						doc.text(date + " " + time, rightX, startY, { align: "right" });
 					} else {
 						doc.text(date, rightX - 10, startY, { align: "right" });
 					}
 				}
-
-				// Add page numbering
 				doc.setFontSize(pageNumberFontSize);
 				doc.text(
 					`Page ${pageNumber}`,
@@ -1027,22 +612,12 @@ export default function DailyCollectionReport() {
 			};
 
 			let currentPageIndex = 0;
-			let startY = paddingTop; // Initialize startY
-			let pageNumber = 1; // Initialize page number
+			let startY = paddingTop;
+			let pageNumber = 1;
 
 			while (currentPageIndex * rowsPerPage < rows.length) {
-				addTitle(comapnyname, "", "", pageNumber, startY, 20, 10); // Render company title with default font size, only date, and page number
-				startY += 7; // Adjust vertical position for the company title
-				// addTitle(
-				// 	"38-Shadman Colony 1, Lahore Ph: 0311-1111111",
-				// 	time,
-				// 	"",
-				// 	pageNumber,
-				// 	startY,
-				// 	14,
-				// 	10
-				// ); // Render sale report title with decreased font size, provide the time, and page number
-				// startY += 7;
+				addTitle(comapnyname, "", "", pageNumber, startY, 20, 10);
+				startY += 7;
 				addTitle(
 					`Daily Collection Report From: ${fromInputDate} To: ${toInputDate}`,
 					"",
@@ -1050,26 +625,15 @@ export default function DailyCollectionReport() {
 					pageNumber,
 					startY,
 					14
-				); // Render sale report title with decreased font size, provide the time, and page number
+				);
 				startY += 13;
 
 				const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
-				const labelsY = startY + 2; // Position the labels below the titles and above the table
-
-				// Set font size and weight for the labels
+				const labelsY = startY + 2;
 				doc.setFontSize(14);
 				doc.setFont("verdana", "bold");
-
-				// let typeText = transectionType ? transectionType : "";
-				// let typeItem = saleType ? saleType : "";
-
-				// doc.text(`Account: ${typeItem}`, labelsX, labelsY); // Adjust x-coordinate for From Date
-				// doc.text(`Type: ${typeText}`, labelsX + 160, labelsY); // Adjust x-coordinate for From Date
-
-				// Reset font weight to normal if necessary for subsequent text
 				doc.setFont("verdana", "normal");
-
-				startY += 0; // Adjust vertical position for the labels
+				startY += 0;
 
 				addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 39);
 				const startIndex = currentPageIndex * rowsPerPage;
@@ -1081,8 +645,8 @@ export default function DailyCollectionReport() {
 					endIndex
 				);
 				if (endIndex < rows.length) {
-					startY = addNewPage(startY); // Add new page and update startY
-					pageNumber++; // Increment page number
+					startY = addNewPage(startY);
+					pageNumber++;
 				}
 				currentPageIndex++;
 			}
@@ -1091,12 +655,11 @@ export default function DailyCollectionReport() {
 		const getCurrentDate = () => {
 			const today = new Date();
 			const dd = String(today.getDate()).padStart(2, "0");
-			const mm = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
+			const mm = String(today.getMonth() + 1).padStart(2, "0");
 			const yyyy = today.getFullYear();
 			return dd + "/" + mm + "/" + yyyy;
 		};
 
-		// Function to get current time in the format HH:MM:SS
 		const getCurrentTime = () => {
 			const today = new Date();
 			const hh = String(today.getHours()).padStart(2, "0");
@@ -1105,37 +668,26 @@ export default function DailyCollectionReport() {
 			return hh + ":" + mm + ":" + ss;
 		};
 
-		const date = getCurrentDate(); // Get current date
-		const time = getCurrentTime(); // Get current time
+		const date = getCurrentDate();
+		const time = getCurrentTime();
 
-		// Call function to handle pagination
 		handlePagination();
-
-		// Save the PDF file
 		doc.save("DailyCollectionReport.pdf");
 
 		const pdfBlob = doc.output("blob");
 		const pdfFile = new File([pdfBlob], "table_data.pdf", {
 			type: "application/pdf",
 		});
-		// setPdfFile(pdfFile);
-		// setShowMailModal(true); // Show the mail modal after downloading PDF
 	};
-	///////////////////////////// DOWNLOAD PDF CODE ////////////////////////////////////////////////////////////
 
-	///////////////////////////// DOWNLOAD PDF EXCEL //////////////////////////////////////////////////////////
 	const handleDownloadCSV = async () => {
 		const workbook = new ExcelJS.Workbook();
 		const worksheet = workbook.addWorksheet("Sheet1");
-
-		const numColumns = 6; // Number of columns
-
-		// Common styles
+		const numColumns = 6;
 		const titleStyle = {
 			font: { bold: true, size: 12 },
 			alignment: { horizontal: "center" },
 		};
-
 		const columnAlignments = [
 			"left",
 			"right",
@@ -1144,11 +696,7 @@ export default function DailyCollectionReport() {
 			"left",
 			"right",
 		];
-
-		// Add an empty row at the start
 		worksheet.addRow([]);
-
-		// Add title rows
 		[
 			comapnyname,
 			`Daily Collection Report From ${fromInputDate} To ${toInputDate}`,
@@ -1158,34 +706,10 @@ export default function DailyCollectionReport() {
 				`A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
 			);
 		});
-
-		worksheet.addRow([]); // Empty row for spacing
-
-		// let typeText = transectionType ? transectionType : "All";
-		// let typeItem = saleType ? saleType : "All";
-
-		// // Add type and store row and bold it
-		// const typeAndStoreRow = worksheet.addRow([
-		// 	" ",
-		// 	"",
-		// 	"",
-		// 	`Account: ${typeItem}`,
-		// 	"",
-		// 	"",
-		// 	`Type: ${typeText}`,
-		// 	"",
-		// 	"",
-		// 	"",
-		// ]);
-		// typeAndStoreRow.eachCell((cell) => {
-		// 	cell.font = { bold: true };
-		// });
-
-		// worksheet.addRow([]); // Empty row for spacing
-
+		worksheet.addRow([]);
 		const headerStyle = {
 			font: { bold: true },
-			alignment: { horizontal: "center" }, // Keep headers centered
+			alignment: { horizontal: "center" },
 			fill: {
 				type: "pattern",
 				pattern: "solid",
@@ -1198,8 +722,6 @@ export default function DailyCollectionReport() {
 				right: { style: "thin" },
 			},
 		};
-
-		// Add headers
 		const headers = [
 			"Date",
 			"Trn#",
@@ -1212,8 +734,6 @@ export default function DailyCollectionReport() {
 		headerRow.eachCell((cell) => {
 			cell.style = { ...headerStyle, alignment: { horizontal: "center" } };
 		});
-
-		// Add data rows
 		tableData.forEach((item) => {
 			worksheet.addRow([
 				item.Date,
@@ -1224,28 +744,26 @@ export default function DailyCollectionReport() {
 				item.Amount,
 			]);
 		});
-
-		// Add total row and bold it
-		const totalRow = worksheet.addRow(["", "Total", "", "", "", totalAmount]);
+		const totalRow = worksheet.addRow([
+			"",
+			"",
+			"",
+			"",
+			"Total",
+			String(totalAmount),
+		]);
 		totalRow.eachCell((cell) => {
 			cell.font = { bold: true };
 		});
-
-		// Set column widths
-		[10, 8, 6, 40, 40, 15].forEach((width, index) => {
+		[12, 7, 5, 40, 40, 12].forEach((width, index) => {
 			worksheet.getColumn(index + 1).width = width;
 		});
-
-		// Apply individual alignment and borders to each column
 		worksheet.eachRow((row, rowNumber) => {
 			if (rowNumber > 5) {
-				// Skip title rows and the empty row
 				row.eachCell((cell, colNumber) => {
 					if (rowNumber === 5) {
-						// Keep headers centered
 						cell.alignment = { horizontal: "center" };
 					} else {
-						// Apply individual alignment to body cells
 						cell.alignment = { horizontal: columnAlignments[colNumber - 1] };
 					}
 					cell.border = {
@@ -1257,17 +775,12 @@ export default function DailyCollectionReport() {
 				});
 			}
 		});
-
-		// Generate Excel file buffer and save
 		const buffer = await workbook.xlsx.writeBuffer();
 		const blob = new Blob([buffer], {
 			type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 		});
 		saveAs(blob, "DailyCollectionReport.xlsx");
 	};
-	///////////////////////////// DOWNLOAD PDF EXCEL ///////////////////////////////////////////////////////////
-
-	///////////////////////////////////////////////////////////////////////////
 
 	const dispatch = useDispatch();
 
@@ -1282,11 +795,6 @@ export default function DailyCollectionReport() {
 	const [isLoading, setIsLoading] = useState(false);
 	const { data, loading, error } = useSelector((state) => state.getuser);
 
-	// useEffect(() => {
-	//     setTableData(data);
-	//     dispatch(fetchGetUser(organisation && organisation.code));
-	// }, [dispatch, organisation.code]);
-
 	const handleSearch = (e) => {
 		setSelectedSearch(e.target.value);
 	};
@@ -1295,14 +803,12 @@ export default function DailyCollectionReport() {
 
 	const getFilteredTableData = () => {
 		let filteredData = tableData;
-
 		if (selectedSearch.trim() !== "") {
 			const query = selectedSearch.trim().toLowerCase();
 			filteredData = filteredData.filter(
 				(data) => data.tusrnam && data.tusrnam.toLowerCase().includes(query)
 			);
 		}
-
 		return filteredData;
 	};
 
@@ -1310,29 +816,32 @@ export default function DailyCollectionReport() {
 		width: "9%",
 	};
 	const secondColWidth = {
-		width: "6%",
+		width: "7%",
 	};
 	const thirdColWidth = {
-		width: "4%",
+		width: "5%",
 	};
 	const forthColWidth = {
-		width: "37%",
+		width: "34.5%",
 	};
 	const fifthColWidth = {
-		width: "34%",
+		width: "34.5%",
 	};
 	const sixthColWidth = {
 		width: "10%",
 	};
 
-	// Adjust the content width based on sidebar state
+	useHotkeys("s", fetchDailyCollectionReport);
+	useHotkeys("alt+p", exportPDFHandler);
+	useHotkeys("alt+e", handleDownloadCSV);
+	useHotkeys("esc", () => navigate("/MainPage"));
+
 	const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
 	useEffect(() => {
 		const handleResize = () => {
 			setWindowWidth(window.innerWidth);
 		};
-
 		window.addEventListener("resize", handleResize);
 		return () => {
 			window.removeEventListener("resize", handleResize);
@@ -1341,7 +850,6 @@ export default function DailyCollectionReport() {
 
 	const contentStyle = {
 		backgroundColor: getcolor,
-		// height: "100vh",
 		width: isSidebarVisible ? "calc(65vw - 0%)" : "65vw",
 		position: "relative",
 		top: "35%",
@@ -1365,29 +873,25 @@ export default function DailyCollectionReport() {
 		fontFamily: '"Poppins", sans-serif',
 	};
 
-	//////////////////////////////////////////// ROW HIGHLIGHT CODE ////////////////////////////////////
 	const [isFilterApplied, setIsFilterApplied] = useState(false);
 	useEffect(() => {
 		if (isFilterApplied || tableData.length > 0) {
-			setSelectedIndex(0); // Set the selected index to the first row
+			setSelectedIndex(0);
 			rowRefs.current[0]?.scrollIntoView({
 				behavior: "smooth",
 				block: "start",
 			});
 		} else {
-			setSelectedIndex(-1); // Reset selected index if no filter applied or filtered data is empty
+			setSelectedIndex(-1);
 		}
 	}, [tableData, isFilterApplied]);
 
 	let totalEnteries = 0;
-	const [selectedRowId, setSelectedRowId] = useState(null); // Track the selected row's tctgcod
-
-	// state initialize for table row highlight
-	const [selectedIndex, setSelectedIndex] = useState(-1); // Initialize selectedIndex state
-	const rowRefs = useRef([]); // Array of refs for rows
+	const [selectedRowId, setSelectedRowId] = useState(null);
+	const [selectedIndex, setSelectedIndex] = useState(-1);
+	const rowRefs = useRef([]);
 	const handleRowClick = (index) => {
 		setSelectedIndex(index);
-		// setSelectedRowId(getFilteredTableData[index].tcmpdsc); // Save the selected row's tctgcod
 	};
 	useEffect(() => {
 		if (selectedRowId !== null) {
@@ -1398,7 +902,7 @@ export default function DailyCollectionReport() {
 		}
 	}, [tableData, selectedRowId]);
 	const handleKeyDown = (e) => {
-		if (selectedIndex === -1 || e.target.id === "searchInput") return; // Return if no row is selected or target is search input
+		if (selectedIndex === -1 || e.target.id === "searchInput") return;
 		if (e.key === "ArrowUp") {
 			e.preventDefault();
 			setSelectedIndex((prevIndex) => Math.max(prevIndex - 1, 0));
@@ -1421,26 +925,55 @@ export default function DailyCollectionReport() {
 	};
 	useEffect(() => {
 		window.addEventListener("keydown", handleKeyDown);
-
-		// Cleanup event listener on component unmount
 		return () => {
 			window.removeEventListener("keydown", handleKeyDown);
 		};
-	}, [selectedIndex]); // Add selectedIndex as a dependency
+	}, [selectedIndex]);
 	useEffect(() => {
-		// Scroll the selected row into view
 		if (selectedIndex !== -1 && rowRefs.current[selectedIndex]) {
 			rowRefs.current[selectedIndex].scrollIntoView({
 				behavior: "smooth",
 				block: "nearest",
 			});
 		}
-	}, [selectedIndex]); // Add selectedIndex as a dependency
-	//////////////////////////////////////////// ROW HIGHLIGHT CODE //////////////////////////////////////
+	}, [selectedIndex]);
+
+	const parseDate = (dateString) => {
+		const [day, month, year] = dateString.split("-").map(Number);
+		return new Date(year, month - 1, day);
+	};
+
+	const handleRadioChange = (days) => {
+		const toDate = parseDate(toInputDate);
+		const fromDate = new Date(toDate);
+		fromDate.setUTCDate(fromDate.getUTCDate() - days);
+
+		setSelectedfromDate(fromDate);
+		setfromInputDate(formatDate(fromDate));
+		setSelectedRadio(days === 0 ? "custom" : `${days}days`);
+	};
+
+	useEffect(() => {
+		if (selectedRadio === "custom") {
+			const currentDate = new Date();
+			const firstDateOfCurrentMonth = new Date(
+				currentDate.getFullYear(),
+				currentDate.getMonth(),
+				1
+			);
+			setSelectedfromDate(firstDateOfCurrentMonth);
+			setfromInputDate(formatDate(firstDateOfCurrentMonth));
+			setSelectedToDate(currentDate);
+			settoInputDate(formatDate(currentDate));
+		} else {
+			const days = parseInt(selectedRadio.replace("days", ""));
+			handleRadioChange(days);
+		}
+	}, [selectedRadio]);
 
 	return (
 		<>
-			<div id="someElementId"></div>
+			<ToastContainer />
 			<div style={contentStyle}>
 				<div
 					style={{
@@ -1452,125 +985,8 @@ export default function DailyCollectionReport() {
 					}}
 				>
 					<NavComponent textdata="Daily Collection Report" />
-					{/* <div
-						className="row "
-						style={{ height: "20px", marginTop: "6px", marginBottom: "10px" }}
-					>
-						<div
-							style={{
-								display: "flex",
-								alignItems: "center",
-								justifyContent: "space-between",
-								margin: "0px",
-								padding: "0px",
-							}}
-						>
-							<div
-								className="d-flex align-items-center  "
-								style={{ marginRight: "1px" }}
-							>
-								<div
-									style={{
-										width: "80px",
-										display: "flex",
-										justifyContent: "end",
-									}}
-								>
-									<label htmlFor="fromDatePicker">
-										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
-											Account :
-										</span>{" "}
-										<br />
-									</label>
-								</div>
-								<div style={{ marginLeft: "3px" }}>
-									<Select
-										className="List-select-class "
-										ref={saleSelectRef}
-										options={options}
-										onKeyDown={(e) => handleSaleKeypress(e, "frominputid")}
-										id="selectedsale"
-										onChange={(selectedOption) => {
-											if (selectedOption && selectedOption.value) {
-												setSaleType(selectedOption.value);
-											} else {
-												setSaleType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
-											}
-										}}
-										components={{ Option: DropdownOption }}
-										// styles={customStyles1}
-										styles={customStyles1(!saleType)}
-										isClearable
-										placeholder="Search or select..."
-									/>
-								</div>
-							</div>
-
-							<div
-								className="d-flex align-items-center"
-								style={{ marginRight: "20px" }}
-							>
-								<div
-									style={{
-										width: "60px",
-										display: "flex",
-										justifyContent: "end",
-									}}
-								>
-									<label htmlFor="fromDatePicker">
-										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
-											Type :
-										</span>{" "}
-										<br />
-									</label>
-								</div>
-								<select
-									ref={input1Ref}
-									onKeyDown={(e) => handleKeyPress(e, input2Ref)}
-									// ref={typeSelectRef}
-									// onKeyDown={(e) => handleTypeKeypress(e, 'submitButton')}
-									// id="selectedtype"
-									id="submitButton"
-									name="type"
-									value={transectionType}
-									onChange={handleTransactionTypeChange}
-									// onChange={(e) => {
-									//   settransectionType(e.target.value);
-									//   handleTransactionTypeChange(e.target.value);
-									// }}
-									style={{
-										width: "200px",
-										height: "24px",
-										marginLeft: "15px",
-										textAlign: "center",
-										backgroundColor: getcolor,
-										border: `1px solid ${fontcolor}`,
-										fontSize: "12px",
-										textAlign: "left",
-										marginRight: "1px",
-										color: fontcolor,
-									}}
-								>
-									<option value="">All</option>
-									<option value="CRV">Cash Receive Vorcher</option>
-									<option value="CPV">Cash Payment Vorcher</option>
-									<option value="BRV">Bank Receive Vorcher</option>
-									<option value="BPV">Bank Payment Vorcher</option>
-									<option value="JRV">Journal Vorcher</option>
-									<option value="INV">Item Sale</option>
-									<option value="SRN">Sale Return</option>
-									<option value="BIL">Purchase</option>
-									<option value="PRN">Purchase Return</option>
-									<option value="ISS">Issue</option>
-									<option value="REC">Received</option>
-									<option value="SLY">Salary</option>
-								</select>
-							</div>
-						</div>
-					</div> */}
-
 					<div
-						className="row "
+						className="row"
 						style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
 					>
 						<div
@@ -1583,8 +999,175 @@ export default function DailyCollectionReport() {
 								justifyContent: "space-between",
 							}}
 						>
-							{/* From Date */}
-							<div className="d-flex align-items-center ">
+							<div className="d-flex align-items-center justify-content-center">
+								<div className="mx-5">
+									{/* <label htmlFor="">
+										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+											Check :
+										</span>{" "}
+									</label>
+									<input
+										onChange={() => setCheck(!check)}
+										type="checkbox"
+										name=""
+										id=""
+										checked={check}
+										style={{
+											alignItems: "center",
+											marginLeft: "10px",
+										}}
+										onFocus={(e) =>
+											(e.currentTarget.style.border = "2px solid red")
+										}
+										onBlur={(e) =>
+											(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+										}
+									/> */}
+								</div>
+								<div
+									className="d-flex align-items-center"
+									style={{ marginRight: "15px" }}
+								>
+									<div
+										style={{
+											display: "flex",
+											justifyContent: "evenly",
+										}}
+									>
+										<div className="d-flex align-items-baseline mx-2">
+											<input
+												type="radio"
+												name="dateRange"
+												id="custom"
+												checked={selectedRadio === "custom"}
+												onChange={() => handleRadioChange(0)}
+												onFocus={(e) =>
+													(e.currentTarget.style.border = "2px solid red")
+												}
+												onBlur={(e) =>
+													(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+												}
+											/>
+											&nbsp;
+											<label htmlFor="custom">Custom</label>
+										</div>
+										<div className="d-flex align-items-baseline mx-2">
+											<input
+												type="radio"
+												name="dateRange"
+												id="30"
+												checked={selectedRadio === "30days"}
+												onChange={() => handleRadioChange(30)}
+												onFocus={(e) =>
+													(e.currentTarget.style.border = "2px solid red")
+												}
+												onBlur={(e) =>
+													(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+												}
+											/>
+											&nbsp;
+											<label htmlFor="30">30 Days</label>
+										</div>
+										<div className="d-flex align-items-baseline mx-2">
+											<input
+												type="radio"
+												name="dateRange"
+												id="60"
+												checked={selectedRadio === "60days"}
+												onChange={() => handleRadioChange(60)}
+												onFocus={(e) =>
+													(e.currentTarget.style.border = "2px solid red")
+												}
+												onBlur={(e) =>
+													(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+												}
+											/>
+											&nbsp;
+											<label htmlFor="60">60 Days</label>
+										</div>
+										<div className="d-flex align-items-baseline mx-2">
+											<input
+												type="radio"
+												name="dateRange"
+												id="90"
+												checked={selectedRadio === "90days"}
+												onChange={() => handleRadioChange(90)}
+												onFocus={(e) =>
+													(e.currentTarget.style.border = "2px solid red")
+												}
+												onBlur={(e) =>
+													(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+												}
+											/>
+											&nbsp;
+											<label htmlFor="90">90 Days</label>
+										</div>
+									</div>
+								</div>
+							</div>
+							{/* ------ */}
+							<div
+								className="d-flex align-items-center"
+								style={{ marginRight: "21px" }}
+							>
+								<div
+									style={{
+										width: "60px",
+										display: "flex",
+										justifyContent: "end",
+									}}
+								>
+									<label htmlFor="transactionType">
+										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+											Type:
+										</span>
+									</label>
+								</div>
+								<select
+									ref={input1Ref}
+									onKeyDown={(e) => handleKeyPress(e, input2Ref)}
+									id="submitButton"
+									name="type"
+									onFocus={(e) =>
+										(e.currentTarget.style.border = "4px solid red")
+									}
+									onBlur={(e) =>
+										(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+									}
+									value={transectionType}
+									onChange={handleTransactionTypeChange}
+									style={{
+										width: "200px",
+										height: "24px",
+										marginLeft: "15px",
+										backgroundColor: getcolor,
+										border: `1px solid ${fontcolor}`,
+										fontSize: "12px",
+										color: fontcolor,
+									}}
+								>
+									<option value="">All</option>
+									<option value="Receivable">Receivable</option>
+									<option value="Payable">Payable</option>
+								</select>
+							</div>
+						</div>
+					</div>
+					<div
+						className="row"
+						style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+					>
+						<div
+							style={{
+								width: "100%",
+								display: "flex",
+								alignItems: "center",
+								margin: "0px",
+								padding: "0px",
+								justifyContent: "space-between",
+							}}
+						>
+							<div className="d-flex align-items-center">
 								<div
 									style={{
 										width: "80px",
@@ -1594,9 +1177,8 @@ export default function DailyCollectionReport() {
 								>
 									<label htmlFor="fromDatePicker">
 										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
-											From :
-										</span>{" "}
-										<br />
+											From:
+										</span>
 									</label>
 								</div>
 								<div
@@ -1606,11 +1188,17 @@ export default function DailyCollectionReport() {
 										border: `1px solid ${fontcolor}`,
 										display: "flex",
 										alignItems: "center",
-										height: " 24px",
-										justifycontent: "center",
+										height: "24px",
+										justifyContent: "center",
 										marginLeft: "3px",
 										background: getcolor,
 									}}
+									onFocus={(e) =>
+										(e.currentTarget.style.border = "2px solid red")
+									}
+									onBlur={(e) =>
+										(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+									}
 								>
 									<input
 										style={{
@@ -1618,24 +1206,23 @@ export default function DailyCollectionReport() {
 											width: "90px",
 											paddingLeft: "5px",
 											outline: "none",
-											alignItems: "center",
-											// marginTop: '5.5px',
 											border: "none",
 											fontSize: "12px",
 											backgroundColor: getcolor,
 											color: fontcolor,
+											opacity: selectedRadio === "custom" ? 1 : 0.5,
+											pointerEvents:
+												selectedRadio === "custom" ? "auto" : "none",
 										}}
 										id="frominputid"
 										value={fromInputDate}
 										ref={fromRef}
 										onChange={handlefromInputChange}
-										// onKeyPress={handlefromKeyPress}
 										onKeyDown={(e) => handlefromKeyPress(e, "toDatePicker")}
-										// onKeyUp={(e) => handlefromKeyPress(e, 'toDatePicker')}
 										autoComplete="off"
 										placeholder="dd-mm-yyyy"
 										aria-label="Date Input"
-										aria-describedby="datepicker"
+										disabled={selectedRadio !== "custom"}
 									/>
 									<DatePicker
 										selected={selectedfromDate}
@@ -1643,32 +1230,34 @@ export default function DailyCollectionReport() {
 										dateFormat="dd-MM-yyyy"
 										popperPlacement="bottom"
 										showPopperArrow={false}
-										// showMonthDropdown
-										// showYearDropdown
 										open={fromCalendarOpen}
 										dropdownMode="select"
 										customInput={
 											<div>
-												<span>
-													<BsCalendar
-														onClick={toggleFromCalendar}
-														style={{
-															cursor: "pointer",
-															alignItems: "center",
-															marginLeft: "18px",
-															// marginTop: '5px',
-															fontSize: "12px",
-															color: fontcolor,
-														}}
-													/>
-												</span>
+												<BsCalendar
+													onClick={
+														selectedRadio === "custom"
+															? toggleFromCalendar
+															: undefined
+													}
+													style={{
+														cursor:
+															selectedRadio === "custom"
+																? "pointer"
+																: "default",
+														marginLeft: "18px",
+														fontSize: "12px",
+														color: fontcolor,
+														opacity: selectedRadio === "custom" ? 1 : 0.5,
+													}}
+													disabled={selectedRadio !== "custom"}
+												/>
 											</div>
 										}
+										disabled={selectedRadio !== "custom"}
 									/>
 								</div>
 							</div>
-
-							{/* To Date */}
 							<div
 								className="d-flex align-items-center"
 								style={{ marginLeft: "15px" }}
@@ -1680,11 +1269,10 @@ export default function DailyCollectionReport() {
 										justifyContent: "end",
 									}}
 								>
-									<label htmlFor="fromDatePicker">
+									<label htmlFor="toDatePicker">
 										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
-											To :
-										</span>{" "}
-										<br />
+											To:
+										</span>
 									</label>
 								</div>
 								<div
@@ -1694,11 +1282,17 @@ export default function DailyCollectionReport() {
 										border: `1px solid ${fontcolor}`,
 										display: "flex",
 										alignItems: "center",
-										height: " 24px",
-										justifycontent: "center",
+										height: "24px",
+										justifyContent: "center",
 										marginLeft: "15px",
 										background: getcolor,
 									}}
+									onFocus={(e) =>
+										(e.currentTarget.style.border = "2px solid red")
+									}
+									onBlur={(e) =>
+										(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+									}
 								>
 									<input
 										ref={toRef}
@@ -1707,23 +1301,22 @@ export default function DailyCollectionReport() {
 											width: "90px",
 											paddingLeft: "5px",
 											outline: "none",
-											alignItems: "center",
-											// marginTop: '5.5px',
 											border: "none",
 											fontSize: "12px",
 											backgroundColor: getcolor,
 											color: fontcolor,
+											opacity: selectedRadio === "custom" ? 1 : 0.5,
+											pointerEvents:
+												selectedRadio === "custom" ? "auto" : "none",
 										}}
 										value={toInputDate}
 										onChange={handleToInputChange}
-										// onKeyPress={handleToKeyPress}
 										onKeyDown={(e) => handleToKeyPress(e, "submitButton")}
-										// onKeyDown={(e) => handleKeyPressBoth(e, 'submitButton')}
 										id="toDatePicker"
 										autoComplete="off"
 										placeholder="dd-mm-yyyy"
 										aria-label="To Date Input"
-										aria-describedby="todatepicker"
+										disabled={selectedRadio !== "custom"}
 									/>
 									<DatePicker
 										selected={selectedToDate}
@@ -1731,31 +1324,34 @@ export default function DailyCollectionReport() {
 										dateFormat="dd-MM-yyyy"
 										popperPlacement="bottom"
 										showPopperArrow={false}
-										// showMonthDropdown
-										// showYearDropdown
 										open={toCalendarOpen}
 										dropdownMode="select"
 										customInput={
 											<div>
-												<span>
-													<BsCalendar
-														onClick={toggleToCalendar}
-														style={{
-															cursor: "pointer",
-															alignItems: "center",
-															marginLeft: "18px",
-															// marginTop: '5px',
-															fontSize: "12px",
-														}}
-													/>
-												</span>
+												<BsCalendar
+													onClick={
+														selectedRadio === "custom"
+															? toggleToCalendar
+															: undefined
+													}
+													style={{
+														cursor:
+															selectedRadio === "custom"
+																? "pointer"
+																: "default",
+														marginLeft: "18px",
+														fontSize: "12px",
+														color: fontcolor,
+														opacity: selectedRadio === "custom" ? 1 : 0.5,
+													}}
+													disabled={selectedRadio !== "custom"}
+												/>
 											</div>
 										}
+										disabled={selectedRadio !== "custom"}
 									/>
 								</div>
 							</div>
-
-							{/* Search Item  */}
 							<div id="lastDiv" style={{ marginRight: "1px" }}>
 								<label for="searchInput" style={{ marginRight: "15px" }}>
 									<span style={{ fontSize: "15px", fontWeight: "bold" }}>
@@ -1765,7 +1361,6 @@ export default function DailyCollectionReport() {
 								<input
 									ref={input2Ref}
 									onKeyDown={(e) => handleKeyPress(e, input3Ref)}
-									// onKeyDown={(e) => handlesearchKeypress(e, 'searchsubmit')}
 									type="text"
 									id="searchsubmit"
 									placeholder="Item description"
@@ -1781,94 +1376,22 @@ export default function DailyCollectionReport() {
 										outline: "none",
 										paddingLeft: "10px",
 									}}
+									onFocus={(e) =>
+										(e.currentTarget.style.border = "2px solid red")
+									}
+									onBlur={(e) =>
+										(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+									}
 									onChange={(e) => setSearchQuery(e.target.value)}
 								/>
 							</div>
 						</div>
 					</div>
-
-					<div
-						className="row "
-						style={{ height: "20px", marginTop: "6px", marginBottom: "10px" }}
-					>
-						<div
-							style={{
-								display: "flex",
-								alignItems: "center",
-								justifyContent: "space-between",
-								margin: "0px",
-								padding: "0px",
-							}}
-						>
-							<div></div>
-							<div
-								className="d-flex align-items-center"
-								style={{ marginRight: "20px" }}
-							>
-								<div
-									style={{
-										width: "60px",
-										display: "flex",
-										justifyContent: "end",
-									}}
-								>
-									<label htmlFor="fromDatePicker">
-										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
-											Type :
-										</span>{" "}
-										<br />
-									</label>
-								</div>
-								<select
-									ref={input1Ref}
-									onKeyDown={(e) => handleKeyPress(e, input2Ref)}
-									// ref={typeSelectRef}
-									// onKeyDown={(e) => handleTypeKeypress(e, 'submitButton')}
-									// id="selectedtype"
-									id="submitButton"
-									name="type"
-									value={transectionType}
-									onChange={handleTransactionTypeChange}
-									// onChange={(e) => {
-									//   settransectionType(e.target.value);
-									//   handleTransactionTypeChange(e.target.value);
-									// }}
-									style={{
-										width: "200px",
-										height: "24px",
-										marginLeft: "15px",
-										textAlign: "center",
-										backgroundColor: getcolor,
-										border: `1px solid ${fontcolor}`,
-										fontSize: "12px",
-										textAlign: "left",
-										marginRight: "1px",
-										color: fontcolor,
-									}}
-								>
-									<option value="">All</option>
-									<option value="CRV">Cash Receive Vorcher</option>
-									<option value="CPV">Cash Payment Vorcher</option>
-									<option value="BRV">Bank Receive Vorcher</option>
-									<option value="BPV">Bank Payment Vorcher</option>
-									<option value="JRV">Journal Vorcher</option>
-									<option value="INV">Item Sale</option>
-									<option value="SRN">Sale Return</option>
-									<option value="BIL">Purchase</option>
-									<option value="PRN">Purchase Return</option>
-									<option value="ISS">Issue</option>
-									<option value="REC">Received</option>
-									<option value="SLY">Salary</option>
-								</select>
-							</div>
-						</div>
-					</div>
-
 					<div>
 						<div
 							style={{
 								overflowY: "auto",
-								width: "98.8%",
+								width: "98.5%",
 							}}
 						>
 							<table
@@ -1878,7 +1401,6 @@ export default function DailyCollectionReport() {
 									fontSize: "12px",
 									width: "100%",
 									position: "relative",
-									paddingRight: "2%",
 								}}
 							>
 								<thead
@@ -1894,6 +1416,7 @@ export default function DailyCollectionReport() {
 									<tr
 										style={{
 											backgroundColor: tableHeadColor,
+											color: "white",
 										}}
 									>
 										<td className="border-dark" style={firstColWidth}>
@@ -1918,7 +1441,6 @@ export default function DailyCollectionReport() {
 								</thead>
 							</table>
 						</div>
-
 						<div
 							className="table-scroll"
 							style={{
@@ -1984,7 +1506,7 @@ export default function DailyCollectionReport() {
 												return (
 													<tr
 														key={`${i}-${selectedIndex}`}
-														ref={(el) => (rowRefs.current[i] = el)} // Assign ref to each row
+														ref={(el) => (rowRefs.current[i] = el)}
 														onClick={() => handleRowClick(i)}
 														className={
 															selectedIndex === i ? "selected-background" : ""
@@ -1994,7 +1516,7 @@ export default function DailyCollectionReport() {
 															color: fontcolor,
 														}}
 													>
-														<td className="text-center" style={firstColWidth}>
+														<td className="text-start" style={firstColWidth}>
 															{item.Date}
 														</td>
 														<td className="text-end" style={secondColWidth}>
@@ -2046,14 +1568,13 @@ export default function DailyCollectionReport() {
 							</table>
 						</div>
 					</div>
-
 					<div
 						style={{
 							borderBottom: `1px solid ${fontcolor}`,
 							borderTop: `1px solid ${fontcolor}`,
 							height: "24px",
 							display: "flex",
-							paddingRight: "1.2%",
+							paddingRight: "1.5%",
 						}}
 					>
 						<div
@@ -2101,7 +1622,6 @@ export default function DailyCollectionReport() {
 							<span className="mobileledger_total">{totalAmount}</span>
 						</div>
 					</div>
-
 					<div
 						style={{
 							margin: "5px",
@@ -2112,27 +1632,40 @@ export default function DailyCollectionReport() {
 							to="/MainPage"
 							text="Return"
 							style={{ backgroundColor: "#186DB7", width: "120px" }}
+							onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
+							onBlur={(e) =>
+								(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+							}
 						/>
 						<SingleButton
 							text="PDF"
 							onClick={exportPDFHandler}
 							style={{ backgroundColor: "#186DB7", width: "120px" }}
+							onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
+							onBlur={(e) =>
+								(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+							}
 						/>
 						<SingleButton
-							text="EXCEL"
+							text="Excel"
 							onClick={handleDownloadCSV}
 							style={{ backgroundColor: "#186DB7", width: "120px" }}
+							onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
+							onBlur={(e) =>
+								(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+							}
 						/>
 						<SingleButton
 							id="searchsubmit"
-							text="SELECT"
+							text="Select"
 							ref={input3Ref}
 							onClick={fetchDailyCollectionReport}
 							style={{ backgroundColor: "#186DB7", width: "120px" }}
+							onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
+							onBlur={(e) =>
+								(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+							}
 						/>
-						{/* <button className="reportBtn" id="searchsubmit" ref={input3Ref}  onClick={fetchDailyCollectionReport}>
-                    Select
-                </button>{" "} */}
 					</div>
 				</div>
 			</div>

@@ -21,7 +21,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-export default function DailyCashBankBalance() {
+export default function InstallarPaymentReport() {
 	const navigate = useNavigate();
 	const user = getUserData();
 	const organisation = getOrganisationData();
@@ -44,6 +44,7 @@ export default function DailyCashBankBalance() {
 	const [totalDebit, setTotalDebit] = useState(0);
 	const [totalCredit, setTotalCredit] = useState(0);
 	const [closingBalance, setClosingBalance] = useState(0);
+	const [totalAmount, setTotalAmount] = useState(0);
 
 	// state for from DatePicker
 	const [selectedfromDate, setSelectedfromDate] = useState(null);
@@ -269,7 +270,7 @@ export default function DailyCashBankBalance() {
 		}
 	};
 
-	function fetchDailyCashBankBalance() {
+	function fetchInstallarPaymentReport() {
 		const fromDateElement = document.getElementById("fromdatevalidation");
 		const toDateElement = document.getElementById("todatevalidation");
 
@@ -364,16 +365,6 @@ export default function DailyCashBankBalance() {
 				break;
 		}
 
-		const data = {
-			FIntDat: fromInputDate,
-			FFnlDat: toInputDate,
-			FTrnTyp: transectionType,
-			FAccCod: saleType,
-			code: "EMART",
-			FLocCod: "001",
-			FYerDsc: "2024-2024",
-		};
-		console.log(data);
 		document.getElementById(
 			"fromdatevalidation"
 		).style.border = `1px solid ${fontcolor}`;
@@ -381,10 +372,10 @@ export default function DailyCashBankBalance() {
 			"todatevalidation"
 		).style.border = `1px solid ${fontcolor}`;
 
-		const apiUrl = apiLinks + "/DailyCashBankBalance.php";
+		const apiUrl = apiLinks + "/InstallarPaymentReport.php";
 		setIsLoading(true);
 		const formData = new URLSearchParams({
-			code: "EMART",
+			code: "AMRELEC",
 			FLocCod: "001",
 			FYerDsc: "2024-2024",
 			FIntDat: fromInputDate,
@@ -396,11 +387,9 @@ export default function DailyCashBankBalance() {
 			.post(apiUrl, formData)
 			.then((response) => {
 				setIsLoading(false);
-				console.log("Response:", response.data);
-				setTotalOpening(response.data["Total Opening"]);
-				setTotalDebit(response.data["Total Debit"]);
-				setTotalCredit(response.data["Total Credit"]);
-				setClosingBalance(response.data["Total Balance"]);
+				// console.log("Response:", response.data);
+
+				setTotalAmount(response.data["Total Amount"]);
 
 				if (response.data && Array.isArray(response.data.Detail)) {
 					setTableData(response.data.Detail);
@@ -522,29 +511,13 @@ export default function DailyCashBankBalance() {
 		const doc = new jsPDF({ orientation: "portrait" });
 		const rows = tableData.map((item) => [
 			item.Code,
-			item.Description,
-			item.Opening,
-			item.Debit,
-			item.Credit,
-			item.Balance,
+			item.Installar,
+			item.Instalaltions,
+			item.Amount,
 		]);
-		rows.push([
-			"",
-			"Total",
-			String(totalOpening),
-			String(totalDebit),
-			String(totalCredit),
-			String(closingBalance),
-		]);
-		const headers = [
-			"Code",
-			"Description",
-			"Opening",
-			"Debit",
-			"Credit",
-			"Balance",
-		];
-		const columnWidths = [18, 80, 20, 20, 20, 25];
+		rows.push(["", "Total", "", String(totalAmount)]);
+		const headers = ["Code", "Installar", "Installations", "Amount"];
+		const columnWidths = [15, 80, 20, 20];
 		const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
 		const pageHeight = doc.internal.pageSize.height;
 		const paddingTop = 15;
@@ -586,10 +559,10 @@ export default function DailyCashBankBalance() {
 				let textColor = [0, 0, 0];
 				let fontName = normalFont;
 
-				if (isRedRow) {
-					textColor = [255, 0, 0];
-					fontName = boldFont;
-				}
+				// if (isRedRow) {
+				// 	textColor = [255, 0, 0];
+				// 	fontName = boldFont;
+				// }
 
 				doc.setDrawColor(0);
 				doc.rect(
@@ -606,12 +579,7 @@ export default function DailyCashBankBalance() {
 					doc.setFont(fontName, "normal");
 					const cellValue = String(cell);
 
-					if (
-						cellIndex === 2 ||
-						cellIndex === 3 ||
-						cellIndex === 4 ||
-						cellIndex === 5
-					) {
+					if (cellIndex === 2 || cellIndex === 3) {
 						const rightAlignX = startX + columnWidths[cellIndex] - 2;
 						doc.text(cellValue, rightAlignX, cellY, {
 							align: "right",
@@ -708,7 +676,7 @@ export default function DailyCashBankBalance() {
 				addTitle(comapnyname, "", "", pageNumber, startY, 20, 10);
 				startY += 7;
 				addTitle(
-					`Daily Cash Bank Balance Report From: ${fromInputDate} To: ${toInputDate}`,
+					`Installar Payment Report From: ${fromInputDate} To: ${toInputDate}`,
 					"",
 					"",
 					pageNumber,
@@ -761,7 +729,7 @@ export default function DailyCashBankBalance() {
 		const time = getCurrentTime();
 
 		handlePagination();
-		doc.save("DailyCashBankBalance.pdf");
+		doc.save("InstallarPaymentReport.pdf");
 
 		const pdfBlob = doc.output("blob");
 		const pdfFile = new File([pdfBlob], "table_data.pdf", {
@@ -772,23 +740,16 @@ export default function DailyCashBankBalance() {
 	const handleDownloadCSV = async () => {
 		const workbook = new ExcelJS.Workbook();
 		const worksheet = workbook.addWorksheet("Sheet1");
-		const numColumns = 6;
+		const numColumns = 4;
 		const titleStyle = {
 			font: { bold: true, size: 12 },
 			alignment: { horizontal: "center" },
 		};
-		const columnAlignments = [
-			"center",
-			"left",
-			"right",
-			"right",
-			"right",
-			"right",
-		];
+		const columnAlignments = ["start", "left", "right", "right"];
 		worksheet.addRow([]);
 		[
 			comapnyname,
-			`Daily Cash Bank Balance Report From ${fromInputDate} To ${toInputDate}`,
+			`Installar Payment Report From ${fromInputDate} To ${toInputDate}`,
 		].forEach((title, index) => {
 			worksheet.addRow([title]).eachCell((cell) => (cell.style = titleStyle));
 			worksheet.mergeCells(
@@ -811,14 +772,7 @@ export default function DailyCashBankBalance() {
 				right: { style: "thin" },
 			},
 		};
-		const headers = [
-			"Code",
-			"Description",
-			"Opening",
-			"Debit",
-			"Credit",
-			"Balance",
-		];
+		const headers = ["Code", "Installar", "Installations", "Amount"];
 		const headerRow = worksheet.addRow(headers);
 		headerRow.eachCell((cell) => {
 			cell.style = { ...headerStyle, alignment: { horizontal: "center" } };
@@ -826,25 +780,16 @@ export default function DailyCashBankBalance() {
 		tableData.forEach((item) => {
 			worksheet.addRow([
 				item.Code,
-				item.Description,
-				item.Opening,
-				item.Debit,
-				item.Credit,
-				item.Balance,
+				item.Installar,
+				item.Instalaltions,
+				item.Amount,
 			]);
 		});
-		const totalRow = worksheet.addRow([
-			"",
-			"Total",
-			totalOpening,
-			totalDebit,
-			totalCredit,
-			closingBalance,
-		]);
+		const totalRow = worksheet.addRow(["", "Total", "", totalAmount]);
 		totalRow.eachCell((cell) => {
 			cell.font = { bold: true };
 		});
-		[10, 45, 12, 12, 12, 15].forEach((width, index) => {
+		[10, 45, 12, 12].forEach((width, index) => {
 			worksheet.getColumn(index + 1).width = width;
 		});
 		worksheet.eachRow((row, rowNumber) => {
@@ -868,7 +813,7 @@ export default function DailyCashBankBalance() {
 		const blob = new Blob([buffer], {
 			type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 		});
-		saveAs(blob, "DailyCashBankBalance.xlsx");
+		saveAs(blob, "InstallarPaymentReport.xlsx");
 	};
 
 	const dispatch = useDispatch();
@@ -902,25 +847,19 @@ export default function DailyCashBankBalance() {
 	};
 
 	const firstColWidth = {
-		width: "9%",
+		width: "10%",
 	};
 	const secondColWidth = {
-		width: "43%",
+		width: "50%",
 	};
 	const thirdColWidth = {
-		width: "12%",
+		width: "20%",
 	};
 	const forthColWidth = {
-		width: "12%",
-	};
-	const fifthColWidth = {
-		width: "12%",
-	};
-	const sixthColWidth = {
-		width: "12%",
+		width: "20%",
 	};
 
-	useHotkeys("s", fetchDailyCashBankBalance);
+	useHotkeys("s", fetchInstallarPaymentReport);
 	useHotkeys("alt+p", exportPDFHandler);
 	useHotkeys("alt+e", handleDownloadCSV);
 	useHotkeys("esc", () => navigate("/MainPage"));
@@ -941,7 +880,7 @@ export default function DailyCashBankBalance() {
 		backgroundColor: getcolor,
 		width: isSidebarVisible ? "calc(65vw - 0%)" : "65vw",
 		position: "relative",
-		top: "35%",
+		top: "40%",
 		left: isSidebarVisible ? "50%" : "50%",
 		transform: "translate(-50%, -50%)",
 		transition: isSidebarVisible
@@ -954,7 +893,7 @@ export default function DailyCashBankBalance() {
 		overflowY: "hidden",
 		wordBreak: "break-word",
 		textAlign: "center",
-		maxWidth: "1000px",
+		maxWidth: "600px",
 		fontSize: "15px",
 		fontStyle: "normal",
 		fontWeight: "400",
@@ -1073,7 +1012,7 @@ export default function DailyCashBankBalance() {
 						borderRadius: "9px",
 					}}
 				>
-					<NavComponent textdata="Daily Cash Bank Balance Report" />
+					<NavComponent textdata="Installar Payment Report" />
 					<div
 						className="row"
 						style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
@@ -1088,159 +1027,125 @@ export default function DailyCashBankBalance() {
 								justifyContent: "space-between",
 							}}
 						>
-							<div className="d-flex align-items-center justify-content-center">
-								<div className="mx-5">
-									{/* <label htmlFor="">
+							<div
+								className="d-flex align-items-center"
+								style={{ marginLeft: "30px" }}
+							>
+								<div
+									style={{
+										display: "flex",
+										justifyContent: "evenly",
+									}}
+								>
+									<div className="d-flex align-items-baseline mx-1">
+										<input
+											type="radio"
+											name="dateRange"
+											id="custom"
+											checked={selectedRadio === "custom"}
+											onChange={() => handleRadioChange(0)}
+											onFocus={(e) =>
+												(e.currentTarget.style.border = "2px solid red")
+											}
+											onBlur={(e) =>
+												(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+											}
+										/>
+										&nbsp;
+										<label htmlFor="custom">Custom</label>
+									</div>
+									<div className="d-flex align-items-baseline mx-1">
+										<input
+											type="radio"
+											name="dateRange"
+											id="30"
+											checked={selectedRadio === "30days"}
+											onChange={() => handleRadioChange(30)}
+											onFocus={(e) =>
+												(e.currentTarget.style.border = "2px solid red")
+											}
+											onBlur={(e) =>
+												(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+											}
+										/>
+										&nbsp;
+										<label htmlFor="30">30 Days</label>
+									</div>
+									<div className="d-flex align-items-baseline mx-1 ">
+										<input
+											type="radio"
+											name="dateRange"
+											id="60"
+											checked={selectedRadio === "60days"}
+											onChange={() => handleRadioChange(60)}
+											onFocus={(e) =>
+												(e.currentTarget.style.border = "2px solid red")
+											}
+											onBlur={(e) =>
+												(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+											}
+										/>
+										&nbsp;
+										<label htmlFor="60">60 Days</label>
+									</div>
+									<div className="d-flex align-items-baseline mx-1">
+										<input
+											type="radio"
+											name="dateRange"
+											id="90"
+											checked={selectedRadio === "90days"}
+											onChange={() => handleRadioChange(90)}
+											onFocus={(e) =>
+												(e.currentTarget.style.border = "2px solid red")
+											}
+											onBlur={(e) =>
+												(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+											}
+										/>
+										&nbsp;
+										<label htmlFor="90">90 Days</label>
+									</div>
+								</div>
+							</div>
+
+							<div
+								className="d-flex align-items-center"
+								style={{ marginRight: "20px" }}
+							>
+								<div>
+									<label for="searchInput">
 										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
-											Check :
-										</span>{" "}
+											Search:&nbsp;&nbsp;
+										</span>
 									</label>
+								</div>
+								<div>
 									<input
-										onChange={() => setCheck(!check)}
-										type="checkbox"
-										name=""
-										id=""
-										checked={check}
+										ref={input2Ref}
+										onKeyDown={(e) => handleKeyPress(e, input3Ref)}
+										type="text"
+										id="searchsubmit"
+										placeholder="Item description"
+										value={searchQuery}
 										style={{
-											alignItems: "center",
-											marginLeft: "10px",
+											width: "135px",
+											height: "24px",
+											fontSize: "12px",
+											color: fontcolor,
+											backgroundColor: getcolor,
+											border: `1px solid ${fontcolor}`,
+											outline: "none",
 										}}
+										onChange={(e) => setSearchQuery(e.target.value)}
 										onFocus={(e) =>
 											(e.currentTarget.style.border = "2px solid red")
 										}
 										onBlur={(e) =>
 											(e.currentTarget.style.border = `1px solid ${fontcolor}`)
 										}
-									/> */}
-								</div>
-								<div
-									className="d-flex align-items-center"
-									style={{ marginRight: "15px" }}
-								>
-									<div
-										style={{
-											display: "flex",
-											justifyContent: "evenly",
-										}}
-									>
-										<div className="d-flex align-items-baseline mx-2">
-											<input
-												type="radio"
-												name="dateRange"
-												id="custom"
-												checked={selectedRadio === "custom"}
-												onChange={() => handleRadioChange(0)}
-												onFocus={(e) =>
-													(e.currentTarget.style.border = "2px solid red")
-												}
-												onBlur={(e) =>
-													(e.currentTarget.style.border = `1px solid ${fontcolor}`)
-												}
-											/>
-											&nbsp;
-											<label htmlFor="custom">Custom</label>
-										</div>
-										<div className="d-flex align-items-baseline mx-2">
-											<input
-												type="radio"
-												name="dateRange"
-												id="30"
-												checked={selectedRadio === "30days"}
-												onChange={() => handleRadioChange(30)}
-												onFocus={(e) =>
-													(e.currentTarget.style.border = "2px solid red")
-												}
-												onBlur={(e) =>
-													(e.currentTarget.style.border = `1px solid ${fontcolor}`)
-												}
-											/>
-											&nbsp;
-											<label htmlFor="30">30 Days</label>
-										</div>
-										<div className="d-flex align-items-baseline mx-2">
-											<input
-												type="radio"
-												name="dateRange"
-												id="60"
-												checked={selectedRadio === "60days"}
-												onChange={() => handleRadioChange(60)}
-												onFocus={(e) =>
-													(e.currentTarget.style.border = "2px solid red")
-												}
-												onBlur={(e) =>
-													(e.currentTarget.style.border = `1px solid ${fontcolor}`)
-												}
-											/>
-											&nbsp;
-											<label htmlFor="60">60 Days</label>
-										</div>
-										<div className="d-flex align-items-baseline mx-2">
-											<input
-												type="radio"
-												name="dateRange"
-												id="90"
-												checked={selectedRadio === "90days"}
-												onChange={() => handleRadioChange(90)}
-												onFocus={(e) =>
-													(e.currentTarget.style.border = "2px solid red")
-												}
-												onBlur={(e) =>
-													(e.currentTarget.style.border = `1px solid ${fontcolor}`)
-												}
-											/>
-											&nbsp;
-											<label htmlFor="90">90 Days</label>
-										</div>
-									</div>
+									/>
 								</div>
 							</div>
-							{/* ------ */}
-							{/* <div
-								className="d-flex align-items-center"
-								style={{ marginRight: "21px" }}
-							>
-								<div
-									style={{
-										width: "60px",
-										display: "flex",
-										justifyContent: "end",
-									}}
-								>
-									<label htmlFor="transactionType">
-										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
-											Type:
-										</span>
-									</label>
-								</div>
-								<select
-									ref={input1Ref}
-									onKeyDown={(e) => handleKeyPress(e, input2Ref)}
-									id="submitButton"
-									name="type"
-									onFocus={(e) =>
-										(e.currentTarget.style.border = "4px solid red")
-									}
-									onBlur={(e) =>
-										(e.currentTarget.style.border = `1px solid ${fontcolor}`)
-									}
-									value={transectionType}
-									onChange={handleTransactionTypeChange}
-									style={{
-										width: "200px",
-										height: "24px",
-										marginLeft: "15px",
-										backgroundColor: getcolor,
-										border: `1px solid ${fontcolor}`,
-										fontSize: "12px",
-										color: fontcolor,
-									}}
-								>
-									<option value="">All</option>
-									<option value="Receivable">Receivable</option>
-									<option value="Payable">Payable</option>
-								</select>
-							</div> */}
-							<div></div>
 						</div>
 					</div>
 					<div
@@ -1350,7 +1255,7 @@ export default function DailyCashBankBalance() {
 							</div>
 							<div
 								className="d-flex align-items-center"
-								style={{ marginLeft: "15px" }}
+								style={{ marginRight: "20px" }}
 							>
 								<div
 									style={{
@@ -1361,7 +1266,7 @@ export default function DailyCashBankBalance() {
 								>
 									<label htmlFor="toDatePicker">
 										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
-											To:
+											To:&nbsp;&nbsp;
 										</span>
 									</label>
 								</div>
@@ -1374,7 +1279,6 @@ export default function DailyCashBankBalance() {
 										alignItems: "center",
 										height: "24px",
 										justifyContent: "center",
-										marginLeft: "15px",
 										background: getcolor,
 									}}
 									onFocus={(e) =>
@@ -1442,46 +1346,13 @@ export default function DailyCashBankBalance() {
 									/>
 								</div>
 							</div>
-							<div id="lastDiv" style={{ marginRight: "1px" }}>
-								<label for="searchInput" style={{ marginRight: "15px" }}>
-									<span style={{ fontSize: "15px", fontWeight: "bold" }}>
-										Search :
-									</span>{" "}
-								</label>
-								<input
-									ref={input2Ref}
-									onKeyDown={(e) => handleKeyPress(e, input3Ref)}
-									type="text"
-									id="searchsubmit"
-									placeholder="Item description"
-									value={searchQuery}
-									style={{
-										marginRight: "20px",
-										width: "200px",
-										height: "24px",
-										fontSize: "12px",
-										color: fontcolor,
-										backgroundColor: getcolor,
-										border: `1px solid ${fontcolor}`,
-										outline: "none",
-										paddingLeft: "10px",
-									}}
-									onFocus={(e) =>
-										(e.currentTarget.style.border = "2px solid red")
-									}
-									onBlur={(e) =>
-										(e.currentTarget.style.border = `1px solid ${fontcolor}`)
-									}
-									onChange={(e) => setSearchQuery(e.target.value)}
-								/>
-							</div>
 						</div>
 					</div>
 					<div>
 						<div
 							style={{
 								overflowY: "auto",
-								width: "98.8%",
+								width: "97.8%",
 							}}
 						>
 							<table
@@ -1514,19 +1385,13 @@ export default function DailyCashBankBalance() {
 											Code
 										</td>
 										<td className="border-dark" style={secondColWidth}>
-											Description
+											Installar
 										</td>
 										<td className="border-dark" style={thirdColWidth}>
-											Opening
+											Installations
 										</td>
 										<td className="border-dark" style={forthColWidth}>
-											Debit
-										</td>
-										<td className="border-dark" style={fifthColWidth}>
-											Credit
-										</td>
-										<td className="border-dark" style={sixthColWidth}>
-											Balance
+											Amount
 										</td>
 									</tr>
 								</thead>
@@ -1560,7 +1425,7 @@ export default function DailyCashBankBalance() {
 													backgroundColor: getcolor,
 												}}
 											>
-												<td colSpan="6" className="text-center">
+												<td colSpan="4" className="text-center">
 													<Spinner animation="border" variant="primary" />
 												</td>
 											</tr>
@@ -1573,7 +1438,7 @@ export default function DailyCashBankBalance() {
 															color: fontcolor,
 														}}
 													>
-														{Array.from({ length: 6 }).map((_, colIndex) => (
+														{Array.from({ length: 4 }).map((_, colIndex) => (
 															<td key={`blank-${rowIndex}-${colIndex}`}>
 																&nbsp;
 															</td>
@@ -1586,8 +1451,6 @@ export default function DailyCashBankBalance() {
 												<td style={secondColWidth}></td>
 												<td style={thirdColWidth}></td>
 												<td style={forthColWidth}></td>
-												<td style={fifthColWidth}></td>
-												<td style={sixthColWidth}></td>
 											</tr>
 										</>
 									) : (
@@ -1607,23 +1470,17 @@ export default function DailyCashBankBalance() {
 															color: fontcolor,
 														}}
 													>
-														<td className="text-center" style={firstColWidth}>
+														<td className="text-start" style={firstColWidth}>
 															{item.Code}
 														</td>
 														<td className="text-start" style={secondColWidth}>
-															{item.Description}
+															{item.Installar}
 														</td>
 														<td className="text-end" style={thirdColWidth}>
-															{item.Opening}
+															{item.Instalaltions}
 														</td>
 														<td className="text-end" style={forthColWidth}>
-															{item.Debit}
-														</td>
-														<td className="text-end" style={fifthColWidth}>
-															{item.Credit}
-														</td>
-														<td className="text-end" style={sixthColWidth}>
-															{item.Balance}
+															{item.Amount}
 														</td>
 													</tr>
 												);
@@ -1638,7 +1495,7 @@ export default function DailyCashBankBalance() {
 														color: fontcolor,
 													}}
 												>
-													{Array.from({ length: 6 }).map((_, colIndex) => (
+													{Array.from({ length: 4 }).map((_, colIndex) => (
 														<td key={`blank-${rowIndex}-${colIndex}`}>
 															&nbsp;
 														</td>
@@ -1650,8 +1507,6 @@ export default function DailyCashBankBalance() {
 												<td style={secondColWidth}></td>
 												<td style={thirdColWidth}></td>
 												<td style={forthColWidth}></td>
-												<td style={fifthColWidth}></td>
-												<td style={sixthColWidth}></td>
 											</tr>
 										</>
 									)}
@@ -1665,7 +1520,7 @@ export default function DailyCashBankBalance() {
 							borderTop: `1px solid ${fontcolor}`,
 							height: "24px",
 							display: "flex",
-							paddingRight: "1.2%",
+							paddingRight: "2.2%",
 						}}
 					>
 						<div
@@ -1688,9 +1543,7 @@ export default function DailyCashBankBalance() {
 								background: getcolor,
 								borderRight: `1px solid ${fontcolor}`,
 							}}
-						>
-							<span className="mobileledger_total">{totalOpening}</span>
-						</div>
+						></div>
 						<div
 							style={{
 								...forthColWidth,
@@ -1698,25 +1551,7 @@ export default function DailyCashBankBalance() {
 								borderRight: `1px solid ${fontcolor}`,
 							}}
 						>
-							<span className="mobileledger_total">{totalDebit}</span>
-						</div>
-						<div
-							style={{
-								...fifthColWidth,
-								background: getcolor,
-								borderRight: `1px solid ${fontcolor}`,
-							}}
-						>
-							<span className="mobileledger_total">{totalCredit}</span>
-						</div>
-						<div
-							style={{
-								...sixthColWidth,
-								background: getcolor,
-								borderRight: `1px solid ${fontcolor}`,
-							}}
-						>
-							<span className="mobileledger_total">{closingBalance}</span>
+							<span className="mobileledger_total">{totalAmount}</span>
 						</div>
 					</div>
 					<div
@@ -1756,7 +1591,7 @@ export default function DailyCashBankBalance() {
 							id="searchsubmit"
 							text="Select"
 							ref={input3Ref}
-							onClick={fetchDailyCashBankBalance}
+							onClick={fetchInstallarPaymentReport}
 							style={{ backgroundColor: "#186DB7", width: "120px" }}
 							onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
 							onBlur={(e) =>
