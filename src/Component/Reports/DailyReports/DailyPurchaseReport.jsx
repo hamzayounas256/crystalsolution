@@ -22,45 +22,27 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 // import "./ItemReports.css";
 
-export default function DailySaleReport() {
+export default function DailyPurchaseReport() {
 	const navigate = useNavigate();
 	const user = getUserData();
 	const organisation = getOrganisationData();
 
-	const saleSelectRef = useRef(null);
 	const input1Ref = useRef(null);
-	const input2Ref = useRef(null);
-	const input3Ref = useRef(null);
 
 	const toRef = useRef(null);
 	const fromRef = useRef(null);
-	const companyRef = useRef(null);
-	const categoryRef = useRef(null);
-	const capacityRef = useRef(null);
+
 	const storeRef = useRef(null);
 	const typeRef = useRef(null);
 	const searchRef = useRef(null);
 	const selectButtonRef = useRef(null);
 
-	const [saleType, setSaleType] = useState("");
 	const [searchQuery, setSearchQuery] = useState("");
 	const [transectionType, settransectionType] = useState("");
-
 	const [storeType, setStoreType] = useState("");
-	const [companyType, setCompanyType] = useState("");
-	const [categoryType, setCategoryType] = useState("");
-	const [capacityType, setCapacityType] = useState("");
-
 	const [storeList, setStoreList] = useState([]);
-	const [companyList, setCompanyList] = useState([]);
-	const [categoryList, setCategoryList] = useState([]);
-	const [capacityList, setCapacityList] = useState([]);
 
 	const [totalQnty, setTotalQnty] = useState(0);
-	const [totalOpening, setTotalOpening] = useState(0);
-	const [totalDebit, setTotalDebit] = useState(0);
-	const [totalCredit, setTotalCredit] = useState(0);
-	const [closingBalance, setClosingBalance] = useState(0);
 	const [totalAmount, setTotalAmount] = useState(0);
 
 	// state for from DatePicker
@@ -148,7 +130,7 @@ export default function DailySaleReport() {
 		settoInputDate(e.target.value);
 	};
 
-	function fetchDailySaleReport() {
+	function fetchDailyPurchaseReport() {
 		const fromDateElement = document.getElementById("fromdatevalidation");
 		const toDateElement = document.getElementById("todatevalidation");
 
@@ -250,7 +232,7 @@ export default function DailySaleReport() {
 			"todatevalidation"
 		).style.border = `1px solid ${fontcolor}`;
 
-		const apiMainUrl = apiLinks + "/DailySaleReport.php";
+		const apiMainUrl = apiLinks + "/DailyPurchaseReport.php";
 		setIsLoading(true);
 		const formMainData = new URLSearchParams({
 			code: "EMART",
@@ -399,18 +381,16 @@ export default function DailySaleReport() {
 			item["Trn #"],
 			item.Type,
 			item.Description,
-			item.Customer,
-			item.Mobile,
+			item.Supplier,
 			item.Rate,
 			item.Qnty,
-			item["Sale Amount"],
+			item["Pur Amount"],
 		]);
 		rows.push([
 			"",
 			"",
 			"",
 			"Total",
-			"",
 			"",
 			"",
 			String(totalQnty),
@@ -421,13 +401,12 @@ export default function DailySaleReport() {
 			"Trn#",
 			"Type",
 			"Description",
-			"Customer",
-			"Mobile",
+			"Supplier",
 			"Rate",
 			"Qnty",
 			"Amount",
 		];
-		const columnWidths = [18, 13, 10, 75, 75, 22, 18, 10, 18];
+		const columnWidths = [18, 13, 10, 75, 75, 18, 10, 18];
 		const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
 		const pageHeight = doc.internal.pageSize.height;
 		const paddingTop = 15;
@@ -493,8 +472,7 @@ export default function DailySaleReport() {
 						cellIndex === 1 ||
 						cellIndex === 5 ||
 						cellIndex === 6 ||
-						cellIndex === 7 ||
-						cellIndex === 8
+						cellIndex === 7
 					) {
 						const rightAlignX = startX + columnWidths[cellIndex] - 2;
 						doc.text(cellValue, rightAlignX, cellY, {
@@ -593,7 +571,7 @@ export default function DailySaleReport() {
 				addTitle(comapnyname, "", "", pageNumber, startY, 20, 10);
 				startY += 7;
 				addTitle(
-					`Daily Sale Report From: ${fromInputDate} To: ${toInputDate}`,
+					`Daily Purchase Report From: ${fromInputDate} To: ${toInputDate}`,
 					"",
 					"",
 					pageNumber,
@@ -646,7 +624,7 @@ export default function DailySaleReport() {
 		const time = getCurrentTime();
 
 		handlePagination();
-		doc.save("DailySaleReport.pdf");
+		doc.save("DailyPurchaseReport.pdf");
 
 		const pdfBlob = doc.output("blob");
 		const pdfFile = new File([pdfBlob], "table_data.pdf", {
@@ -671,12 +649,11 @@ export default function DailySaleReport() {
 			"right",
 			"right",
 			"right",
-			"right",
 		];
 		worksheet.addRow([]);
 		[
 			comapnyname,
-			`Daily Sale Report From ${fromInputDate} To ${toInputDate}`,
+			`Daily Purchase Report From ${fromInputDate} To ${toInputDate}`,
 		].forEach((title, index) => {
 			worksheet.addRow([title]).eachCell((cell) => (cell.style = titleStyle));
 			worksheet.mergeCells(
@@ -704,8 +681,7 @@ export default function DailySaleReport() {
 			"Trn#",
 			"Type",
 			"Description",
-			"Customer",
-			"Mobile",
+			"Supplier",
 			"Rate",
 			"Qnty",
 			"Amount",
@@ -720,11 +696,10 @@ export default function DailySaleReport() {
 				item["Trn #"],
 				item.Type,
 				item.Description,
-				item.Customer,
-				item.Mobile,
+				item.Supplier,
 				item.Rate,
 				item.Qnty,
-				item["Sale Amount"],
+				item["Pur Amount"],
 			]);
 		});
 		const totalRow = worksheet.addRow([
@@ -734,14 +709,13 @@ export default function DailySaleReport() {
 			"Total",
 			"",
 			"",
-			"",
 			String(totalQnty),
 			String(totalAmount),
 		]);
 		totalRow.eachCell((cell) => {
 			cell.font = { bold: true };
 		});
-		[11, 8, 5, 45, 45, 13, 11, 5, 11].forEach((width, index) => {
+		[11, 8, 5, 45, 45, 11, 6, 11].forEach((width, index) => {
 			worksheet.getColumn(index + 1).width = width;
 		});
 		worksheet.eachRow((row, rowNumber) => {
@@ -765,7 +739,7 @@ export default function DailySaleReport() {
 		const blob = new Blob([buffer], {
 			type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 		});
-		saveAs(blob, "DailySaleReport.xlsx");
+		saveAs(blob, "DailyPurchaseReport.xlsx");
 	};
 
 	const dispatch = useDispatch();
@@ -799,34 +773,31 @@ export default function DailySaleReport() {
 	};
 
 	const firstColWidth = {
-		width: "7%",
+		width: "8%",
 	};
 	const secondColWidth = {
-		width: "5%",
+		width: "6%",
 	};
 	const thirdColWidth = {
 		width: "4%",
 	};
 	const forthColWidth = {
-		width: "31%",
+		width: "32%",
 	};
 	const fifthColWidth = {
-		width: "27%",
+		width: "32%",
 	};
 	const sixthColWidth = {
-		width: "8%",
-	};
-	const seventhColWidth = {
 		width: "6%",
 	};
-	const eighthColWidth = {
+	const seventhColWidth = {
 		width: "4%",
 	};
-	const ninthColWidth = {
+	const eighthColWidth = {
 		width: "8%",
 	};
 
-	useHotkeys("s", fetchDailySaleReport);
+	useHotkeys("s", fetchDailyPurchaseReport);
 	useHotkeys("alt+p", exportPDFHandler);
 	useHotkeys("alt+e", handleDownloadCSV);
 	useHotkeys("esc", () => navigate("/MainPage"));
@@ -939,7 +910,6 @@ export default function DailySaleReport() {
 	}, [selectedIndex]);
 
 	// Radio Functionality
-
 	const parseDate = (dateString) => {
 		const [day, month, year] = dateString.split("-").map(Number);
 		return new Date(year, month - 1, day);
@@ -1102,7 +1072,7 @@ export default function DailySaleReport() {
 						borderRadius: "9px",
 					}}
 				>
-					<NavComponent textdata="Daily Sale Report" />
+					<NavComponent textdata="Daily Purchase Report" />
 
 					{/* ------------1st row */}
 					<div
@@ -1518,8 +1488,8 @@ export default function DailySaleReport() {
 									}}
 								>
 									<option value="">All</option>
-									<option value="INV">Sale</option>
-									<option value="SRN">Sale Return</option>
+									<option value="BIL">Purchase</option>
+									<option value="PRN">Purchase Return</option>
 								</select>
 							</div>
 
@@ -1613,24 +1583,22 @@ export default function DailySaleReport() {
 											Description
 										</td>
 										<td className="border-dark" style={fifthColWidth}>
-											Customer
+											Supplier
 										</td>
 										<td className="border-dark" style={sixthColWidth}>
-											Mobile
-										</td>
-										<td className="border-dark" style={seventhColWidth}>
 											Rate
 										</td>
-										<td className="border-dark" style={eighthColWidth}>
+										<td className="border-dark" style={seventhColWidth}>
 											Qnty
 										</td>
-										<td className="border-dark" style={ninthColWidth}>
+										<td className="border-dark" style={eighthColWidth}>
 											Amount
 										</td>
 									</tr>
 								</thead>
 							</table>
 						</div>
+
 						{/* Table Body */}
 						<div
 							className="table-scroll"
@@ -1660,7 +1628,7 @@ export default function DailySaleReport() {
 													backgroundColor: getcolor,
 												}}
 											>
-												<td colSpan="9" className="text-center">
+												<td colSpan="8" className="text-center">
 													<Spinner animation="border" variant="primary" />
 												</td>
 											</tr>
@@ -1673,7 +1641,7 @@ export default function DailySaleReport() {
 															color: fontcolor,
 														}}
 													>
-														{Array.from({ length: 9 }).map((_, colIndex) => (
+														{Array.from({ length: 8 }).map((_, colIndex) => (
 															<td key={`blank-${rowIndex}-${colIndex}`}>
 																&nbsp;
 															</td>
@@ -1690,7 +1658,6 @@ export default function DailySaleReport() {
 												<td style={sixthColWidth}></td>
 												<td style={seventhColWidth}></td>
 												<td style={eighthColWidth}></td>
-												<td style={ninthColWidth}></td>
 											</tr>
 										</>
 									) : (
@@ -1723,19 +1690,16 @@ export default function DailySaleReport() {
 															{item.Description}
 														</td>
 														<td className="text-start" style={fifthColWidth}>
-															{item.Customer}
+															{item.Supplier}
 														</td>
 														<td className="text-end" style={sixthColWidth}>
-															{item.Mobile}
-														</td>
-														<td className="text-end" style={seventhColWidth}>
 															{item.Rate}
 														</td>
-														<td className="text-center" style={eighthColWidth}>
+														<td className="text-end" style={seventhColWidth}>
 															{item.Qnty}
 														</td>
-														<td className="text-end" style={ninthColWidth}>
-															{item["Sale Amount"]}
+														<td className="text-end" style={eighthColWidth}>
+															{item["Pur Amount"]}
 														</td>
 													</tr>
 												);
@@ -1750,7 +1714,7 @@ export default function DailySaleReport() {
 														color: fontcolor,
 													}}
 												>
-													{Array.from({ length: 9 }).map((_, colIndex) => (
+													{Array.from({ length: 8 }).map((_, colIndex) => (
 														<td key={`blank-${rowIndex}-${colIndex}`}>
 															&nbsp;
 														</td>
@@ -1766,7 +1730,6 @@ export default function DailySaleReport() {
 												<td style={sixthColWidth}></td>
 												<td style={seventhColWidth}></td>
 												<td style={eighthColWidth}></td>
-												<td style={ninthColWidth}></td>
 											</tr>
 										</>
 									)}
@@ -1774,6 +1737,7 @@ export default function DailySaleReport() {
 							</table>
 						</div>
 					</div>
+
 					{/* Table Footer */}
 					<div
 						style={{
@@ -1832,7 +1796,9 @@ export default function DailySaleReport() {
 								background: getcolor,
 								borderRight: `1px solid ${fontcolor}`,
 							}}
-						></div>
+						>
+							<span className="mobileledger_total">{totalQnty}</span>
+						</div>
 						<div
 							style={{
 								...eighthColWidth,
@@ -1840,18 +1806,10 @@ export default function DailySaleReport() {
 								borderRight: `1px solid ${fontcolor}`,
 							}}
 						>
-							<span className="mobileledger_total">{totalQnty}</span>
-						</div>
-						<div
-							style={{
-								...ninthColWidth,
-								background: getcolor,
-								borderRight: `1px solid ${fontcolor}`,
-							}}
-						>
 							<span className="mobileledger_total">{totalAmount}</span>
 						</div>
 					</div>
+
 					{/* Action Buttons */}
 					<div
 						style={{
@@ -1890,7 +1848,7 @@ export default function DailySaleReport() {
 							id="searchsubmit"
 							text="Select"
 							ref={selectButtonRef}
-							onClick={fetchDailySaleReport}
+							onClick={fetchDailyPurchaseReport}
 							style={{ backgroundColor: "#186DB7", width: "120px" }}
 							onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
 							onBlur={(e) =>
