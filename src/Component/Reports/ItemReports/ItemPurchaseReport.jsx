@@ -1867,8 +1867,8 @@ export default function ItemPurchaseReport() {
 									}}
 								>
 									<option value="">All</option>
-									<option value="INV">Sale</option>
-									<option value="SRN">Sale Return</option>
+									<option value="BIL">Purchase</option>
+									<option value="PRN">Purchase Return</option>
 								</select>
 							</div>
 						</div>

@@ -50,6 +50,7 @@ import DailySaleReport from "./Component/Reports/DailyReports/DailySaleReport.js
 import DailyPurchaseReport from "./Component/Reports/DailyReports/DailyPurchaseReport.jsx";
 import InstallarPaymentReport from "./Component/Reports/InstallationReports/InstallarPaymentReport.jsx";
 import DailyPaymentReport from "./Component/Reports/DailyReports/DailyPaymentReport.jsx";
+import DailyInstallationReport from "./Component/Reports/InstallationReports/DailyInstallationReport.jsx";
 
 function App() {
 	const queryClient = new QueryClient();
@@ -198,6 +199,11 @@ function App() {
 									exact
 									path="/InstallarPaymentReport"
 									element={<InstallarPaymentReport />}
+								/>
+								<Route
+									exact
+									path="/DailyInstallationReport"
+									element={<DailyInstallationReport />}
 								/>
 
 								{/* Item Reports */}

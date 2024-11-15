@@ -21,7 +21,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-export default function DailyCollectionReport() {
+export default function DailyInstallationReport() {
 	const navigate = useNavigate();
 	const user = getUserData();
 	const organisation = getOrganisationData();
@@ -33,18 +33,23 @@ export default function DailyCollectionReport() {
 
 	const toRef = useRef(null);
 	const fromRef = useRef(null);
+	const dealerRef = useRef(null);
+	const installarRef = useRef(null);
+	const cityRef = useRef(null);
+	const typeRef = useRef(null);
+	const searchRef = useRef(null);
+	const selectButtonRef = useRef(null);
 
-	const [saleType, setSaleType] = useState("");
 	const [searchQuery, setSearchQuery] = useState("");
 	const [transectionType, settransectionType] = useState("");
-	const [supplierList, setSupplierList] = useState([]);
 
-	const [totalQnty, setTotalQnty] = useState(0);
-	const [totalOpening, setTotalOpening] = useState(0);
-	const [totalDebit, setTotalDebit] = useState(0);
-	const [totalCredit, setTotalCredit] = useState(0);
-	const [closingBalance, setClosingBalance] = useState(0);
-	const [totalAmount, setTotalAmount] = useState(0);
+	const [cityType, setCityType] = useState("");
+	const [dealerType, setDealerType] = useState("");
+	const [installarType, setInstallarType] = useState("");
+
+	const [cityList, setCityList] = useState([]);
+	const [dealerList, setDealerList] = useState([]);
+	const [installarList, setInstallarList] = useState([]);
 
 	// state for from DatePicker
 	const [selectedfromDate, setSelectedfromDate] = useState(null);
@@ -54,6 +59,8 @@ export default function DailyCollectionReport() {
 	const [selectedToDate, setSelectedToDate] = useState(null);
 	const [toInputDate, settoInputDate] = useState("");
 	const [toCalendarOpen, settoCalendarOpen] = useState(false);
+
+	const [selectedRadio, setSelectedRadio] = useState("custom"); // State to track selected radio button
 
 	const {
 		isSidebarVisible,
@@ -68,9 +75,11 @@ export default function DailyCollectionReport() {
 		gettodate,
 	} = useTheme();
 
-	const comapnyname = organisation.description;
+	useEffect(() => {
+		document.documentElement.style.setProperty("--background-color", getcolor);
+	}, [getcolor]);
 
-	const [selectedRadio, setSelectedRadio] = useState("custom"); // State to track selected radio button
+	const comapnyname = organisation.description;
 
 	//////////////////////// CUSTOM DATE LIMITS ////////////////////////////
 
@@ -118,126 +127,6 @@ export default function DailyCollectionReport() {
 		setfromInputDate(e.target.value);
 	};
 
-	const handlefromKeyPress = (e, inputId) => {
-		if (e.key === "Enter") {
-			e.preventDefault();
-			const fromDateElement = document.getElementById("fromdatevalidation");
-			const formattedInput = fromInputDate.replace(
-				/^(\d{2})(\d{2})(\d{4})$/,
-				"$1-$2-$3"
-			);
-			const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
-
-			if (formattedInput.length === 10 && datePattern.test(formattedInput)) {
-				const [day, month, year] = formattedInput.split("-").map(Number);
-
-				if (month > 12 || month === 0) {
-					toast.error("Please enter a valid month (MM) between 01 and 12");
-					return;
-				}
-
-				const daysInMonth = new Date(year, month, 0).getDate();
-				if (day > daysInMonth || day === 0) {
-					toast.error(`Please enter a valid day (DD) for month ${month}`);
-					return;
-				}
-
-				const currentDate = new Date();
-				const enteredDate = new Date(year, month - 1, day);
-
-				if (GlobalfromDate && enteredDate < GlobalfromDate) {
-					toast.error(
-						`Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-					);
-					return;
-				}
-				if (GlobalfromDate && enteredDate > GlobaltoDate) {
-					toast.error(
-						`Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-					);
-					return;
-				}
-
-				fromDateElement.style.border = `1px solid ${fontcolor}`;
-				setfromInputDate(formattedInput);
-
-				const nextInput = document.getElementById(inputId);
-				if (nextInput) {
-					nextInput.focus();
-					nextInput.select();
-				} else {
-					document.getElementById("submitButton").click();
-				}
-			} else {
-				toast.error("Date must be in the format dd-mm-yyyy");
-			}
-		}
-	};
-
-	const handleToKeyPress = (e) => {
-		if (e.key === "Enter") {
-			e.preventDefault();
-			const toDateElement = document.getElementById("todatevalidation");
-			const formattedInput = toInputDate.replace(
-				/^(\d{2})(\d{2})(\d{4})$/,
-				"$1-$2-$3"
-			);
-			const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
-
-			if (formattedInput.length === 10 && datePattern.test(formattedInput)) {
-				const [day, month, year] = formattedInput.split("-").map(Number);
-
-				if (month > 12 || month === 0) {
-					toast.error("Please enter a valid month (MM) between 01 and 12");
-					return;
-				}
-
-				const daysInMonth = new Date(year, month, 0).getDate();
-				if (day > daysInMonth || day === 0) {
-					toast.error(`Please enter a valid day (DD) for month ${month}`);
-					return;
-				}
-
-				const currentDate = new Date();
-				const enteredDate = new Date(year, month - 1, day);
-
-				if (GlobaltoDate && enteredDate > GlobaltoDate) {
-					toast.error(
-						`Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-					);
-					return;
-				}
-
-				if (GlobaltoDate && enteredDate < GlobalfromDate) {
-					toast.error(
-						`Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-					);
-					return;
-				}
-
-				if (fromInputDate) {
-					const fromDate = new Date(
-						fromInputDate.split("-").reverse().join("-")
-					);
-					if (enteredDate <= fromDate) {
-						toast.error("To date must be after from date");
-						return;
-					}
-				}
-
-				toDateElement.style.border = `1px solid ${fontcolor}`;
-				settoInputDate(formattedInput);
-
-				if (input1Ref.current) {
-					e.preventDefault();
-					input1Ref.current.focus();
-				}
-			} else {
-				toast.error("Date must be in the format dd-mm-yyyy");
-			}
-		}
-	};
-
 	const handleToDateChange = (date) => {
 		setSelectedToDate(date);
 		settoInputDate(date ? formatDate(date) : "");
@@ -246,31 +135,8 @@ export default function DailyCollectionReport() {
 	const handleToInputChange = (e) => {
 		settoInputDate(e.target.value);
 	};
-	const handleSaleKeypress = (event, inputId) => {
-		if (event.key === "Enter") {
-			const selectedOption = saleSelectRef.current.state.selectValue;
-			if (selectedOption && selectedOption.value) {
-				setSaleType(selectedOption.value);
-			}
-			const nextInput = document.getElementById(inputId);
-			if (nextInput) {
-				nextInput.focus();
-				nextInput.select();
-			} else {
-				document.getElementById("submitButton").click();
-			}
-		}
-	};
-	const handleKeyPress = (e, nextInputRef) => {
-		if (e.key === "Enter") {
-			e.preventDefault();
-			if (nextInputRef.current) {
-				nextInputRef.current.focus();
-			}
-		}
-	};
 
-	function fetchDailyCollectionReport() {
+	function fetchDailyInstallationReport() {
 		const fromDateElement = document.getElementById("fromdatevalidation");
 		const toDateElement = document.getElementById("todatevalidation");
 
@@ -372,25 +238,31 @@ export default function DailyCollectionReport() {
 			"todatevalidation"
 		).style.border = `1px solid ${fontcolor}`;
 
-		const apiUrl = apiLinks + "/DailyCollectionReport.php";
+		const apiMainUrl = apiLinks + "/DailyInstallationReport.php";
 		setIsLoading(true);
-		const formData = new URLSearchParams({
-			code: "EMART",
+		const formMainData = new URLSearchParams({
+			code: "AMRELEC",
 			FLocCod: "001",
 			FYerDsc: "2024-2024",
 			FIntDat: fromInputDate,
 			FFnlDat: toInputDate,
-			FTrnTyp: transectionType,
+			// FRepTyp: transectionType,
+			FRepTyp: "all",
+			FCtyCod: cityType,
+			FIntCod: installarType,
+			FDlrCod: dealerType,
+			// FStrCod: storeType,
+			// FCapCod: capacityType,
+			// FCmpCod: companyType,
+			// FCtgCod: categoryType,
 			FSchTxt: "",
 		}).toString();
 
 		axios
-			.post(apiUrl, formData)
+			.post(apiMainUrl, formMainData)
 			.then((response) => {
 				setIsLoading(false);
-				console.log("Response:", response.data);
-
-				setTotalAmount(response.data["Total Amount"]);
+				console.log("Response:", response);
 
 				if (response.data && Array.isArray(response.data.Detail)) {
 					setTableData(response.data.Detail);
@@ -436,6 +308,183 @@ export default function DailyCollectionReport() {
 		setfromInputDate(formatDate(firstDateOfCurrentMonth));
 	}, []);
 
+	useEffect(() => {
+		//-------------- city dropdown
+		const apiCityUrl = apiLinks + "/GetCity.php";
+		const formCityData = new URLSearchParams({
+			// FLocCod: getLocationNumber,
+			code: organisation.code,
+			// code: "EMART",
+		}).toString();
+		axios
+			.post(apiCityUrl, formCityData)
+			.then((response) => {
+				setCityList(response.data);
+				// console.log("CAPACITY" + response.data);
+			})
+			.catch((error) => {
+				console.error("Error fetching data:", error);
+			});
+
+		// ------------company dropdown
+		const apiDealerUrl = apiLinks + "/GetCompany.php";
+		const formDealerData = new URLSearchParams({
+			code: organisation.code,
+		}).toString();
+		axios
+			.post(apiDealerUrl, formDealerData)
+			.then((response) => {
+				setDealerList(response.data);
+				// console.log("COMPANY" + response.data);
+			})
+			.catch((error) => {
+				console.error("Error fetching data:", error);
+			});
+
+		// -----------installar dropdown
+		const apiInstallarUrl = apiLinks + "/GetInstallar.php";
+		const formInstallarData = new URLSearchParams({
+			// FLocCod: getLocationNumber,
+			code: organisation.code,
+			// code: "EMART",
+		}).toString();
+		axios
+			.post(apiInstallarUrl, formInstallarData)
+			.then((response) => {
+				setInstallarList(response.data);
+				// console.log("CATEGORY" + response.data);
+			})
+			.catch((error) => {
+				console.error("Error fetching data:", error);
+			});
+	}, []);
+
+	// City List array
+	const optionCity = cityList.map((item) => ({
+		value: item.tctycod,
+		label: `${item.tctycod}-${item.tctydsc.trim()}`,
+	}));
+
+	// Dealer List array
+	const optionDealer = dealerList.map((item) => ({
+		value: item.tcmpcod,
+		label: `${item.tcmpcod}-${item.tcmpdsc.trim()}`,
+	}));
+
+	// Installation List array
+	const optionInstallar = installarList.map((item) => ({
+		value: item.tintcod,
+		label: `${item.tintcod}-${item.tintdsc.trim()}`,
+	}));
+
+	const DropdownOption = (props) => {
+		return (
+			<components.Option {...props}>
+				<div
+					style={{
+						fontSize: "12px",
+						paddingBottom: "5px",
+						lineHeight: "3px",
+						color: "black",
+						textAlign: "start",
+					}}
+				>
+					{props.data.label}
+				</div>
+			</components.Option>
+		);
+	};
+
+	// ------------ capacity style customization
+	const customStylesCity = () => ({
+		control: (base, state) => ({
+			...base,
+			height: "24px",
+			minHeight: "unset",
+			width: 275,
+			fontSize: "12px",
+			backgroundColor: getcolor,
+			color: fontcolor,
+			borderRadius: 0,
+			// border: hasError ? "2px solid red" : `1px solid ${fontcolor}`,
+			transition: "border-color 0.15s ease-in-out",
+			"&:hover": {
+				borderColor: state.isFocused ? base.borderColor : "black",
+			},
+			padding: "0 8px",
+			display: "flex",
+			// alignItems: "center",
+			justifyContent: "space-between",
+		}),
+		dropdownIndicator: (base) => ({
+			...base,
+			padding: 0,
+			fontSize: "18px",
+			display: "flex",
+			textAlign: "center !important",
+		}),
+	});
+
+	// ------------ company style customization
+	const customStylesDealer = () => ({
+		control: (base, state) => ({
+			...base,
+			height: "24px",
+			minHeight: "unset",
+			width: 275,
+			fontSize: "12px",
+			backgroundColor: getcolor,
+			color: fontcolor,
+			borderRadius: 0,
+			// border: hasError ? "2px solid red" : `1px solid ${fontcolor}`,
+			transition: "border-color 0.15s ease-in-out",
+			"&:hover": {
+				borderColor: state.isFocused ? base.borderColor : "black",
+			},
+			padding: "0 8px",
+			display: "flex",
+			// alignItems: "center",
+			justifyContent: "space-between",
+		}),
+		dropdownIndicator: (base) => ({
+			...base,
+			padding: 0,
+			fontSize: "18px",
+			display: "flex",
+			textAlign: "center !important",
+		}),
+	});
+
+	// ------------ Installar style customization
+	const customStylesInstallar = () => ({
+		control: (base, state) => ({
+			...base,
+			height: "24px",
+			minHeight: "unset",
+			width: 275,
+			fontSize: "12px",
+			backgroundColor: getcolor,
+			color: fontcolor,
+			borderRadius: 0,
+			// border: hasError ? "2px solid red" : `1px solid ${fontcolor}`,
+			transition: "border-color 0.15s ease-in-out",
+			"&:hover": {
+				borderColor: state.isFocused ? base.borderColor : "black",
+			},
+			padding: "0 8px",
+			display: "flex",
+			// alignItems: "center",
+			justifyContent: "space-between",
+		}),
+		dropdownIndicator: (base) => ({
+			...base,
+			padding: 0,
+			fontSize: "18px",
+			display: "flex",
+			textAlign: "center !important",
+		}),
+	});
+
 	const handleTransactionTypeChange = (event) => {
 		const selectedTransactionType = event.target.value;
 		settransectionType(selectedTransactionType);
@@ -445,22 +494,24 @@ export default function DailyCollectionReport() {
 		const doc = new jsPDF({ orientation: "portrait" });
 		const rows = tableData.map((item) => [
 			item.Date,
-			item["Trn#"],
-			item.Type,
-			item["A/C Description"],
-			item.Description,
-			item.Amount,
+			item["Comp #"],
+			item.Item,
+			item["Serial#"],
+			item.Qnty,
+			item["Done On"],
+			item.Days,
 		]);
-		rows.push(["", "", "", "", "Total", String(totalAmount)]);
+		// rows.push(["", "Total", "", String(totalQnty), String(totalAmount)]);
 		const headers = [
 			"Date",
-			"Trn#",
-			"Type",
-			"A/C Description",
-			"Description",
-			"Amount",
+			"Comp#",
+			"Item",
+			"Serial#",
+			"Qnty",
+			"Done on",
+			"Days",
 		];
-		const columnWidths = [18, 12, 10, 65, 65, 18];
+		const columnWidths = [18, 13, 75, 40, 10, 18, 10];
 		const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
 		const pageHeight = doc.internal.pageSize.height;
 		const paddingTop = 15;
@@ -522,7 +573,7 @@ export default function DailyCollectionReport() {
 					doc.setFont(fontName, "normal");
 					const cellValue = String(cell);
 
-					if (cellIndex === 1 || cellIndex === 5) {
+					if (cellIndex === 1 || cellIndex === 4 || cellIndex === 6) {
 						const rightAlignX = startX + columnWidths[cellIndex] - 2;
 						doc.text(cellValue, rightAlignX, cellY, {
 							align: "right",
@@ -619,7 +670,7 @@ export default function DailyCollectionReport() {
 				addTitle(comapnyname, "", "", pageNumber, startY, 20, 10);
 				startY += 7;
 				addTitle(
-					`Daily Collection Report From: ${fromInputDate} To: ${toInputDate}`,
+					`Daily Installation Report From: ${fromInputDate} To: ${toInputDate}`,
 					"",
 					"",
 					pageNumber,
@@ -672,7 +723,7 @@ export default function DailyCollectionReport() {
 		const time = getCurrentTime();
 
 		handlePagination();
-		doc.save("DailyCollectionReport.pdf");
+		doc.save("DailyInstallationReport.pdf");
 
 		const pdfBlob = doc.output("blob");
 		const pdfFile = new File([pdfBlob], "table_data.pdf", {
@@ -683,7 +734,7 @@ export default function DailyCollectionReport() {
 	const handleDownloadCSV = async () => {
 		const workbook = new ExcelJS.Workbook();
 		const worksheet = workbook.addWorksheet("Sheet1");
-		const numColumns = 6;
+		const numColumns = 7;
 		const titleStyle = {
 			font: { bold: true, size: 12 },
 			alignment: { horizontal: "center" },
@@ -691,15 +742,16 @@ export default function DailyCollectionReport() {
 		const columnAlignments = [
 			"left",
 			"right",
-			"center",
 			"left",
+			"left",
+			"right",
 			"left",
 			"right",
 		];
 		worksheet.addRow([]);
 		[
 			comapnyname,
-			`Daily Collection Report From ${fromInputDate} To ${toInputDate}`,
+			`Daily Installation Report From ${fromInputDate} To ${toInputDate}`,
 		].forEach((title, index) => {
 			worksheet.addRow([title]).eachCell((cell) => (cell.style = titleStyle));
 			worksheet.mergeCells(
@@ -724,11 +776,12 @@ export default function DailyCollectionReport() {
 		};
 		const headers = [
 			"Date",
-			"Trn#",
-			"Type",
-			"A/C Description",
-			"Description",
-			"Amount",
+			"Comp#",
+			"Item",
+			"Serial#",
+			"Qnty",
+			"Done on",
+			"Days",
 		];
 		const headerRow = worksheet.addRow(headers);
 		headerRow.eachCell((cell) => {
@@ -737,25 +790,25 @@ export default function DailyCollectionReport() {
 		tableData.forEach((item) => {
 			worksheet.addRow([
 				item.Date,
-				item["Trn#"],
-				item.Type,
-				item["A/C Description"],
-				item.Description,
-				item.Amount,
+				item["Comp #"],
+				item.Item,
+				item["Serial#"],
+				item.Qnty,
+				item["Done On"],
+				item.Days,
 			]);
 		});
-		const totalRow = worksheet.addRow([
-			"",
-			"",
-			"",
-			"",
-			"Total",
-			String(totalAmount),
-		]);
-		totalRow.eachCell((cell) => {
-			cell.font = { bold: true };
-		});
-		[12, 7, 5, 40, 40, 12].forEach((width, index) => {
+		// const totalRow = worksheet.addRow([
+		// 	"",
+		// 	"Total",
+		// 	"",
+		// 	totalQnty,
+		// 	totalAmount,
+		// ]);
+		// totalRow.eachCell((cell) => {
+		// 	cell.font = { bold: true };
+		// });
+		[12, 8, 45, 25, 7, 12, 7].forEach((width, index) => {
 			worksheet.getColumn(index + 1).width = width;
 		});
 		worksheet.eachRow((row, rowNumber) => {
@@ -779,7 +832,7 @@ export default function DailyCollectionReport() {
 		const blob = new Blob([buffer], {
 			type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 		});
-		saveAs(blob, "DailyCollectionReport.xlsx");
+		saveAs(blob, "DailyInstallationReport.xlsx");
 	};
 
 	const dispatch = useDispatch();
@@ -819,19 +872,22 @@ export default function DailyCollectionReport() {
 		width: "7%",
 	};
 	const thirdColWidth = {
-		width: "5%",
+		width: "40%",
 	};
 	const forthColWidth = {
-		width: "34.5%",
+		width: "25%",
 	};
 	const fifthColWidth = {
-		width: "34.5%",
+		width: "5%",
 	};
 	const sixthColWidth = {
-		width: "10%",
+		width: "9%",
+	};
+	const seventhColWidth = {
+		width: "5%",
 	};
 
-	useHotkeys("s", fetchDailyCollectionReport);
+	useHotkeys("s", fetchDailyInstallationReport);
 	useHotkeys("alt+p", exportPDFHandler);
 	useHotkeys("alt+e", handleDownloadCSV);
 	useHotkeys("esc", () => navigate("/MainPage"));
@@ -851,8 +907,8 @@ export default function DailyCollectionReport() {
 	const contentStyle = {
 		backgroundColor: getcolor,
 		width: isSidebarVisible ? "calc(65vw - 0%)" : "65vw",
-		position: "relative",
-		top: "35%",
+		position: "absolute",
+		top: "52%",
 		left: isSidebarVisible ? "50%" : "50%",
 		transform: "translate(-50%, -50%)",
 		transition: isSidebarVisible
@@ -865,7 +921,7 @@ export default function DailyCollectionReport() {
 		overflowY: "hidden",
 		wordBreak: "break-word",
 		textAlign: "center",
-		maxWidth: "1000px",
+		maxWidth: "900px",
 		fontSize: "15px",
 		fontStyle: "normal",
 		fontWeight: "400",
@@ -893,6 +949,7 @@ export default function DailyCollectionReport() {
 	const handleRowClick = (index) => {
 		setSelectedIndex(index);
 	};
+
 	useEffect(() => {
 		if (selectedRowId !== null) {
 			const newIndex = tableData.findIndex(
@@ -901,6 +958,7 @@ export default function DailyCollectionReport() {
 			setSelectedIndex(newIndex);
 		}
 	}, [tableData, selectedRowId]);
+
 	const handleKeyDown = (e) => {
 		if (selectedIndex === -1 || e.target.id === "searchInput") return;
 		if (e.key === "ArrowUp") {
@@ -915,6 +973,7 @@ export default function DailyCollectionReport() {
 			scrollToSelectedRow();
 		}
 	};
+
 	const scrollToSelectedRow = () => {
 		if (selectedIndex !== -1 && rowRefs.current[selectedIndex]) {
 			rowRefs.current[selectedIndex].scrollIntoView({
@@ -923,12 +982,14 @@ export default function DailyCollectionReport() {
 			});
 		}
 	};
+
 	useEffect(() => {
 		window.addEventListener("keydown", handleKeyDown);
 		return () => {
 			window.removeEventListener("keydown", handleKeyDown);
 		};
 	}, [selectedIndex]);
+
 	useEffect(() => {
 		if (selectedIndex !== -1 && rowRefs.current[selectedIndex]) {
 			rowRefs.current[selectedIndex].scrollIntoView({
@@ -971,6 +1032,142 @@ export default function DailyCollectionReport() {
 		}
 	}, [selectedRadio]);
 
+	const [menuCompanyIsOpen, setMenuCompanyIsOpen] = useState(false);
+	const [menuCategoryIsOpen, setMenuCategoryIsOpen] = useState(false);
+	const [menuCapacityIsOpen, setMenuCapacityIsOpen] = useState(false);
+	const [menuCityIsOpen, setMenuCityIsOpen] = useState(false);
+	const [menuInstallarIsOpen, setMenuInstallarIsOpen] = useState(false);
+	const [menuDealerIsOpen, setMenuDealerIsOpen] = useState(false);
+	const [menuStoreIsOpen, setMenuStoreIsOpen] = useState(false);
+
+	const focusNextElement = (currentRef, nextRef) => {
+		if (currentRef.current && nextRef.current) {
+			currentRef.current.focus();
+			nextRef.current.focus();
+		}
+	};
+
+	const handleFromDateEnter = (e) => {
+		if (e.key !== "Enter") return;
+		e.preventDefault();
+
+		const inputDate = e.target.value;
+		const formattedDate = inputDate.replace(
+			/^(\d{2})(\d{2})(\d{4})$/,
+			"$1-$2-$3"
+		);
+
+		// Basic format validation (dd-mm-yyyy)
+		if (
+			!/^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/.test(formattedDate)
+		) {
+			toast.error("Date must be in the format dd-mm-yyyy");
+			return;
+		}
+
+		const [day, month, year] = formattedDate.split("-").map(Number);
+		const enteredDate = new Date(year, month - 1, day);
+		const daysInMonth = new Date(year, month, 0).getDate();
+
+		// Validate month, day, and date range
+		if (month < 1 || month > 12 || day < 1 || day > daysInMonth) {
+			toast.error("Invalid date. Please check the day and month.");
+			return;
+		}
+		if (enteredDate < GlobalfromDate || enteredDate > GlobaltoDate) {
+			toast.error(
+				`Date must be between ${GlobalfromDate1} and ${GlobaltoDate1}`
+			);
+			return;
+		}
+
+		// Update input value and state
+		e.target.value = formattedDate;
+		setfromInputDate(formattedDate); // Update the state with formatted date
+
+		// Move focus to the next element
+		focusNextElement(fromRef, toRef);
+	};
+
+	const handleToDateEnter = (e) => {
+		if (e.key === "Enter") {
+			if (e.key !== "Enter") return;
+			e.preventDefault();
+
+			const inputDate = e.target.value;
+			const formattedDate = inputDate.replace(
+				/^(\d{2})(\d{2})(\d{4})$/,
+				"$1-$2-$3"
+			);
+
+			// Basic format validation (dd-mm-yyyy)
+			if (
+				!/^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/.test(formattedDate)
+			) {
+				toast.error("Date must be in the format dd-mm-yyyy");
+				return;
+			}
+
+			const [day, month, year] = formattedDate.split("-").map(Number);
+			const enteredDate = new Date(year, month - 1, day);
+			const daysInMonth = new Date(year, month, 0).getDate();
+
+			// Validate month, day, and date range
+			if (month < 1 || month > 12 || day < 1 || day > daysInMonth) {
+				toast.error("Invalid date. Please check the day and month.");
+				return;
+			}
+			if (enteredDate < GlobalfromDate || enteredDate > GlobaltoDate) {
+				toast.error(
+					`Date must be between ${GlobalfromDate1} and ${GlobaltoDate1}`
+				);
+				return;
+			}
+
+			// Update input value and state
+			e.target.value = formattedDate;
+			settoInputDate(formattedDate); // Update the state with formatted date
+
+			// Move focus to the next element
+			focusNextElement(toRef, dealerRef);
+		}
+	};
+
+	const handleDealerEnter = (e) => {
+		if (e.key === "Enter" && !menuDealerIsOpen) {
+			e.preventDefault();
+			focusNextElement(dealerRef, installarRef);
+		}
+	};
+
+	const handleInstallarEnter = (e) => {
+		if (e.key === "Enter" && !menuInstallarIsOpen) {
+			e.preventDefault();
+			focusNextElement(installarRef, cityRef);
+		}
+	};
+
+	const handleCityEnter = (e) => {
+		if (e.key === "Enter" && !menuCityIsOpen) {
+			e.preventDefault();
+			focusNextElement(cityRef, typeRef);
+		}
+	};
+
+	const handleTypeEnter = (e) => {
+		if (e.key === "Enter") {
+			e.preventDefault();
+			focusNextElement(typeRef, searchRef);
+		}
+	};
+
+	const handleSearchEnter = (e) => {
+		if (e.key === "Enter") {
+			e.preventDefault();
+			focusNextElement(searchRef, selectButtonRef);
+		}
+	};
+
 	return (
 		<>
 			<ToastContainer />
@@ -984,7 +1181,9 @@ export default function DailyCollectionReport() {
 						borderRadius: "9px",
 					}}
 				>
-					<NavComponent textdata="Daily Collection Report" />
+					<NavComponent textdata="Daily Installation Report" />
+
+					{/* ------------1st row */}
 					<div
 						className="row"
 						style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
@@ -999,175 +1198,11 @@ export default function DailyCollectionReport() {
 								justifyContent: "space-between",
 							}}
 						>
-							<div className="d-flex align-items-center justify-content-center">
-								<div className="mx-5">
-									{/* <label htmlFor="">
-										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
-											Check :
-										</span>{" "}
-									</label>
-									<input
-										onChange={() => setCheck(!check)}
-										type="checkbox"
-										name=""
-										id=""
-										checked={check}
-										style={{
-											alignItems: "center",
-											marginLeft: "10px",
-										}}
-										onFocus={(e) =>
-											(e.currentTarget.style.border = "2px solid red")
-										}
-										onBlur={(e) =>
-											(e.currentTarget.style.border = `1px solid ${fontcolor}`)
-										}
-									/> */}
-								</div>
-								<div
-									className="d-flex align-items-center"
-									style={{ marginRight: "15px" }}
-								>
-									<div
-										style={{
-											display: "flex",
-											justifyContent: "evenly",
-										}}
-									>
-										<div className="d-flex align-items-baseline mx-2">
-											<input
-												type="radio"
-												name="dateRange"
-												id="custom"
-												checked={selectedRadio === "custom"}
-												onChange={() => handleRadioChange(0)}
-												onFocus={(e) =>
-													(e.currentTarget.style.border = "2px solid red")
-												}
-												onBlur={(e) =>
-													(e.currentTarget.style.border = `1px solid ${fontcolor}`)
-												}
-											/>
-											&nbsp;
-											<label htmlFor="custom">Custom</label>
-										</div>
-										<div className="d-flex align-items-baseline mx-2">
-											<input
-												type="radio"
-												name="dateRange"
-												id="30"
-												checked={selectedRadio === "30days"}
-												onChange={() => handleRadioChange(30)}
-												onFocus={(e) =>
-													(e.currentTarget.style.border = "2px solid red")
-												}
-												onBlur={(e) =>
-													(e.currentTarget.style.border = `1px solid ${fontcolor}`)
-												}
-											/>
-											&nbsp;
-											<label htmlFor="30">30 Days</label>
-										</div>
-										<div className="d-flex align-items-baseline mx-2">
-											<input
-												type="radio"
-												name="dateRange"
-												id="60"
-												checked={selectedRadio === "60days"}
-												onChange={() => handleRadioChange(60)}
-												onFocus={(e) =>
-													(e.currentTarget.style.border = "2px solid red")
-												}
-												onBlur={(e) =>
-													(e.currentTarget.style.border = `1px solid ${fontcolor}`)
-												}
-											/>
-											&nbsp;
-											<label htmlFor="60">60 Days</label>
-										</div>
-										<div className="d-flex align-items-baseline mx-2">
-											<input
-												type="radio"
-												name="dateRange"
-												id="90"
-												checked={selectedRadio === "90days"}
-												onChange={() => handleRadioChange(90)}
-												onFocus={(e) =>
-													(e.currentTarget.style.border = "2px solid red")
-												}
-												onBlur={(e) =>
-													(e.currentTarget.style.border = `1px solid ${fontcolor}`)
-												}
-											/>
-											&nbsp;
-											<label htmlFor="90">90 Days</label>
-										</div>
-									</div>
-								</div>
-							</div>
-							{/* ------ */}
+							{/* From Date */}
 							<div
 								className="d-flex align-items-center"
-								style={{ marginRight: "21px" }}
+								style={{ marginLeft: "20px" }}
 							>
-								<div
-									style={{
-										width: "60px",
-										display: "flex",
-										justifyContent: "end",
-									}}
-								>
-									<label htmlFor="transactionType">
-										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
-											Type:
-										</span>
-									</label>
-								</div>
-								<select
-									ref={input1Ref}
-									onKeyDown={(e) => handleKeyPress(e, input2Ref)}
-									id="submitButton"
-									name="type"
-									onFocus={(e) =>
-										(e.currentTarget.style.border = "4px solid red")
-									}
-									onBlur={(e) =>
-										(e.currentTarget.style.border = `1px solid ${fontcolor}`)
-									}
-									value={transectionType}
-									onChange={handleTransactionTypeChange}
-									style={{
-										width: "200px",
-										height: "24px",
-										marginLeft: "15px",
-										backgroundColor: getcolor,
-										border: `1px solid ${fontcolor}`,
-										fontSize: "12px",
-										color: fontcolor,
-									}}
-								>
-									<option value="">All</option>
-									<option value="CRV">Cash Receipt Voucher</option>
-									<option value="BRV">Bank Receipt Voucher</option>
-								</select>
-							</div>
-						</div>
-					</div>
-					<div
-						className="row"
-						style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-					>
-						<div
-							style={{
-								width: "100%",
-								display: "flex",
-								alignItems: "center",
-								margin: "0px",
-								padding: "0px",
-								justifyContent: "space-between",
-							}}
-						>
-							<div className="d-flex align-items-center">
 								<div
 									style={{
 										width: "80px",
@@ -1177,7 +1212,7 @@ export default function DailyCollectionReport() {
 								>
 									<label htmlFor="fromDatePicker">
 										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
-											From:
+											From:&nbsp;&nbsp;
 										</span>
 									</label>
 								</div>
@@ -1190,7 +1225,6 @@ export default function DailyCollectionReport() {
 										alignItems: "center",
 										height: "24px",
 										justifyContent: "center",
-										marginLeft: "3px",
 										background: getcolor,
 									}}
 									onFocus={(e) =>
@@ -1218,7 +1252,7 @@ export default function DailyCollectionReport() {
 										value={fromInputDate}
 										ref={fromRef}
 										onChange={handlefromInputChange}
-										onKeyDown={(e) => handlefromKeyPress(e, "toDatePicker")}
+										onKeyDown={handleFromDateEnter}
 										autoComplete="off"
 										placeholder="dd-mm-yyyy"
 										aria-label="Date Input"
@@ -1258,10 +1292,9 @@ export default function DailyCollectionReport() {
 									/>
 								</div>
 							</div>
-							<div
-								className="d-flex align-items-center"
-								style={{ marginLeft: "15px" }}
-							>
+
+							{/* To Date */}
+							<div className="d-flex align-items-center">
 								<div
 									style={{
 										width: "60px",
@@ -1271,7 +1304,7 @@ export default function DailyCollectionReport() {
 								>
 									<label htmlFor="toDatePicker">
 										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
-											To:
+											To:&nbsp;&nbsp;
 										</span>
 									</label>
 								</div>
@@ -1284,7 +1317,6 @@ export default function DailyCollectionReport() {
 										alignItems: "center",
 										height: "24px",
 										justifyContent: "center",
-										marginLeft: "15px",
 										background: getcolor,
 									}}
 									onFocus={(e) =>
@@ -1311,7 +1343,7 @@ export default function DailyCollectionReport() {
 										}}
 										value={toInputDate}
 										onChange={handleToInputChange}
-										onKeyDown={(e) => handleToKeyPress(e, "submitButton")}
+										onKeyDown={handleToDateEnter}
 										id="toDatePicker"
 										autoComplete="off"
 										placeholder="dd-mm-yyyy"
@@ -1352,46 +1384,377 @@ export default function DailyCollectionReport() {
 									/>
 								</div>
 							</div>
-							<div id="lastDiv" style={{ marginRight: "1px" }}>
-								<label for="searchInput" style={{ marginRight: "15px" }}>
-									<span style={{ fontSize: "15px", fontWeight: "bold" }}>
-										Search :
-									</span>{" "}
-								</label>
-								<input
-									ref={input2Ref}
-									onKeyDown={(e) => handleKeyPress(e, input3Ref)}
-									type="text"
-									id="searchsubmit"
-									placeholder="Item description"
-									value={searchQuery}
+
+							{/* radio checks */}
+							<div
+								className="d-flex align-items-center"
+								style={{ marginRight: "15px" }}
+							>
+								<div
 									style={{
-										marginRight: "20px",
-										width: "200px",
-										height: "24px",
-										fontSize: "12px",
-										color: fontcolor,
-										backgroundColor: getcolor,
-										border: `1px solid ${fontcolor}`,
-										outline: "none",
-										paddingLeft: "10px",
+										display: "flex",
+										justifyContent: "evenly",
 									}}
+								>
+									<div className="d-flex align-items-baseline mx-2">
+										<input
+											type="radio"
+											name="dateRange"
+											id="custom"
+											checked={selectedRadio === "custom"}
+											onChange={() => handleRadioChange(0)}
+											onFocus={(e) =>
+												(e.currentTarget.style.border = "2px solid red")
+											}
+											onBlur={(e) =>
+												(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+											}
+										/>
+										&nbsp;
+										<label htmlFor="custom" style={{ fontSize: "14px" }}>
+											Custom
+										</label>
+									</div>
+									<div className="d-flex align-items-baseline mx-2">
+										<input
+											type="radio"
+											name="dateRange"
+											id="30"
+											checked={selectedRadio === "30days"}
+											onChange={() => handleRadioChange(30)}
+											onFocus={(e) =>
+												(e.currentTarget.style.border = "2px solid red")
+											}
+											onBlur={(e) =>
+												(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+											}
+										/>
+										&nbsp;
+										<label htmlFor="30" style={{ fontSize: "14px" }}>
+											30 Days
+										</label>
+									</div>
+									<div className="d-flex align-items-baseline mx-2">
+										<input
+											type="radio"
+											name="dateRange"
+											id="60"
+											checked={selectedRadio === "60days"}
+											onChange={() => handleRadioChange(60)}
+											onFocus={(e) =>
+												(e.currentTarget.style.border = "2px solid red")
+											}
+											onBlur={(e) =>
+												(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+											}
+										/>
+										&nbsp;
+										<label htmlFor="60" style={{ fontSize: "14px" }}>
+											60 Days
+										</label>
+									</div>
+									<div className="d-flex align-items-baseline mx-2">
+										<input
+											type="radio"
+											name="dateRange"
+											id="90"
+											checked={selectedRadio === "90days"}
+											onChange={() => handleRadioChange(90)}
+											onFocus={(e) =>
+												(e.currentTarget.style.border = "2px solid red")
+											}
+											onBlur={(e) =>
+												(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+											}
+										/>
+										&nbsp;
+										<label htmlFor="90" style={{ fontSize: "14px" }}>
+											90 Days
+										</label>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					{/* --------2nd row */}
+					<div
+						className="row"
+						style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+					>
+						<div
+							style={{
+								width: "100%",
+								display: "flex",
+								alignItems: "center",
+								margin: "0px",
+								padding: "0px",
+								justifyContent: "space-between",
+							}}
+						>
+							{/* Dealer Select */}
+							<div className="d-flex align-items-center">
+								<div
+									style={{
+										width: "100px",
+										display: "flex",
+										justifyContent: "end",
+									}}
+								>
+									<label htmlFor="fromDatePicker">
+										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+											Dealer:&nbsp;&nbsp;
+										</span>{" "}
+										<br />
+									</label>
+								</div>
+								<div>
+									<Select
+										className="List-select-class "
+										ref={dealerRef}
+										options={optionDealer}
+										onKeyDown={handleDealerEnter}
+										id="selectedsale"
+										onChange={(selectedOption) => {
+											if (selectedOption && selectedOption.value) {
+												setDealerType(selectedOption.value);
+											} else {
+												setDealerType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+											}
+										}}
+										components={{ Option: DropdownOption }}
+										// styles={customStylesStore}
+										styles={customStylesDealer()}
+										isClearable
+										placeholder="Search or select..."
+										menuIsOpen={menuDealerIsOpen}
+										onMenuOpen={() => setMenuDealerIsOpen(true)}
+										onMenuClose={() => setMenuDealerIsOpen(false)}
+									/>
+								</div>
+							</div>
+
+							<div></div>
+						</div>
+					</div>
+
+					{/* ------------3rd row */}
+					<div
+						className="row"
+						style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+					>
+						<div
+							style={{
+								width: "100%",
+								display: "flex",
+								alignItems: "center",
+								margin: "0px",
+								padding: "0px",
+								justifyContent: "space-between",
+							}}
+						>
+							{/* Installar Select  */}
+							<div
+								className="d-flex align-items-center  "
+								style={{ marginRight: "20px" }}
+							>
+								<div
+									style={{
+										width: "100px",
+										display: "flex",
+										justifyContent: "end",
+									}}
+								>
+									<label htmlFor="fromDatePicker">
+										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+											Installar:&nbsp;&nbsp;
+										</span>{" "}
+										<br />
+									</label>
+								</div>
+								<div>
+									<Select
+										className="List-select-class "
+										ref={installarRef}
+										options={optionInstallar}
+										onKeyDown={handleInstallarEnter}
+										id="selectedsale"
+										onChange={(selectedOption) => {
+											if (selectedOption && selectedOption.value) {
+												setInstallarType(selectedOption.value);
+											} else {
+												setInstallarType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+											}
+										}}
+										components={{ Option: DropdownOption }}
+										// styles={customStylesStore}
+										styles={customStylesInstallar()}
+										isClearable
+										placeholder="Search or select..."
+										menuIsOpen={menuInstallarIsOpen}
+										onMenuOpen={() => setMenuInstallarIsOpen(true)}
+										onMenuClose={() => setMenuInstallarIsOpen(false)}
+									/>
+								</div>
+							</div>
+
+							{/* Type */}
+							<div
+								className="d-flex align-items-center"
+								style={{ marginRight: "20px" }}
+							>
+								<div
+									style={{
+										width: "60px",
+										display: "flex",
+										justifyContent: "end",
+									}}
+								>
+									<label htmlFor="transactionType">
+										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+											Type:&nbsp;&nbsp;
+										</span>
+									</label>
+								</div>
+								<select
+									ref={typeRef}
+									onKeyDown={handleTypeEnter}
+									id="submitButton"
+									name="type"
 									onFocus={(e) =>
-										(e.currentTarget.style.border = "2px solid red")
+										(e.currentTarget.style.border = "4px solid red")
 									}
 									onBlur={(e) =>
 										(e.currentTarget.style.border = `1px solid ${fontcolor}`)
 									}
-									onChange={(e) => setSearchQuery(e.target.value)}
-								/>
+									value={transectionType}
+									onChange={handleTransactionTypeChange}
+									style={{
+										width: "275px",
+										height: "24px",
+										// marginLeft: "15px",
+										backgroundColor: getcolor,
+										border: `1px solid ${fontcolor}`,
+										fontSize: "12px",
+										color: fontcolor,
+									}}
+								>
+									<option value="All">All</option>
+									<option value="Not Assigned">Not Assigned</option>
+									<option value="Pending">Pending</option>
+									<option value="Installed">Installed</option>
+								</select>
+							</div>
+						</div>
+					</div>
+
+					{/* ------------4th row */}
+					<div
+						className="row"
+						style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+					>
+						<div
+							style={{
+								width: "100%",
+								display: "flex",
+								alignItems: "center",
+								margin: "0px",
+								padding: "0px",
+								justifyContent: "space-between",
+							}}
+						>
+							{/* City Select */}
+							<div
+								className="d-flex align-items-center  "
+								// style={{ marginRight: "20px" }}
+							>
+								<div
+									style={{
+										width: "100px",
+										display: "flex",
+										justifyContent: "end",
+									}}
+								>
+									<label htmlFor="fromDatePicker">
+										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+											City:&nbsp;&nbsp;
+										</span>{" "}
+										<br />
+									</label>
+								</div>
+								<div>
+									<Select
+										className="List-select-class "
+										ref={cityRef}
+										options={optionCity}
+										onKeyDown={handleCityEnter}
+										id="selectedsale"
+										onChange={(selectedOption) => {
+											if (selectedOption && selectedOption.value) {
+												setCityType(selectedOption.value);
+											} else {
+												setCityType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+											}
+										}}
+										components={{ Option: DropdownOption }}
+										// styles={customStylesStore}
+										styles={customStylesCity()}
+										isClearable
+										placeholder="Search or select..."
+										menuIsOpen={menuCityIsOpen}
+										onMenuOpen={() => setMenuCityIsOpen(true)}
+										onMenuClose={() => setMenuCityIsOpen(false)}
+									/>
+								</div>
+							</div>
+
+							{/* Search */}
+							<div
+								className="d-flex align-items-center"
+								style={{ marginRight: "20px" }}
+							>
+								<div>
+									<label for="searchInput">
+										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+											Search:&nbsp;&nbsp;
+										</span>
+									</label>
+								</div>
+								<div>
+									<input
+										ref={searchRef}
+										onKeyDown={handleSearchEnter}
+										type="text"
+										id="searchsubmit"
+										placeholder="Item description"
+										value={searchQuery}
+										style={{
+											width: "275px",
+											height: "24px",
+											fontSize: "12px",
+											color: fontcolor,
+											backgroundColor: getcolor,
+											border: `1px solid ${fontcolor}`,
+											outline: "none",
+											paddingLeft: "10px",
+										}}
+										onFocus={(e) =>
+											(e.currentTarget.style.border = "2px solid red")
+										}
+										onBlur={(e) =>
+											(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+										}
+										onChange={(e) => setSearchQuery(e.target.value)}
+									/>
+								</div>
 							</div>
 						</div>
 					</div>
 					<div>
+						{/* Table Head */}
 						<div
 							style={{
 								overflowY: "auto",
-								width: "98.5%",
+								width: "98.8%",
 							}}
 						>
 							<table
@@ -1401,6 +1764,7 @@ export default function DailyCollectionReport() {
 									fontSize: "12px",
 									width: "100%",
 									position: "relative",
+									paddingRight: "2%",
 								}}
 							>
 								<thead
@@ -1423,24 +1787,28 @@ export default function DailyCollectionReport() {
 											Date
 										</td>
 										<td className="border-dark" style={secondColWidth}>
-											Trn#
+											Comp#
 										</td>
 										<td className="border-dark" style={thirdColWidth}>
-											Type
+											Item
 										</td>
 										<td className="border-dark" style={forthColWidth}>
-											A/C Description
+											Serial#
 										</td>
 										<td className="border-dark" style={fifthColWidth}>
-											Description
+											Qnty
 										</td>
 										<td className="border-dark" style={sixthColWidth}>
-											Amount
+											Done on
+										</td>
+										<td className="border-dark" style={seventhColWidth}>
+											Days
 										</td>
 									</tr>
 								</thead>
 							</table>
 						</div>
+						{/* Table Body */}
 						<div
 							className="table-scroll"
 							style={{
@@ -1469,11 +1837,11 @@ export default function DailyCollectionReport() {
 													backgroundColor: getcolor,
 												}}
 											>
-												<td colSpan="6" className="text-center">
+												<td colSpan="7" className="text-center">
 													<Spinner animation="border" variant="primary" />
 												</td>
 											</tr>
-											{Array.from({ length: Math.max(0, 30 - 5) }).map(
+											{Array.from({ length: Math.max(0, 30 - 7) }).map(
 												(_, rowIndex) => (
 													<tr
 														key={`blank-${rowIndex}`}
@@ -1482,7 +1850,7 @@ export default function DailyCollectionReport() {
 															color: fontcolor,
 														}}
 													>
-														{Array.from({ length: 6 }).map((_, colIndex) => (
+														{Array.from({ length: 7 }).map((_, colIndex) => (
 															<td key={`blank-${rowIndex}-${colIndex}`}>
 																&nbsp;
 															</td>
@@ -1497,6 +1865,7 @@ export default function DailyCollectionReport() {
 												<td style={forthColWidth}></td>
 												<td style={fifthColWidth}></td>
 												<td style={sixthColWidth}></td>
+												<td style={seventhColWidth}></td>
 											</tr>
 										</>
 									) : (
@@ -1520,19 +1889,22 @@ export default function DailyCollectionReport() {
 															{item.Date}
 														</td>
 														<td className="text-end" style={secondColWidth}>
-															{item["Trn#"]}
+															{item["Comp #"]}
 														</td>
-														<td className="text-center" style={thirdColWidth}>
-															{item.Type}
+														<td className="text-start" style={thirdColWidth}>
+															{item.Item}
 														</td>
 														<td className="text-start" style={forthColWidth}>
-															{item["A/C Description"]}
+															{item["Serial#"]}
+														</td>
+														<td className="text-end" style={fifthColWidth}>
+															{item.Qnty}
 														</td>
 														<td className="text-start" style={fifthColWidth}>
-															{item.Description}
+															{item["Done On"]}
 														</td>
-														<td className="text-end" style={sixthColWidth}>
-															{item.Amount}
+														<td className="text-end" style={fifthColWidth}>
+															{item.Days}
 														</td>
 													</tr>
 												);
@@ -1547,7 +1919,7 @@ export default function DailyCollectionReport() {
 														color: fontcolor,
 													}}
 												>
-													{Array.from({ length: 6 }).map((_, colIndex) => (
+													{Array.from({ length: 7 }).map((_, colIndex) => (
 														<td key={`blank-${rowIndex}-${colIndex}`}>
 															&nbsp;
 														</td>
@@ -1561,6 +1933,7 @@ export default function DailyCollectionReport() {
 												<td style={forthColWidth}></td>
 												<td style={fifthColWidth}></td>
 												<td style={sixthColWidth}></td>
+												<td style={seventhColWidth}></td>
 											</tr>
 										</>
 									)}
@@ -1568,13 +1941,14 @@ export default function DailyCollectionReport() {
 							</table>
 						</div>
 					</div>
+					{/* Table Footer */}
 					<div
 						style={{
 							borderBottom: `1px solid ${fontcolor}`,
 							borderTop: `1px solid ${fontcolor}`,
 							height: "24px",
 							display: "flex",
-							paddingRight: "1.5%",
+							paddingRight: "1.4%",
 						}}
 					>
 						<div
@@ -1618,10 +1992,16 @@ export default function DailyCollectionReport() {
 								background: getcolor,
 								borderRight: `1px solid ${fontcolor}`,
 							}}
-						>
-							<span className="mobileledger_total">{totalAmount}</span>
-						</div>
+						></div>
+						<div
+							style={{
+								...seventhColWidth,
+								background: getcolor,
+								borderRight: `1px solid ${fontcolor}`,
+							}}
+						></div>
 					</div>
+					{/* Action Buttons */}
 					<div
 						style={{
 							margin: "5px",
@@ -1658,8 +2038,8 @@ export default function DailyCollectionReport() {
 						<SingleButton
 							id="searchsubmit"
 							text="Select"
-							ref={input3Ref}
-							onClick={fetchDailyCollectionReport}
+							ref={selectButtonRef}
+							onClick={fetchDailyInstallationReport}
 							style={{ backgroundColor: "#186DB7", width: "120px" }}
 							onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
 							onBlur={(e) =>

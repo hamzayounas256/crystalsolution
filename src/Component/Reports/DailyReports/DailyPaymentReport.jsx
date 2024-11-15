@@ -1147,8 +1147,8 @@ export default function DailyPaymentReport() {
 									}}
 								>
 									<option value="">All</option>
-									<option value="Receivable">Receivable</option>
-									<option value="Payable">Payable</option>
+									<option value="CPV">Cash Payment Voucher</option>
+									<option value="BPV">Bank Payment Voucher</option>
 								</select>
 							</div>
 						</div>
