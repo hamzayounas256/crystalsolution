@@ -21,7 +21,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-export default function DailyStatusReport() {
+export default function ReceivableAging() {
 	const navigate = useNavigate();
 	const user = getUserData();
 	const organisation = getOrganisationData();
@@ -43,17 +43,14 @@ export default function DailyStatusReport() {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [transectionType, settransectionType] = useState("");
 
-	const [storeList, setStoreList] = useState([]);
-	const [storeType, setStoreType] = useState("");
-
-	const [totalOpening, setTotalOpening] = useState(0);
-	const [totalPurchase, setTotalPurchase] = useState(0);
-	const [totalPurRet, setTotalPurRet] = useState(0);
-	const [totalReceive, setTotalReceive] = useState(0);
-	const [totalIssue, setTotalIssue] = useState(0);
-	const [totalSale, setTotalSale] = useState(0);
-	const [totalSaleRet, setTotalSaleRet] = useState(0);
-	const [totalBalance, setTotalBalance] = useState(0);
+	const [totalAmt1, setTotalAmt1] = useState(0);
+	const [totalAmt2, setTotalAmt2] = useState(0);
+	const [totalAmt3, setTotalAmt3] = useState(0);
+	const [totalAmt4, setTotalAmt4] = useState(0);
+	const [totalAmt5, setTotalAmt5] = useState(0);
+	const [totalAmt6, setTotalAmt6] = useState(0);
+	const [total, setTotal] = useState(0);
+	const [totalAmount, setTotalAmount] = useState(0);
 
 	// state for from DatePicker
 	const [selectedfromDate, setSelectedfromDate] = useState(null);
@@ -127,7 +124,7 @@ export default function DailyStatusReport() {
 		settoInputDate(e.target.value);
 	};
 
-	function fetchDailyStatusReport() {
+	function fetchReceivableAging() {
 		const dateRegex = /^\d{2}-\d{2}-\d{4}$/;
 
 		let errorType = "";
@@ -187,7 +184,7 @@ export default function DailyStatusReport() {
 			toDateElement.style.border = `1px solid ${fontcolor}`;
 		}
 
-		const apiMainUrl = apiLinks + "/DailyStatusReport.php";
+		const apiMainUrl = apiLinks + "/ReceivableAging.php";
 		setIsLoading(true);
 		const formMainData = new URLSearchParams({
 			code: "EMART",
@@ -195,7 +192,6 @@ export default function DailyStatusReport() {
 			FYerDsc: "2024-2024",
 			// FIntDat: fromInputDate,
 			FRepDat: toInputDate,
-			FStrCod: storeType,
 			FSchTxt: "",
 		}).toString();
 
@@ -205,14 +201,13 @@ export default function DailyStatusReport() {
 				setIsLoading(false);
 				// console.log("Response:", response.data);
 
-				setTotalOpening(response.data["Opening"]);
-				setTotalPurchase(response.data["Purchase"]);
-				setTotalPurRet(response.data["Pur Ret"]);
-				setTotalReceive(response.data["Receive"]);
-				setTotalIssue(response.data["Issue"]);
-				setTotalSale(response.data["Sale"]);
-				setTotalSaleRet(response.data["Sale Ret"]);
-				setTotalBalance(response.data["Balance"]);
+				setTotalAmt1(response.data["amt001"]);
+				setTotalAmt2(response.data["amt002"]);
+				setTotalAmt3(response.data["amt003"]);
+				setTotalAmt4(response.data["amt004"]);
+				setTotalAmt5(response.data["amt005"]);
+				setTotalAmt6(response.data["amt006"]);
+				setTotal(response.data["total"]);
 
 				if (response.data && Array.isArray(response.data.Detail)) {
 					setTableData(response.data.Detail);
@@ -258,116 +253,47 @@ export default function DailyStatusReport() {
 		setfromInputDate(formatDate(firstDateOfCurrentMonth));
 	}, []);
 
-	useEffect(() => {
-		//----------------- store dropdown
-		const apiStoreUrl = apiLinks + "/GetStore.php";
-		const formStoreData = new URLSearchParams({
-			code: organisation.code,
-		}).toString();
-		axios
-			.post(apiStoreUrl, formStoreData)
-			.then((response) => {
-				setStoreList(response.data);
-				// console.log("STORE"+response.data);
-			})
-			.catch((error) => {
-				console.error("Error fetching data:", error);
-			});
-	}, []);
-
-	// Store List array
-	const optionStore = storeList.map((item) => ({
-		value: item.tstrcod,
-		label: `${item.tstrcod}-${item.tstrdsc.trim()}`,
-	}));
-
-	const DropdownOption = (props) => {
-		return (
-			<components.Option {...props}>
-				<div
-					style={{
-						fontSize: "12px",
-						paddingBottom: "5px",
-						lineHeight: "3px",
-						color: "black",
-						textAlign: "start",
-					}}
-				>
-					{props.data.label}
-				</div>
-			</components.Option>
-		);
+	const handleTransactionTypeChange = (event) => {
+		const selectedTransactionType = event.target.value;
+		settransectionType(selectedTransactionType);
 	};
 
-	// ------------ store style customization
-	const customStylesStore = () => ({
-		control: (base, state) => ({
-			...base,
-			height: "24px",
-			minHeight: "unset",
-			width: "275px",
-			fontSize: "12px",
-			backgroundColor: getcolor,
-			color: fontcolor,
-			borderRadius: 0,
-			// border: hasError ? "2px solid red" : `1px solid ${fontcolor}`,
-			transition: "border-color 0.15s ease-in-out",
-			"&:hover": {
-				borderColor: state.isFocused ? base.borderColor : "black",
-			},
-			padding: "0 8px",
-			display: "flex",
-			// alignItems: "center",
-			justifyContent: "space-between",
-		}),
-		dropdownIndicator: (base) => ({
-			...base,
-			padding: 0,
-			fontSize: "18px",
-			display: "flex",
-			textAlign: "center !important",
-		}),
-	});
-
-	const exportPDFHandler = async () => {
+	const exportPDFHandler = () => {
 		const doc = new jsPDF({ orientation: "landscape" });
 		const rows = tableData.map((item) => [
-			item.code,
-			item.Description,
-			item["Opening"],
-			item["Purchase"],
-			item["Pur Ret"],
-			item["Receive"],
-			item["Issue"],
-			item["Sale"],
-			item["Sale Ret"],
-			item["Balance"],
+			item.Code,
+			item.Customer,
+			item["Amt001"],
+			item["Amt002"],
+			item["Amt003"],
+			item["Amt004"],
+			item["Amt005"],
+			item["Amt006"],
+			item["Total"],
 		]);
 		rows.push([
 			"",
 			"Total",
-			String(totalOpening),
-			String(totalPurchase),
-			String(totalPurRet),
-			String(totalReceive),
-			String(totalIssue),
-			String(totalSale),
-			String(totalSaleRet),
-			String(totalBalance),
+			String(totalAmt1),
+			String(totalAmt2),
+			String(totalAmt3),
+			String(totalAmt4),
+			String(totalAmt5),
+			String(totalAmt6),
+			String(total),
 		]);
 		const headers = [
 			"Code",
-			"Description",
-			"Open",
-			"Pur",
-			"Pur Ret",
-			"Rec",
-			"Iss",
-			"Sal",
-			"Sal Ret",
-			"Bal",
+			"Customer",
+			"Amt 1",
+			"Amt 2",
+			"Amt 3",
+			"Amt 4",
+			"Amt 5",
+			"Amt 6",
+			"Total",
 		];
-		const columnWidths = [30, 80, 15, 15, 15, 15, 15, 15, 15, 15];
+		const columnWidths = [20, 80, 20, 20, 20, 20, 20, 20, 20];
 		const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
 		const pageHeight = doc.internal.pageSize.height;
 		const paddingTop = 15;
@@ -436,8 +362,7 @@ export default function DailyStatusReport() {
 						cellIndex === 5 ||
 						cellIndex === 6 ||
 						cellIndex === 7 ||
-						cellIndex === 8 ||
-						cellIndex === 9
+						cellIndex === 8
 					) {
 						const rightAlignX = startX + columnWidths[cellIndex] - 2;
 						doc.text(cellValue, rightAlignX, cellY, {
@@ -535,7 +460,7 @@ export default function DailyStatusReport() {
 				addTitle(comapnyname, "", "", pageNumber, startY, 20, 10);
 				startY += 7;
 				addTitle(
-					`Daily Status Report Rep Date: ${toInputDate}`,
+					`Receivable Aging Rep Date: ${toInputDate}`,
 					"",
 					"",
 					pageNumber,
@@ -588,7 +513,7 @@ export default function DailyStatusReport() {
 		const time = getCurrentTime();
 
 		handlePagination();
-		doc.save("DailyStatusReport.pdf");
+		doc.save("ReceivableAging.pdf");
 
 		const pdfBlob = doc.output("blob");
 		const pdfFile = new File([pdfBlob], "table_data.pdf", {
@@ -599,7 +524,7 @@ export default function DailyStatusReport() {
 	const handleDownloadCSV = async () => {
 		const workbook = new ExcelJS.Workbook();
 		const worksheet = workbook.addWorksheet("Sheet1");
-		const numColumns = 10;
+		const numColumns = 9;
 		const titleStyle = {
 			font: { bold: true, size: 12 },
 			alignment: { horizontal: "center" },
@@ -614,10 +539,9 @@ export default function DailyStatusReport() {
 			"right",
 			"right",
 			"right",
-			"right",
 		];
 		worksheet.addRow([]);
-		[comapnyname, `Daily Status Report Rep Date ${toInputDate}`].forEach(
+		[comapnyname, `Receivable Aging Rep Date ${toInputDate}`].forEach(
 			(title, index) => {
 				worksheet.addRow([title]).eachCell((cell) => (cell.style = titleStyle));
 				worksheet.mergeCells(
@@ -643,15 +567,14 @@ export default function DailyStatusReport() {
 		};
 		const headers = [
 			"Code",
-			"Description",
-			"Open",
-			"Pur",
-			"Pur Ret",
-			"Rec",
-			"Iss",
-			"Sal",
-			"Sal Ret",
-			"Bal",
+			"Customer",
+			"Amt 1",
+			"Amt 2",
+			"Amt 3",
+			"Amt 4",
+			"Amt 5",
+			"Amt 6",
+			"Total",
 		];
 		const headerRow = worksheet.addRow(headers);
 		headerRow.eachCell((cell) => {
@@ -659,34 +582,32 @@ export default function DailyStatusReport() {
 		});
 		tableData.forEach((item) => {
 			worksheet.addRow([
-				item.code,
-				item.Description,
-				item["Opening"],
-				item["Purchase"],
-				item["Pur Ret"],
-				item["Receive"],
-				item["Issue"],
-				item["Sale"],
-				item["Sale Ret"],
-				item["Balance"],
+				item.Code,
+				item.Customer,
+				item["Amt001"],
+				item["Amt002"],
+				item["Amt003"],
+				item["Amt004"],
+				item["Amt005"],
+				item["Amt006"],
+				item["Total"],
 			]);
 		});
 		const totalRow = worksheet.addRow([
 			"",
 			"Total",
-			String(totalOpening),
-			String(totalPurchase),
-			String(totalPurRet),
-			String(totalReceive),
-			String(totalIssue),
-			String(totalSale),
-			String(totalSaleRet),
-			String(totalBalance),
+			String(totalAmt1),
+			String(totalAmt2),
+			String(totalAmt3),
+			String(totalAmt4),
+			String(totalAmt5),
+			String(totalAmt6),
+			String(total),
 		]);
 		totalRow.eachCell((cell) => {
 			cell.font = { bold: true };
 		});
-		[25, 45, 10, 10, 10, 10, 10, 10, 10, 10].forEach((width, index) => {
+		[10, 45, 10, 10, 10, 10, 10, 10, 10].forEach((width, index) => {
 			worksheet.getColumn(index + 1).width = width;
 		});
 		worksheet.eachRow((row, rowNumber) => {
@@ -710,7 +631,7 @@ export default function DailyStatusReport() {
 		const blob = new Blob([buffer], {
 			type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 		});
-		saveAs(blob, "DailyStatusReport.xlsx");
+		saveAs(blob, "ReceivableAging.xlsx");
 	};
 
 	const dispatch = useDispatch();
@@ -744,37 +665,34 @@ export default function DailyStatusReport() {
 	};
 
 	const firstColWidth = {
-		width: "15%",
+		width: "9%",
 	};
 	const secondColWidth = {
-		width: "30%",
+		width: "35%",
 	};
 	const thirdColWidth = {
-		width: "7%",
+		width: "8%",
 	};
 	const forthColWidth = {
-		width: "7%",
+		width: "8%",
 	};
 	const fifthColWidth = {
-		width: "7%",
+		width: "8%",
 	};
 	const sixthColWidth = {
-		width: "7%",
+		width: "8%",
 	};
 	const seventhColWidth = {
-		width: "7%",
+		width: "8%",
 	};
 	const eighthColWidth = {
-		width: "7%",
+		width: "8%",
 	};
 	const ninthColWidth = {
-		width: "7%",
-	};
-	const tenthColWidth = {
-		width: "7%",
+		width: "8%",
 	};
 
-	useHotkeys("s", fetchDailyStatusReport);
+	useHotkeys("s", fetchReceivableAging);
 	useHotkeys("alt+p", exportPDFHandler);
 	useHotkeys("alt+e", handleDownloadCSV);
 	useHotkeys("esc", () => navigate("/MainPage"));
@@ -794,8 +712,8 @@ export default function DailyStatusReport() {
 	const contentStyle = {
 		backgroundColor: getcolor,
 		width: isSidebarVisible ? "calc(65vw - 0%)" : "65vw",
-		position: "absolute",
-		top: "52%",
+		position: "relative",
+		top: "30%",
 		left: isSidebarVisible ? "50%" : "50%",
 		transform: "translate(-50%, -50%)",
 		transition: isSidebarVisible
@@ -808,7 +726,7 @@ export default function DailyStatusReport() {
 		overflowY: "hidden",
 		wordBreak: "break-word",
 		textAlign: "center",
-		maxWidth: "1100px",
+		maxWidth: "900px",
 		fontSize: "15px",
 		fontStyle: "normal",
 		fontWeight: "400",
@@ -886,8 +804,6 @@ export default function DailyStatusReport() {
 		}
 	}, [selectedIndex]);
 
-	const [menuStoreIsOpen, setMenuStoreIsOpen] = useState(false);
-
 	const focusNextElement = (currentRef, nextRef) => {
 		if (currentRef.current && nextRef.current) {
 			currentRef.current.focus();
@@ -933,14 +849,7 @@ export default function DailyStatusReport() {
 			settoInputDate(formattedDate); // Update the state with formatted date
 
 			// Move focus to the next element
-			focusNextElement(toRef, storeRef);
-		}
-	};
-
-	const handleStoreEnter = (e) => {
-		if (e.key === "Enter" && !menuStoreIsOpen) {
-			e.preventDefault();
-			focusNextElement(storeRef, searchRef);
+			focusNextElement(toRef, searchRef);
 		}
 	};
 
@@ -964,7 +873,7 @@ export default function DailyStatusReport() {
 						borderRadius: "9px",
 					}}
 				>
-					<NavComponent textdata="Daily Status Report" />
+					<NavComponent textdata="Receivable Aging" />
 
 					{/* ------------1st row */}
 					<div
@@ -1073,51 +982,6 @@ export default function DailyStatusReport() {
 								</div>
 							</div>
 
-							{/* Store Select */}
-							<div
-								className="d-flex align-items-center"
-								// style={{ marginRight: "20px" }}
-							>
-								<div
-									style={{
-										width: "60px",
-										display: "flex",
-										justifyContent: "end",
-									}}
-								>
-									<label htmlFor="fromDatePicker">
-										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
-											Store:&nbsp;&nbsp;
-										</span>{" "}
-										<br />
-									</label>
-								</div>
-								<div>
-									<Select
-										className="List-select-class "
-										ref={storeRef}
-										options={optionStore}
-										onKeyDown={handleStoreEnter}
-										id="selectedsale"
-										onChange={(selectedOption) => {
-											if (selectedOption && selectedOption.value) {
-												setStoreType(selectedOption.value);
-											} else {
-												setStoreType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
-											}
-										}}
-										components={{ Option: DropdownOption }}
-										// styles={customStylesStore}
-										styles={customStylesStore()}
-										isClearable
-										placeholder="Search or select..."
-										menuIsOpen={menuStoreIsOpen}
-										onMenuOpen={() => setMenuStoreIsOpen(true)}
-										onMenuClose={() => setMenuStoreIsOpen(false)}
-									/>
-								</div>
-							</div>
-
 							{/* Search */}
 							<div
 								className="d-flex align-items-center"
@@ -1166,7 +1030,7 @@ export default function DailyStatusReport() {
 						<div
 							style={{
 								overflowY: "auto",
-								width: "98.8%",
+								width: "98.7%",
 							}}
 						>
 							<table
@@ -1198,31 +1062,28 @@ export default function DailyStatusReport() {
 											Code
 										</td>
 										<td className="border-dark" style={secondColWidth}>
-											Description
+											Customer
 										</td>
 										<td className="border-dark" style={thirdColWidth}>
-											Open
+											Amt 1
 										</td>
 										<td className="border-dark" style={forthColWidth}>
-											Pur
+											Amt 2
 										</td>
 										<td className="border-dark" style={fifthColWidth}>
-											Pur Ret
+											Amt 3
 										</td>
 										<td className="border-dark" style={sixthColWidth}>
-											Rec
+											Amt 4
 										</td>
 										<td className="border-dark" style={seventhColWidth}>
-											Iss
+											Amt 5
 										</td>
 										<td className="border-dark" style={eighthColWidth}>
-											Sal
+											Amt 6
 										</td>
 										<td className="border-dark" style={ninthColWidth}>
-											Sal Ret
-										</td>
-										<td className="border-dark" style={tenthColWidth}>
-											Bal
+											Total
 										</td>
 									</tr>
 								</thead>
@@ -1257,11 +1118,11 @@ export default function DailyStatusReport() {
 													backgroundColor: getcolor,
 												}}
 											>
-												<td colSpan="10" className="text-center">
+												<td colSpan="9" className="text-center">
 													<Spinner animation="border" variant="primary" />
 												</td>
 											</tr>
-											{Array.from({ length: Math.max(0, 30 - 5) }).map(
+											{Array.from({ length: Math.max(0, 30 - 9) }).map(
 												(_, rowIndex) => (
 													<tr
 														key={`blank-${rowIndex}`}
@@ -1270,7 +1131,7 @@ export default function DailyStatusReport() {
 															color: fontcolor,
 														}}
 													>
-														{Array.from({ length: 10 }).map((_, colIndex) => (
+														{Array.from({ length: 9 }).map((_, colIndex) => (
 															<td key={`blank-${rowIndex}-${colIndex}`}>
 																&nbsp;
 															</td>
@@ -1288,7 +1149,6 @@ export default function DailyStatusReport() {
 												<td style={seventhColWidth}></td>
 												<td style={eighthColWidth}></td>
 												<td style={ninthColWidth}></td>
-												<td style={tenthColWidth}></td>
 											</tr>
 										</>
 									) : (
@@ -1309,34 +1169,31 @@ export default function DailyStatusReport() {
 														}}
 													>
 														<td className="text-start" style={firstColWidth}>
-															{item.code}
+															{item.Code}
 														</td>
 														<td className="text-start" style={secondColWidth}>
-															{item.Description}
+															{item.Customer}
 														</td>
 														<td className="text-end" style={thirdColWidth}>
-															{item["Opening"]}
+															{item["Amt001"]}
 														</td>
 														<td className="text-end" style={forthColWidth}>
-															{item["Purchase"]}
+															{item["Amt002"]}
 														</td>
 														<td className="text-end" style={fifthColWidth}>
-															{item["Pur Ret"]}
+															{item["Amt003"]}
 														</td>
 														<td className="text-end" style={sixthColWidth}>
-															{item["Receive"]}
+															{item["Amt004"]}
 														</td>
 														<td className="text-end" style={seventhColWidth}>
-															{item["Issue"]}
+															{item["Amt005"]}
 														</td>
 														<td className="text-end" style={eighthColWidth}>
-															{item["Sale"]}
+															{item["Amt006"]}
 														</td>
 														<td className="text-end" style={ninthColWidth}>
-															{item["Sale Ret"]}
-														</td>
-														<td className="text-end" style={tenthColWidth}>
-															{item["Balance"]}
+															{item["Total"]}
 														</td>
 													</tr>
 												);
@@ -1351,7 +1208,7 @@ export default function DailyStatusReport() {
 														color: fontcolor,
 													}}
 												>
-													{Array.from({ length: 10 }).map((_, colIndex) => (
+													{Array.from({ length: 9 }).map((_, colIndex) => (
 														<td key={`blank-${rowIndex}-${colIndex}`}>
 															&nbsp;
 														</td>
@@ -1368,7 +1225,6 @@ export default function DailyStatusReport() {
 												<td style={seventhColWidth}></td>
 												<td style={eighthColWidth}></td>
 												<td style={ninthColWidth}></td>
-												<td style={tenthColWidth}></td>
 											</tr>
 										</>
 									)}
@@ -1383,14 +1239,13 @@ export default function DailyStatusReport() {
 							borderTop: `1px solid ${fontcolor}`,
 							height: "24px",
 							display: "flex",
-							paddingRight: "1.2%",
+							paddingRight: "1.3%",
 						}}
 					>
 						<div
 							style={{
 								...firstColWidth,
 								background: getcolor,
-								marginLeft: "2px",
 								borderRight: `1px solid ${fontcolor}`,
 							}}
 						></div>
@@ -1408,7 +1263,7 @@ export default function DailyStatusReport() {
 								borderRight: `1px solid ${fontcolor}`,
 							}}
 						>
-							<span className="mobileledger_total">{totalOpening}</span>
+							<span className="mobileledger_total">{totalAmt1}</span>
 						</div>
 						<div
 							style={{
@@ -1417,7 +1272,7 @@ export default function DailyStatusReport() {
 								borderRight: `1px solid ${fontcolor}`,
 							}}
 						>
-							<span className="mobileledger_total">{totalPurchase}</span>
+							<span className="mobileledger_total">{totalAmt2}</span>
 						</div>
 						<div
 							style={{
@@ -1426,7 +1281,7 @@ export default function DailyStatusReport() {
 								borderRight: `1px solid ${fontcolor}`,
 							}}
 						>
-							<span className="mobileledger_total">{totalPurRet}</span>
+							<span className="mobileledger_total">{totalAmt3}</span>
 						</div>
 						<div
 							style={{
@@ -1435,7 +1290,7 @@ export default function DailyStatusReport() {
 								borderRight: `1px solid ${fontcolor}`,
 							}}
 						>
-							<span className="mobileledger_total">{totalReceive}</span>
+							<span className="mobileledger_total">{totalAmt4}</span>
 						</div>
 						<div
 							style={{
@@ -1444,7 +1299,7 @@ export default function DailyStatusReport() {
 								borderRight: `1px solid ${fontcolor}`,
 							}}
 						>
-							<span className="mobileledger_total">{totalIssue}</span>
+							<span className="mobileledger_total">{totalAmt5}</span>
 						</div>
 						<div
 							style={{
@@ -1453,7 +1308,7 @@ export default function DailyStatusReport() {
 								borderRight: `1px solid ${fontcolor}`,
 							}}
 						>
-							<span className="mobileledger_total">{totalSale}</span>
+							<span className="mobileledger_total">{totalAmt6}</span>
 						</div>
 						<div
 							style={{
@@ -1462,16 +1317,7 @@ export default function DailyStatusReport() {
 								borderRight: `1px solid ${fontcolor}`,
 							}}
 						>
-							<span className="mobileledger_total">{totalSaleRet}</span>
-						</div>
-						<div
-							style={{
-								...tenthColWidth,
-								background: getcolor,
-								borderRight: `1px solid ${fontcolor}`,
-							}}
-						>
-							<span className="mobileledger_total">{totalBalance}</span>
+							<span className="mobileledger_total">{total}</span>
 						</div>
 					</div>
 					{/* Action Buttons */}
@@ -1512,7 +1358,7 @@ export default function DailyStatusReport() {
 							id="searchsubmit"
 							text="Select"
 							ref={selectButtonRef}
-							onClick={fetchDailyStatusReport}
+							onClick={fetchReceivableAging}
 							style={{ backgroundColor: "#186DB7", width: "120px" }}
 							onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
 							onBlur={(e) =>

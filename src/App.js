@@ -53,6 +53,8 @@ import DailyPaymentReport from "./Component/Reports/DailyReports/DailyPaymentRep
 import DailyInstallationReport from "./Component/Reports/InstallationReports/DailyInstallationReport.jsx";
 import InstallarBalanceReport from "./Component/Reports/InstallationReports/InstallarBalanceReport.jsx";
 import DailyStatusReport from "./Component/Reports/DailyReports/DailyStatusReport.jsx";
+import ReceivableAging from "./Component/Reports/MiscReports/ReceivableAging.jsx";
+import PayableAging from "./Component/Reports/MiscReports/PayableAging.jsx";
 
 function App() {
 	const queryClient = new QueryClient();
@@ -195,6 +197,12 @@ function App() {
 									path="/PayableReport"
 									element={<PayableReport />}
 								/>
+								<Route
+									exact
+									path="/ReceivableAging"
+									element={<ReceivableAging />}
+								/>
+								<Route exact path="/PayableAging" element={<PayableAging />} />
 
 								{/* Installation Reports */}
 								<Route
