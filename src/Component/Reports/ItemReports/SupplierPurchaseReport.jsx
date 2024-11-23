@@ -550,7 +550,8 @@ export default function SupplierPurchaseReport() {
 	// Account List array
 	const optionAccount = AccountList.map((item) => ({
 		value: item.tacccod,
-		label: `${item.tacccod}-${item.taccdsc.trim()}`,
+		label: `${item.taccdsc.trim()}`,
+		// label: `${item.tacccod}-${item.taccdsc.trim()}`,
 	}));
 
 	// Company List array

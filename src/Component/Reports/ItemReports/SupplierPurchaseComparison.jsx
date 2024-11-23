@@ -407,7 +407,8 @@ export default function SupplierPurchaseComparison() {
 	// Account List array
 	const optionAccount = AccountList.map((item) => ({
 		value: item.tacccod,
-		label: `${item.tacccod}-${item.taccdsc.trim()}`,
+		label: `${item.taccdsc.trim()}`,
+		// label: `${item.tacccod}-${item.taccdsc.trim()}`,
 	}));
 
 	// Company List array
@@ -1643,7 +1644,7 @@ export default function SupplierPurchaseComparison() {
 							</div>
 
 							{/* Type */}
-							{/* <div
+							<div
 								className="d-flex align-items-center"
 								style={{ marginRight: "20px" }}
 							>
@@ -1684,10 +1685,10 @@ export default function SupplierPurchaseComparison() {
 									}}
 								>
 									<option value="">All</option>
-									<option value="INV">Sale</option>
-									<option value="SRN">Sale Return</option>
+									<option value="BIL">Purchase</option>
+									<option value="PRN">Purchase Return</option>
 								</select>
-							</div> */}
+							</div>
 						</div>
 					</div>
 
