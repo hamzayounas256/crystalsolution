@@ -56,6 +56,9 @@ import DailyStatusReport from "./Component/Reports/DailyReports/DailyStatusRepor
 import ReceivableAging from "./Component/Reports/MiscReports/ReceivableAging.jsx";
 import PayableAging from "./Component/Reports/MiscReports/PayableAging.jsx";
 import SupplierPurchaseReport from "./Component/Reports/ItemReports/SupplierPurchaseReport.jsx";
+import CustomerSaleReport from "./Component/Reports/ItemReports/CustomerSaleReport.jsx";
+import SupplierActivity from "./Component/Reports/ItemReports/SupplierActivity.jsx";
+import CustomerActivity from "./Component/Reports/ItemReports/CustomerActivity.jsx";
 
 function App() {
 	const queryClient = new QueryClient();
@@ -242,6 +245,21 @@ function App() {
 									exact
 									path="/SupplierPurchaseReport"
 									element={<SupplierPurchaseReport />}
+								/>
+								<Route
+									exact
+									path="/CustomerSaleReport"
+									element={<CustomerSaleReport />}
+								/>
+								<Route
+									exact
+									path="/SupplierActivity"
+									element={<SupplierActivity />}
+								/>
+								<Route
+									exact
+									path="/CustomerActivity"
+									element={<CustomerActivity />}
 								/>
 							</Route>
 						</Routes>
