@@ -46,6 +46,8 @@ export default function SupplierPurchaseReport() {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [transectionType, settransectionType] = useState("");
 
+	const [isAccountValid, setIsAccountValid] = useState(true);
+
 	const [storeType, setStoreType] = useState("");
 	const [companyType, setCompanyType] = useState("");
 	const [categoryType, setCategoryType] = useState("");
@@ -406,15 +408,15 @@ export default function SupplierPurchaseReport() {
 		const apiMainUrl = apiLinks + "/SupplierPurchaseReport.php";
 		setIsLoading(true);
 		const formMainData = new URLSearchParams({
-			code: "EMART",
+			code: "NASIRTRD",
 			FLocCod: "001",
 			FYerDsc: "2024-2024",
 			FIntDat: fromInputDate,
 			FFnlDat: toInputDate,
 			// FTrnTyp: transectionType,
 			// FStrCod: storeType,
-			FAccCod: "12-01-001",
-			// FAccCod: accountType,
+			// FAccCod: "12-01-001",
+			FAccCod: accountType,
 			FCmpCod: companyType,
 			FCtgCod: categoryType,
 			FSchTxt: "",
@@ -490,11 +492,11 @@ export default function SupplierPurchaseReport() {
 			});
 
 		//-------------- Account dropdown
-		const apiAccountUrl = apiLinks + "/GetAccount.php";
+		const apiAccountUrl = apiLinks + "/GetActiveSupplier.php";
 		const formAccountData = new URLSearchParams({
 			// FLocCod: getLocationNumber,
 			// code: organisation.code,
-			code: "EMART",
+			code: "NASIRTRD",
 		}).toString();
 		axios
 			.post(apiAccountUrl, formAccountData)
@@ -547,8 +549,8 @@ export default function SupplierPurchaseReport() {
 
 	// Account List array
 	const optionAccount = AccountList.map((item) => ({
-		value: item.tcapcod,
-		label: `${item.tcapcod}-${item.tcapdsc.trim()}`,
+		value: item.tacccod,
+		label: `${item.tacccod}-${item.taccdsc.trim()}`,
 	}));
 
 	// Company List array
@@ -622,14 +624,13 @@ export default function SupplierPurchaseReport() {
 			backgroundColor: getcolor,
 			color: fontcolor,
 			borderRadius: 0,
-			// border: hasError ? "2px solid red" : `1px solid ${fontcolor}`,
+			border: isAccountValid ? `1px solid ${fontcolor}` : "2px solid red",
 			transition: "border-color 0.15s ease-in-out",
 			"&:hover": {
 				borderColor: state.isFocused ? base.borderColor : "black",
 			},
 			padding: "0 8px",
 			display: "flex",
-			// alignItems: "center",
 			justifyContent: "space-between",
 		}),
 		dropdownIndicator: (base) => ({
@@ -713,7 +714,7 @@ export default function SupplierPurchaseReport() {
 			item.Description,
 			item.Rate,
 			item.Qnty,
-			item["Sale Amount"],
+			item["Amount"],
 		]);
 		rows.push(["", "Total", "", String(totalQnty), String(totalAmount)]);
 		const headers = ["Code", "Description", "Rate", "Qnty", "Amount"];
@@ -983,7 +984,7 @@ export default function SupplierPurchaseReport() {
 				item.Description,
 				item.Rate,
 				item.Qnty,
-				item["Sale Amount"],
+				item["Amount"],
 			]);
 		});
 		const totalRow = worksheet.addRow([
@@ -1354,6 +1355,25 @@ export default function SupplierPurchaseReport() {
 		}
 	};
 
+	const handleAccountChange = (selectedOption) => {
+		if (selectedOption && selectedOption.value) {
+			setAccountType(selectedOption.value);
+			setIsAccountValid(true); // Reset validation state
+		} else {
+			setAccountType("");
+			setIsAccountValid(false); // Set validation state to false
+		}
+	};
+
+	const handleSelectButtonClick = () => {
+		if (!accountType) {
+			toast.error("Account code is required");
+			setIsAccountValid(false);
+			return;
+		}
+		fetchSupplierPurchaseReport();
+	};
+
 	return (
 		<>
 			<ToastContainer />
@@ -1703,15 +1723,8 @@ export default function SupplierPurchaseReport() {
 										options={optionAccount}
 										onKeyDown={handleAccountEnter}
 										id="selectedsale"
-										onChange={(selectedOption) => {
-											if (selectedOption && selectedOption.value) {
-												setAccountType(selectedOption.value);
-											} else {
-												setAccountType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
-											}
-										}}
+										onChange={handleAccountChange}
 										components={{ Option: DropdownOption }}
-										// styles={customStylesStore}
 										styles={customStylesAccount()}
 										isClearable
 										placeholder="Search or select..."
@@ -2075,7 +2088,7 @@ export default function SupplierPurchaseReport() {
 															{item.Qnty}
 														</td>
 														<td className="text-end" style={fifthColWidth}>
-															{item["Sale Amount"]}
+															{item["Amount"]}
 														</td>
 													</tr>
 												);
@@ -2198,7 +2211,7 @@ export default function SupplierPurchaseReport() {
 							id="searchsubmit"
 							text="Select"
 							ref={selectButtonRef}
-							onClick={fetchSupplierPurchaseReport}
+							onClick={handleSelectButtonClick}
 							style={{ backgroundColor: "#186DB7", width: "120px" }}
 							onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
 							onBlur={(e) =>

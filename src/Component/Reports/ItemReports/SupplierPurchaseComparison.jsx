@@ -22,7 +22,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./ItemReports.css";
 
-export default function CustomerSaleReport() {
+export default function SupplierPurchaseComparison() {
 	const navigate = useNavigate();
 	const user = getUserData();
 	const organisation = getOrganisationData();
@@ -141,126 +141,6 @@ export default function CustomerSaleReport() {
 		setfromInputDate(e.target.value);
 	};
 
-	const handlefromKeyPress = (e, inputId) => {
-		if (e.key === "Enter") {
-			e.preventDefault();
-			const fromDateElement = document.getElementById("fromdatevalidation");
-			const formattedInput = fromInputDate.replace(
-				/^(\d{2})(\d{2})(\d{4})$/,
-				"$1-$2-$3"
-			);
-			const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
-
-			if (formattedInput.length === 10 && datePattern.test(formattedInput)) {
-				const [day, month, year] = formattedInput.split("-").map(Number);
-
-				if (month > 12 || month === 0) {
-					toast.error("Please enter a valid month (MM) between 01 and 12");
-					return;
-				}
-
-				const daysInMonth = new Date(year, month, 0).getDate();
-				if (day > daysInMonth || day === 0) {
-					toast.error(`Please enter a valid day (DD) for month ${month}`);
-					return;
-				}
-
-				const currentDate = new Date();
-				const enteredDate = new Date(year, month - 1, day);
-
-				if (GlobalfromDate && enteredDate < GlobalfromDate) {
-					toast.error(
-						`Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-					);
-					return;
-				}
-				if (GlobalfromDate && enteredDate > GlobaltoDate) {
-					toast.error(
-						`Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-					);
-					return;
-				}
-
-				fromDateElement.style.border = `1px solid ${fontcolor}`;
-				setfromInputDate(formattedInput);
-
-				const nextInput = document.getElementById(inputId);
-				if (nextInput) {
-					nextInput.focus();
-					nextInput.select();
-				} else {
-					document.getElementById("submitButton").click();
-				}
-			} else {
-				toast.error("Date must be in the format dd-mm-yyyy");
-			}
-		}
-	};
-
-	const handleToKeyPress = (e) => {
-		if (e.key === "Enter") {
-			e.preventDefault();
-			const toDateElement = document.getElementById("todatevalidation");
-			const formattedInput = toInputDate.replace(
-				/^(\d{2})(\d{2})(\d{4})$/,
-				"$1-$2-$3"
-			);
-			const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
-
-			if (formattedInput.length === 10 && datePattern.test(formattedInput)) {
-				const [day, month, year] = formattedInput.split("-").map(Number);
-
-				if (month > 12 || month === 0) {
-					toast.error("Please enter a valid month (MM) between 01 and 12");
-					return;
-				}
-
-				const daysInMonth = new Date(year, month, 0).getDate();
-				if (day > daysInMonth || day === 0) {
-					toast.error(`Please enter a valid day (DD) for month ${month}`);
-					return;
-				}
-
-				const currentDate = new Date();
-				const enteredDate = new Date(year, month - 1, day);
-
-				if (GlobaltoDate && enteredDate > GlobaltoDate) {
-					toast.error(
-						`Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-					);
-					return;
-				}
-
-				if (GlobaltoDate && enteredDate < GlobalfromDate) {
-					toast.error(
-						`Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-					);
-					return;
-				}
-
-				if (fromInputDate) {
-					const fromDate = new Date(
-						fromInputDate.split("-").reverse().join("-")
-					);
-					if (enteredDate <= fromDate) {
-						toast.error("To date must be after from date");
-						return;
-					}
-				}
-
-				toDateElement.style.border = `1px solid ${fontcolor}`;
-				settoInputDate(formattedInput);
-
-				if (input1Ref.current) {
-					e.preventDefault();
-					input1Ref.current.focus();
-				}
-			} else {
-				toast.error("Date must be in the format dd-mm-yyyy");
-			}
-		}
-	};
-
 	const handleToDateChange = (date) => {
 		setSelectedToDate(date);
 		settoInputDate(date ? formatDate(date) : "");
@@ -269,31 +149,8 @@ export default function CustomerSaleReport() {
 	const handleToInputChange = (e) => {
 		settoInputDate(e.target.value);
 	};
-	const handleSaleKeypress = (event, inputId) => {
-		if (event.key === "Enter") {
-			const selectedOption = saleSelectRef.current.state.selectValue;
-			if (selectedOption && selectedOption.value) {
-				setSaleType(selectedOption.value);
-			}
-			const nextInput = document.getElementById(inputId);
-			if (nextInput) {
-				nextInput.focus();
-				nextInput.select();
-			} else {
-				document.getElementById("submitButton").click();
-			}
-		}
-	};
-	const handleKeyPress = (e, nextInputRef) => {
-		if (e.key === "Enter") {
-			e.preventDefault();
-			if (nextInputRef.current) {
-				nextInputRef.current.focus();
-			}
-		}
-	};
 
-	function fetchCustomerSaleReport() {
+	function fetchSupplierPurchaseComparison() {
 		const fromDateElement = document.getElementById("fromdatevalidation");
 		const toDateElement = document.getElementById("todatevalidation");
 
@@ -405,7 +262,7 @@ export default function CustomerSaleReport() {
 			"todatevalidation"
 		).style.border = `1px solid ${fontcolor}`;
 
-		const apiMainUrl = apiLinks + "/CustomerSaleReport.php";
+		const apiMainUrl = apiLinks + "/SupplierPurchaseComparison.php";
 		setIsLoading(true);
 		const formMainData = new URLSearchParams({
 			code: "NASIRTRD",
@@ -492,7 +349,7 @@ export default function CustomerSaleReport() {
 			});
 
 		//-------------- Account dropdown
-		const apiAccountUrl = apiLinks + "/GetActiveCustomer.php";
+		const apiAccountUrl = apiLinks + "/GetActiveSupplier.php";
 		const formAccountData = new URLSearchParams({
 			// FLocCod: getLocationNumber,
 			// code: organisation.code,
@@ -712,13 +569,12 @@ export default function CustomerSaleReport() {
 		const rows = tableData.map((item) => [
 			item.code,
 			item.Description,
-			item.Rate,
 			item.Qnty,
 			item["Amount"],
 		]);
-		rows.push(["", "Total", "", String(totalQnty), String(totalAmount)]);
-		const headers = ["Code", "Description", "Rate", "Qnty", "Amount"];
-		const columnWidths = [35, 80, 20, 10, 20];
+		rows.push(["", "Total", String(totalQnty), String(totalAmount)]);
+		const headers = ["Code", "Description", "Qnty", "Amount"];
+		const columnWidths = [20, 80, 10, 20];
 		const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
 		const pageHeight = doc.internal.pageSize.height;
 		const paddingTop = 15;
@@ -780,7 +636,7 @@ export default function CustomerSaleReport() {
 					doc.setFont(fontName, "normal");
 					const cellValue = String(cell);
 
-					if (cellIndex === 2 || cellIndex === 3 || cellIndex === 4) {
+					if (cellIndex === 2 || cellIndex === 3) {
 						const rightAlignX = startX + columnWidths[cellIndex] - 2;
 						doc.text(cellValue, rightAlignX, cellY, {
 							align: "right",
@@ -877,7 +733,7 @@ export default function CustomerSaleReport() {
 				addTitle(comapnyname, "", "", pageNumber, startY, 20, 10);
 				startY += 7;
 				addTitle(
-					`Customer Sale Report From: ${fromInputDate} To: ${toInputDate}`,
+					`Supplier Purchase Comparison From: ${fromInputDate} To: ${toInputDate}`,
 					"",
 					"",
 					pageNumber,
@@ -930,7 +786,7 @@ export default function CustomerSaleReport() {
 		const time = getCurrentTime();
 
 		handlePagination();
-		doc.save("CustomerSaleReport.pdf");
+		doc.save("SupplierPurchaseComparison.pdf");
 
 		const pdfBlob = doc.output("blob");
 		const pdfFile = new File([pdfBlob], "table_data.pdf", {
@@ -941,16 +797,16 @@ export default function CustomerSaleReport() {
 	const handleDownloadCSV = async () => {
 		const workbook = new ExcelJS.Workbook();
 		const worksheet = workbook.addWorksheet("Sheet1");
-		const numColumns = 5;
+		const numColumns = 4;
 		const titleStyle = {
 			font: { bold: true, size: 12 },
 			alignment: { horizontal: "center" },
 		};
-		const columnAlignments = ["left", "left", "right", "center", "right"];
+		const columnAlignments = ["left", "left", "center", "right"];
 		worksheet.addRow([]);
 		[
 			comapnyname,
-			`Customer Sale Report From ${fromInputDate} To ${toInputDate}`,
+			`Supplier Purchase Comparison From ${fromInputDate} To ${toInputDate}`,
 		].forEach((title, index) => {
 			worksheet.addRow([title]).eachCell((cell) => (cell.style = titleStyle));
 			worksheet.mergeCells(
@@ -973,7 +829,7 @@ export default function CustomerSaleReport() {
 				right: { style: "thin" },
 			},
 		};
-		const headers = ["Code", "Description", "Rate", "Qnty", "Amount"];
+		const headers = ["Code", "Description", "Qnty", "Amount"];
 		const headerRow = worksheet.addRow(headers);
 		headerRow.eachCell((cell) => {
 			cell.style = { ...headerStyle, alignment: { horizontal: "center" } };
@@ -982,22 +838,15 @@ export default function CustomerSaleReport() {
 			worksheet.addRow([
 				item.code,
 				item.Description,
-				item.Rate,
 				item.Qnty,
 				item["Amount"],
 			]);
 		});
-		const totalRow = worksheet.addRow([
-			"",
-			"Total",
-			"",
-			totalQnty,
-			totalAmount,
-		]);
+		const totalRow = worksheet.addRow(["", "Total", totalQnty, totalAmount]);
 		totalRow.eachCell((cell) => {
 			cell.font = { bold: true };
 		});
-		[20, 45, 12, 7, 12].forEach((width, index) => {
+		[15, 45, 7, 15].forEach((width, index) => {
 			worksheet.getColumn(index + 1).width = width;
 		});
 		worksheet.eachRow((row, rowNumber) => {
@@ -1021,7 +870,7 @@ export default function CustomerSaleReport() {
 		const blob = new Blob([buffer], {
 			type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 		});
-		saveAs(blob, "CustomerSaleReport.xlsx");
+		saveAs(blob, "SupplierPurchaseComparison.xlsx");
 	};
 
 	const dispatch = useDispatch();
@@ -1055,22 +904,19 @@ export default function CustomerSaleReport() {
 	};
 
 	const firstColWidth = {
-		width: "20%",
+		width: "12%",
 	};
 	const secondColWidth = {
-		width: "49%",
+		width: "65%",
 	};
 	const thirdColWidth = {
-		width: "12%",
+		width: "8%",
 	};
 	const forthColWidth = {
-		width: "7%",
-	};
-	const fifthColWidth = {
-		width: "12%",
+		width: "15%",
 	};
 
-	useHotkeys("s", fetchCustomerSaleReport);
+	useHotkeys("s", fetchSupplierPurchaseComparison);
 	useHotkeys("alt+p", exportPDFHandler);
 	useHotkeys("alt+e", handleDownloadCSV);
 	useHotkeys("esc", () => navigate("/MainPage"));
@@ -1371,7 +1217,7 @@ export default function CustomerSaleReport() {
 			setIsAccountValid(false);
 			return;
 		}
-		fetchCustomerSaleReport();
+		fetchSupplierPurchaseComparison();
 	};
 
 	return (
@@ -1387,7 +1233,7 @@ export default function CustomerSaleReport() {
 						borderRadius: "9px",
 					}}
 				>
-					<NavComponent textdata="Customer Sale Report" />
+					<NavComponent textdata="Supplier Purchase Comparison" />
 
 					{/* ------------1st row */}
 					<div
@@ -1988,12 +1834,9 @@ export default function CustomerSaleReport() {
 											Description
 										</td>
 										<td className="border-dark" style={thirdColWidth}>
-											Rate
-										</td>
-										<td className="border-dark" style={forthColWidth}>
 											Qnty
 										</td>
-										<td className="border-dark" style={fifthColWidth}>
+										<td className="border-dark" style={forthColWidth}>
 											Amount
 										</td>
 									</tr>
@@ -2029,7 +1872,7 @@ export default function CustomerSaleReport() {
 													backgroundColor: getcolor,
 												}}
 											>
-												<td colSpan="5" className="text-center">
+												<td colSpan="4" className="text-center">
 													<Spinner animation="border" variant="primary" />
 												</td>
 											</tr>
@@ -2042,7 +1885,7 @@ export default function CustomerSaleReport() {
 															color: fontcolor,
 														}}
 													>
-														{Array.from({ length: 5 }).map((_, colIndex) => (
+														{Array.from({ length: 4 }).map((_, colIndex) => (
 															<td key={`blank-${rowIndex}-${colIndex}`}>
 																&nbsp;
 															</td>
@@ -2055,7 +1898,6 @@ export default function CustomerSaleReport() {
 												<td style={secondColWidth}></td>
 												<td style={thirdColWidth}></td>
 												<td style={forthColWidth}></td>
-												<td style={fifthColWidth}></td>
 											</tr>
 										</>
 									) : (
@@ -2081,13 +1923,10 @@ export default function CustomerSaleReport() {
 														<td className="text-start" style={secondColWidth}>
 															{item.Description}
 														</td>
-														<td className="text-end" style={thirdColWidth}>
-															{item.Rate}
-														</td>
-														<td className="text-center" style={forthColWidth}>
+														<td className="text-center" style={thirdColWidth}>
 															{item.Qnty}
 														</td>
-														<td className="text-end" style={fifthColWidth}>
+														<td className="text-end" style={forthColWidth}>
 															{item["Amount"]}
 														</td>
 													</tr>
@@ -2103,7 +1942,7 @@ export default function CustomerSaleReport() {
 														color: fontcolor,
 													}}
 												>
-													{Array.from({ length: 5 }).map((_, colIndex) => (
+													{Array.from({ length: 4 }).map((_, colIndex) => (
 														<td key={`blank-${rowIndex}-${colIndex}`}>
 															&nbsp;
 														</td>
@@ -2115,7 +1954,6 @@ export default function CustomerSaleReport() {
 												<td style={secondColWidth}></td>
 												<td style={thirdColWidth}></td>
 												<td style={forthColWidth}></td>
-												<td style={fifthColWidth}></td>
 											</tr>
 										</>
 									)}
@@ -2153,19 +1991,12 @@ export default function CustomerSaleReport() {
 								background: getcolor,
 								borderRight: `1px solid ${fontcolor}`,
 							}}
-						></div>
-						<div
-							style={{
-								...forthColWidth,
-								background: getcolor,
-								borderRight: `1px solid ${fontcolor}`,
-							}}
 						>
 							<span className="mobileledger_total">{totalQnty}</span>
 						</div>
 						<div
 							style={{
-								...fifthColWidth,
+								...forthColWidth,
 								background: getcolor,
 								borderRight: `1px solid ${fontcolor}`,
 							}}

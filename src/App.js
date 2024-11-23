@@ -59,6 +59,8 @@ import SupplierPurchaseReport from "./Component/Reports/ItemReports/SupplierPurc
 import CustomerSaleReport from "./Component/Reports/ItemReports/CustomerSaleReport.jsx";
 import SupplierActivity from "./Component/Reports/ItemReports/SupplierActivity.jsx";
 import CustomerActivity from "./Component/Reports/ItemReports/CustomerActivity.jsx";
+import SupplierPurchaseComparison from "./Component/Reports/ItemReports/SupplierPurchaseComparison.jsx";
+import CustomerSaleComparison from "./Component/Reports/ItemReports/CustomerSaleComparison.jsx";
 
 function App() {
 	const queryClient = new QueryClient();
@@ -260,6 +262,16 @@ function App() {
 									exact
 									path="/CustomerActivity"
 									element={<CustomerActivity />}
+								/>
+								<Route
+									exact
+									path="/SupplierPurchaseComparison"
+									element={<SupplierPurchaseComparison />}
+								/>
+								<Route
+									exact
+									path="/CustomerSaleComparison"
+									element={<CustomerSaleComparison />}
 								/>
 							</Route>
 						</Routes>
