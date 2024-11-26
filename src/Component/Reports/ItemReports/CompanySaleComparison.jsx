@@ -20,48 +20,31 @@ import { fetchGetUser } from "../../Redux/action";
 import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import "./ItemReports.css";
+// import "./ItemReports.css";
 
-export default function ItemSaleReport() {
+export default function CompanySaleComparison() {
 	const navigate = useNavigate();
 	const user = getUserData();
 	const organisation = getOrganisationData();
 
-	const saleSelectRef = useRef(null);
 	const input1Ref = useRef(null);
-	const input2Ref = useRef(null);
-	const input3Ref = useRef(null);
 
 	const toRef = useRef(null);
 	const fromRef = useRef(null);
-	const companyRef = useRef(null);
-	const categoryRef = useRef(null);
-	const capacityRef = useRef(null);
+
 	const storeRef = useRef(null);
 	const typeRef = useRef(null);
 	const searchRef = useRef(null);
 	const selectButtonRef = useRef(null);
 
-	const [saleType, setSaleType] = useState("");
 	const [searchQuery, setSearchQuery] = useState("");
 	const [transectionType, settransectionType] = useState("");
-
 	const [storeType, setStoreType] = useState("");
-	const [companyType, setCompanyType] = useState("");
-	const [categoryType, setCategoryType] = useState("");
-	const [capacityType, setCapacityType] = useState("");
-
 	const [storeList, setStoreList] = useState([]);
-	const [companyList, setCompanyList] = useState([]);
-	const [categoryList, setCategoryList] = useState([]);
-	const [capacityList, setCapacityList] = useState([]);
 
 	const [totalQnty, setTotalQnty] = useState(0);
-	const [totalOpening, setTotalOpening] = useState(0);
-	const [totalDebit, setTotalDebit] = useState(0);
-	const [totalCredit, setTotalCredit] = useState(0);
-	const [closingBalance, setClosingBalance] = useState(0);
 	const [totalAmount, setTotalAmount] = useState(0);
+	const [totalMargin, setTotalMargin] = useState(0);
 
 	// state for from DatePicker
 	const [selectedfromDate, setSelectedfromDate] = useState(null);
@@ -139,126 +122,6 @@ export default function ItemSaleReport() {
 		setfromInputDate(e.target.value);
 	};
 
-	const handlefromKeyPress = (e, inputId) => {
-		if (e.key === "Enter") {
-			e.preventDefault();
-			const fromDateElement = document.getElementById("fromdatevalidation");
-			const formattedInput = fromInputDate.replace(
-				/^(\d{2})(\d{2})(\d{4})$/,
-				"$1-$2-$3"
-			);
-			const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
-
-			if (formattedInput.length === 10 && datePattern.test(formattedInput)) {
-				const [day, month, year] = formattedInput.split("-").map(Number);
-
-				if (month > 12 || month === 0) {
-					toast.error("Please enter a valid month (MM) between 01 and 12");
-					return;
-				}
-
-				const daysInMonth = new Date(year, month, 0).getDate();
-				if (day > daysInMonth || day === 0) {
-					toast.error(`Please enter a valid day (DD) for month ${month}`);
-					return;
-				}
-
-				const currentDate = new Date();
-				const enteredDate = new Date(year, month - 1, day);
-
-				if (GlobalfromDate && enteredDate < GlobalfromDate) {
-					toast.error(
-						`Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-					);
-					return;
-				}
-				if (GlobalfromDate && enteredDate > GlobaltoDate) {
-					toast.error(
-						`Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-					);
-					return;
-				}
-
-				fromDateElement.style.border = `1px solid ${fontcolor}`;
-				setfromInputDate(formattedInput);
-
-				const nextInput = document.getElementById(inputId);
-				if (nextInput) {
-					nextInput.focus();
-					nextInput.select();
-				} else {
-					document.getElementById("submitButton").click();
-				}
-			} else {
-				toast.error("Date must be in the format dd-mm-yyyy");
-			}
-		}
-	};
-
-	const handleToKeyPress = (e) => {
-		if (e.key === "Enter") {
-			e.preventDefault();
-			const toDateElement = document.getElementById("todatevalidation");
-			const formattedInput = toInputDate.replace(
-				/^(\d{2})(\d{2})(\d{4})$/,
-				"$1-$2-$3"
-			);
-			const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
-
-			if (formattedInput.length === 10 && datePattern.test(formattedInput)) {
-				const [day, month, year] = formattedInput.split("-").map(Number);
-
-				if (month > 12 || month === 0) {
-					toast.error("Please enter a valid month (MM) between 01 and 12");
-					return;
-				}
-
-				const daysInMonth = new Date(year, month, 0).getDate();
-				if (day > daysInMonth || day === 0) {
-					toast.error(`Please enter a valid day (DD) for month ${month}`);
-					return;
-				}
-
-				const currentDate = new Date();
-				const enteredDate = new Date(year, month - 1, day);
-
-				if (GlobaltoDate && enteredDate > GlobaltoDate) {
-					toast.error(
-						`Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-					);
-					return;
-				}
-
-				if (GlobaltoDate && enteredDate < GlobalfromDate) {
-					toast.error(
-						`Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-					);
-					return;
-				}
-
-				if (fromInputDate) {
-					const fromDate = new Date(
-						fromInputDate.split("-").reverse().join("-")
-					);
-					if (enteredDate <= fromDate) {
-						toast.error("To date must be after from date");
-						return;
-					}
-				}
-
-				toDateElement.style.border = `1px solid ${fontcolor}`;
-				settoInputDate(formattedInput);
-
-				if (input1Ref.current) {
-					e.preventDefault();
-					input1Ref.current.focus();
-				}
-			} else {
-				toast.error("Date must be in the format dd-mm-yyyy");
-			}
-		}
-	};
-
 	const handleToDateChange = (date) => {
 		setSelectedToDate(date);
 		settoInputDate(date ? formatDate(date) : "");
@@ -267,31 +130,8 @@ export default function ItemSaleReport() {
 	const handleToInputChange = (e) => {
 		settoInputDate(e.target.value);
 	};
-	const handleSaleKeypress = (event, inputId) => {
-		if (event.key === "Enter") {
-			const selectedOption = saleSelectRef.current.state.selectValue;
-			if (selectedOption && selectedOption.value) {
-				setSaleType(selectedOption.value);
-			}
-			const nextInput = document.getElementById(inputId);
-			if (nextInput) {
-				nextInput.focus();
-				nextInput.select();
-			} else {
-				document.getElementById("submitButton").click();
-			}
-		}
-	};
-	const handleKeyPress = (e, nextInputRef) => {
-		if (e.key === "Enter") {
-			e.preventDefault();
-			if (nextInputRef.current) {
-				nextInputRef.current.focus();
-			}
-		}
-	};
 
-	function fetchItemSaleReport() {
+	function fetchCompanySaleComparison() {
 		const fromDateElement = document.getElementById("fromdatevalidation");
 		const toDateElement = document.getElementById("todatevalidation");
 
@@ -386,16 +226,6 @@ export default function ItemSaleReport() {
 				break;
 		}
 
-		const data = {
-			FIntDat: fromInputDate,
-			FFnlDat: toInputDate,
-			FTrnTyp: transectionType,
-			FAccCod: saleType,
-			code: "EMART",
-			FLocCod: "001",
-			FYerDsc: "2024-2024",
-		};
-		// console.log(data);
 		document.getElementById(
 			"fromdatevalidation"
 		).style.border = `1px solid ${fontcolor}`;
@@ -403,19 +233,15 @@ export default function ItemSaleReport() {
 			"todatevalidation"
 		).style.border = `1px solid ${fontcolor}`;
 
-		const apiMainUrl = apiLinks + "/ItemSaleReport.php";
+		const apiMainUrl = apiLinks + "/CompanySaleComparison.php";
 		setIsLoading(true);
 		const formMainData = new URLSearchParams({
-			code: "EMART",
+			code: "NASIRTRD",
 			FLocCod: "001",
 			FYerDsc: "2024-2024",
 			FIntDat: fromInputDate,
 			FFnlDat: toInputDate,
-			FTrnTyp: transectionType,
-			FStrCod: storeType,
-			FCapCod: capacityType,
-			FCmpCod: companyType,
-			FCtgCod: categoryType,
+			FCtgCod: storeType,
 			FSchTxt: "",
 		}).toString();
 
@@ -427,6 +253,7 @@ export default function ItemSaleReport() {
 
 				setTotalQnty(response.data["Total Qnty"]);
 				setTotalAmount(response.data["Total Amount"]);
+				setTotalMargin(response.data["Total MArgin"]);
 
 				if (response.data && Array.isArray(response.data.Detail)) {
 					setTableData(response.data.Detail);
@@ -474,9 +301,9 @@ export default function ItemSaleReport() {
 
 	useEffect(() => {
 		//----------------- store dropdown
-		const apiStoreUrl = apiLinks + "/GetStore.php";
+		const apiStoreUrl = apiLinks + "/GetCatg.php";
 		const formStoreData = new URLSearchParams({
-			code: organisation.code,
+			code: "NASIRTRD",
 		}).toString();
 		axios
 			.post(apiStoreUrl, formStoreData)
@@ -487,77 +314,10 @@ export default function ItemSaleReport() {
 			.catch((error) => {
 				console.error("Error fetching data:", error);
 			});
-
-		//-------------- capacity dropdown
-		const apiCapacityUrl = apiLinks + "/GetCapacity.php";
-		const formCapacityData = new URLSearchParams({
-			// FLocCod: getLocationNumber,
-			// code: organisation.code,
-			code: "EMART",
-		}).toString();
-		axios
-			.post(apiCapacityUrl, formCapacityData)
-			.then((response) => {
-				setCapacityList(response.data);
-				// console.log("CAPACITY" + response.data);
-			})
-			.catch((error) => {
-				console.error("Error fetching data:", error);
-			});
-
-		// ------------company dropdown
-		const apiCompanyUrl = apiLinks + "/GetCompany.php";
-		const formCompanyData = new URLSearchParams({
-			code: organisation.code,
-		}).toString();
-		axios
-			.post(apiCompanyUrl, formCompanyData)
-			.then((response) => {
-				setCompanyList(response.data);
-				// console.log("COMPANY" + response.data);
-			})
-			.catch((error) => {
-				console.error("Error fetching data:", error);
-			});
-
-		// -----------category dropdown
-		const apiCategoryUrl = apiLinks + "/GetCatg.php";
-		const formCategoryData = new URLSearchParams({
-			// FLocCod: getLocationNumber,
-			// code: organisation.code,
-			code: "EMART",
-		}).toString();
-		axios
-			.post(apiCategoryUrl, formCategoryData)
-			.then((response) => {
-				setCategoryList(response.data);
-				// console.log("CATEGORY" + response.data);
-			})
-			.catch((error) => {
-				console.error("Error fetching data:", error);
-			});
 	}, []);
 
 	// Store List array
 	const optionStore = storeList.map((item) => ({
-		value: item.tstrcod,
-		label: `${item.tstrcod}-${item.tstrdsc.trim()}`,
-	}));
-
-	// Capacity List array
-	const optionCapacity = capacityList.map((item) => ({
-		value: item.tcapcod,
-		label: `${item.tcapcod}-${item.tcapdsc.trim()}`,
-	}));
-
-	// Company List array
-	const optionCompany = companyList.map((item) => ({
-		value: item.tcmpcod,
-		label: `${item.tcmpcod}-${item.tcmpdsc.trim()}`,
-	}));
-
-	// Category List array
-	const optionCategory = categoryList.map((item) => ({
 		value: item.tctgcod,
 		label: `${item.tctgcod}-${item.tctgdsc.trim()}`,
 	}));
@@ -610,96 +370,6 @@ export default function ItemSaleReport() {
 		}),
 	});
 
-	// ------------ capacity style customization
-	const customStylesCapacity = () => ({
-		control: (base, state) => ({
-			...base,
-			height: "24px",
-			minHeight: "unset",
-			width: 275,
-			fontSize: "12px",
-			backgroundColor: getcolor,
-			color: fontcolor,
-			borderRadius: 0,
-			// border: hasError ? "2px solid red" : `1px solid ${fontcolor}`,
-			transition: "border-color 0.15s ease-in-out",
-			"&:hover": {
-				borderColor: state.isFocused ? base.borderColor : "black",
-			},
-			padding: "0 8px",
-			display: "flex",
-			// alignItems: "center",
-			justifyContent: "space-between",
-		}),
-		dropdownIndicator: (base) => ({
-			...base,
-			padding: 0,
-			fontSize: "18px",
-			display: "flex",
-			textAlign: "center !important",
-		}),
-	});
-
-	// ------------ company style customization
-	const customStylesCompany = () => ({
-		control: (base, state) => ({
-			...base,
-			height: "24px",
-			minHeight: "unset",
-			width: 275,
-			fontSize: "12px",
-			backgroundColor: getcolor,
-			color: fontcolor,
-			borderRadius: 0,
-			// border: hasError ? "2px solid red" : `1px solid ${fontcolor}`,
-			transition: "border-color 0.15s ease-in-out",
-			"&:hover": {
-				borderColor: state.isFocused ? base.borderColor : "black",
-			},
-			padding: "0 8px",
-			display: "flex",
-			// alignItems: "center",
-			justifyContent: "space-between",
-		}),
-		dropdownIndicator: (base) => ({
-			...base,
-			padding: 0,
-			fontSize: "18px",
-			display: "flex",
-			textAlign: "center !important",
-		}),
-	});
-
-	// ------------ category style customization
-	const customStylesCategory = () => ({
-		control: (base, state) => ({
-			...base,
-			height: "24px",
-			minHeight: "unset",
-			width: 275,
-			fontSize: "12px",
-			backgroundColor: getcolor,
-			color: fontcolor,
-			borderRadius: 0,
-			// border: hasError ? "2px solid red" : `1px solid ${fontcolor}`,
-			transition: "border-color 0.15s ease-in-out",
-			"&:hover": {
-				borderColor: state.isFocused ? base.borderColor : "black",
-			},
-			padding: "0 8px",
-			display: "flex",
-			// alignItems: "center",
-			justifyContent: "space-between",
-		}),
-		dropdownIndicator: (base) => ({
-			...base,
-			padding: 0,
-			fontSize: "18px",
-			display: "flex",
-			textAlign: "center !important",
-		}),
-	});
-
 	const handleTransactionTypeChange = (event) => {
 		const selectedTransactionType = event.target.value;
 		settransectionType(selectedTransactionType);
@@ -708,16 +378,21 @@ export default function ItemSaleReport() {
 	const exportPDFHandler = () => {
 		const doc = new jsPDF({ orientation: "portrait" });
 		const rows = tableData.map((item) => [
-			item.Date,
-			item["Trn#"],
-			item.Type,
-			item.Description,
-			item.Rate,
+			item.tcmpcod,
+			item.Company,
 			item.Qnty,
+			item.Amount,
+			item.Margin,
 		]);
-		rows.push(["", "", "", "Total", String(totalAmount), String(totalQnty)]);
-		const headers = ["Date", "Trn#", "Type", "Description", "Rate", "Qnty"];
-		const columnWidths = [20, 12, 10, 80, 20, 10];
+		rows.push([
+			"",
+			"Total",
+			String(totalQnty),
+			String(totalAmount),
+			String(totalMargin),
+		]);
+		const headers = ["Code", "Company", "Qnty", "Amount", "Margin"];
+		const columnWidths = [10, 75, 10, 18, 18];
 		const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
 		const pageHeight = doc.internal.pageSize.height;
 		const paddingTop = 15;
@@ -779,7 +454,7 @@ export default function ItemSaleReport() {
 					doc.setFont(fontName, "normal");
 					const cellValue = String(cell);
 
-					if (cellIndex === 1 || cellIndex === 4 || cellIndex === 5) {
+					if (cellIndex === 2 || cellIndex === 3 || cellIndex === 4) {
 						const rightAlignX = startX + columnWidths[cellIndex] - 2;
 						doc.text(cellValue, rightAlignX, cellY, {
 							align: "right",
@@ -833,7 +508,8 @@ export default function ItemSaleReport() {
 			return paddingTop;
 		};
 
-		const rowsPerPage = 46;
+		const rowsPerPage = 46; //portrait
+		// const rowsPerPage = 29; //landscape
 
 		const handlePagination = () => {
 			const addTitle = (
@@ -876,7 +552,7 @@ export default function ItemSaleReport() {
 				addTitle(comapnyname, "", "", pageNumber, startY, 20, 10);
 				startY += 7;
 				addTitle(
-					`Item Sale Report From: ${fromInputDate} To: ${toInputDate}`,
+					`Company Sale Comparison From: ${fromInputDate} To: ${toInputDate}`,
 					"",
 					"",
 					pageNumber,
@@ -929,7 +605,7 @@ export default function ItemSaleReport() {
 		const time = getCurrentTime();
 
 		handlePagination();
-		doc.save("ItemSaleReport.pdf");
+		doc.save("CompanySaleComparison.pdf");
 
 		const pdfBlob = doc.output("blob");
 		const pdfFile = new File([pdfBlob], "table_data.pdf", {
@@ -940,23 +616,16 @@ export default function ItemSaleReport() {
 	const handleDownloadCSV = async () => {
 		const workbook = new ExcelJS.Workbook();
 		const worksheet = workbook.addWorksheet("Sheet1");
-		const numColumns = 6;
+		const numColumns = 9;
 		const titleStyle = {
 			font: { bold: true, size: 12 },
 			alignment: { horizontal: "center" },
 		};
-		const columnAlignments = [
-			"left",
-			"right",
-			"center",
-			"left",
-			"right",
-			"right",
-		];
+		const columnAlignments = ["center", "left", "right", "right", "right"];
 		worksheet.addRow([]);
 		[
 			comapnyname,
-			`Item Sale Report From ${fromInputDate} To ${toInputDate}`,
+			`Company Sale Comparison From ${fromInputDate} To ${toInputDate}`,
 		].forEach((title, index) => {
 			worksheet.addRow([title]).eachCell((cell) => (cell.style = titleStyle));
 			worksheet.mergeCells(
@@ -979,33 +648,31 @@ export default function ItemSaleReport() {
 				right: { style: "thin" },
 			},
 		};
-		const headers = ["Date", "Trn#", "Type", "Description", "Rate", "Qnty"];
+		const headers = ["Code", "Company", "Qnty", "Amount", "Margin"];
 		const headerRow = worksheet.addRow(headers);
 		headerRow.eachCell((cell) => {
 			cell.style = { ...headerStyle, alignment: { horizontal: "center" } };
 		});
 		tableData.forEach((item) => {
 			worksheet.addRow([
-				item.Date,
-				item["Trn#"],
-				item.Type,
-				item.Description,
-				item.Rate,
+				item.tcmpcod,
+				item.Company,
 				item.Qnty,
+				item.Amount,
+				item.Margin,
 			]);
 		});
 		const totalRow = worksheet.addRow([
 			"",
-			"",
-			"",
 			"Total",
-			totalAmount,
-			totalQnty,
+			String(totalQnty),
+			String(totalAmount),
+			String(totalMargin),
 		]);
 		totalRow.eachCell((cell) => {
 			cell.font = { bold: true };
 		});
-		[12, 7, 6, 45, 12, 7].forEach((width, index) => {
+		[6, 45, 7, 11, 11].forEach((width, index) => {
 			worksheet.getColumn(index + 1).width = width;
 		});
 		worksheet.eachRow((row, rowNumber) => {
@@ -1029,7 +696,7 @@ export default function ItemSaleReport() {
 		const blob = new Blob([buffer], {
 			type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 		});
-		saveAs(blob, "ItemSaleReport.xlsx");
+		saveAs(blob, "CompanySaleComparison.xlsx");
 	};
 
 	const dispatch = useDispatch();
@@ -1063,25 +730,22 @@ export default function ItemSaleReport() {
 	};
 
 	const firstColWidth = {
-		width: "12%",
-	};
-	const secondColWidth = {
 		width: "8%",
 	};
+	const secondColWidth = {
+		width: "54%",
+	};
 	const thirdColWidth = {
-		width: "6%",
+		width: "8%",
 	};
 	const forthColWidth = {
-		width: "55%",
+		width: "15%",
 	};
 	const fifthColWidth = {
-		width: "12%",
-	};
-	const sixthColWidth = {
-		width: "7%",
+		width: "15%",
 	};
 
-	useHotkeys("s", fetchItemSaleReport);
+	useHotkeys("s", fetchCompanySaleComparison);
 	useHotkeys("alt+p", exportPDFHandler);
 	useHotkeys("alt+e", handleDownloadCSV);
 	useHotkeys("esc", () => navigate("/MainPage"));
@@ -1102,7 +766,7 @@ export default function ItemSaleReport() {
 		backgroundColor: getcolor,
 		width: isSidebarVisible ? "calc(65vw - 0%)" : "65vw",
 		position: "relative",
-		top: "40%",
+		top: "35%",
 		left: isSidebarVisible ? "50%" : "50%",
 		transform: "translate(-50%, -50%)",
 		transition: isSidebarVisible
@@ -1193,6 +857,7 @@ export default function ItemSaleReport() {
 		}
 	}, [selectedIndex]);
 
+	// Radio Functionality
 	const parseDate = (dateString) => {
 		const [day, month, year] = dateString.split("-").map(Number);
 		return new Date(year, month - 1, day);
@@ -1226,9 +891,6 @@ export default function ItemSaleReport() {
 		}
 	}, [selectedRadio]);
 
-	const [menuCompanyIsOpen, setMenuCompanyIsOpen] = useState(false);
-	const [menuCategoryIsOpen, setMenuCategoryIsOpen] = useState(false);
-	const [menuCapacityIsOpen, setMenuCapacityIsOpen] = useState(false);
 	const [menuStoreIsOpen, setMenuStoreIsOpen] = useState(false);
 
 	const focusNextElement = (currentRef, nextRef) => {
@@ -1320,42 +982,14 @@ export default function ItemSaleReport() {
 			settoInputDate(formattedDate); // Update the state with formatted date
 
 			// Move focus to the next element
-			focusNextElement(toRef, companyRef);
-		}
-	};
-
-	const handleCompanyEnter = (e) => {
-		if (e.key === "Enter" && !menuCompanyIsOpen) {
-			e.preventDefault();
-			focusNextElement(companyRef, categoryRef);
-		}
-	};
-
-	const handleCategoryEnter = (e) => {
-		if (e.key === "Enter" && !menuCategoryIsOpen) {
-			e.preventDefault();
-			focusNextElement(categoryRef, capacityRef);
-		}
-	};
-
-	const handleCapacityEnter = (e) => {
-		if (e.key === "Enter" && !menuCapacityIsOpen) {
-			e.preventDefault();
-			focusNextElement(capacityRef, storeRef);
+			focusNextElement(toRef, storeRef);
 		}
 	};
 
 	const handleStoreEnter = (e) => {
 		if (e.key === "Enter" && !menuStoreIsOpen) {
 			e.preventDefault();
-			focusNextElement(storeRef, typeRef);
-		}
-	};
-
-	const handleTypeEnter = (e) => {
-		if (e.key === "Enter") {
-			e.preventDefault();
-			focusNextElement(typeRef, searchRef);
+			focusNextElement(storeRef, searchRef);
 		}
 	};
 
@@ -1379,7 +1013,7 @@ export default function ItemSaleReport() {
 						borderRadius: "9px",
 					}}
 				>
-					<NavComponent textdata="Item Sale Report" />
+					<NavComponent textdata="Company Sale Comparison" />
 
 					{/* ------------1st row */}
 					<div
@@ -1399,11 +1033,11 @@ export default function ItemSaleReport() {
 							{/* From Date */}
 							<div
 								className="d-flex align-items-center"
-								style={{ marginLeft: "20px" }}
+								// style={{ marginLeft: "20px" }}
 							>
 								<div
 									style={{
-										width: "80px",
+										width: "100px",
 										display: "flex",
 										justifyContent: "end",
 									}}
@@ -1594,7 +1228,7 @@ export default function ItemSaleReport() {
 										justifyContent: "evenly",
 									}}
 								>
-									<div className="d-flex align-items-baseline mx-2">
+									<div className="d-flex align-items-baseline mx-1">
 										<input
 											type="radio"
 											name="dateRange"
@@ -1613,7 +1247,7 @@ export default function ItemSaleReport() {
 											Custom
 										</label>
 									</div>
-									<div className="d-flex align-items-baseline mx-2">
+									<div className="d-flex align-items-baseline mx-1">
 										<input
 											type="radio"
 											name="dateRange"
@@ -1632,7 +1266,7 @@ export default function ItemSaleReport() {
 											30 Days
 										</label>
 									</div>
-									<div className="d-flex align-items-baseline mx-2">
+									<div className="d-flex align-items-baseline mx-1">
 										<input
 											type="radio"
 											name="dateRange"
@@ -1651,7 +1285,7 @@ export default function ItemSaleReport() {
 											60 Days
 										</label>
 									</div>
-									<div className="d-flex align-items-baseline mx-2">
+									<div className="d-flex align-items-baseline mx-1">
 										<input
 											type="radio"
 											name="dateRange"
@@ -1689,52 +1323,10 @@ export default function ItemSaleReport() {
 								justifyContent: "space-between",
 							}}
 						>
-							{/* Company Select */}
-							<div className="d-flex align-items-center">
-								<div
-									style={{
-										width: "100px",
-										display: "flex",
-										justifyContent: "end",
-									}}
-								>
-									<label htmlFor="fromDatePicker">
-										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
-											Company:&nbsp;&nbsp;
-										</span>{" "}
-										<br />
-									</label>
-								</div>
-								<div>
-									<Select
-										className="List-select-class "
-										ref={companyRef}
-										options={optionCompany}
-										onKeyDown={handleCompanyEnter}
-										id="selectedsale"
-										onChange={(selectedOption) => {
-											if (selectedOption && selectedOption.value) {
-												setCompanyType(selectedOption.value);
-											} else {
-												setCompanyType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
-											}
-										}}
-										components={{ Option: DropdownOption }}
-										// styles={customStylesStore}
-										styles={customStylesCompany()}
-										isClearable
-										placeholder="Search or select..."
-										menuIsOpen={menuCompanyIsOpen}
-										onMenuOpen={() => setMenuCompanyIsOpen(true)}
-										onMenuClose={() => setMenuCompanyIsOpen(false)}
-									/>
-								</div>
-							</div>
-
 							{/* Store Select */}
 							<div
 								className="d-flex align-items-center"
-								style={{ marginRight: "20px" }}
+								// style={{ marginRight: "20px" }}
 							>
 								<div
 									style={{
@@ -1745,7 +1337,7 @@ export default function ItemSaleReport() {
 								>
 									<label htmlFor="fromDatePicker">
 										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
-											Store:&nbsp;&nbsp;
+											Category:&nbsp;&nbsp;
 										</span>{" "}
 										<br />
 									</label>
@@ -1772,177 +1364,6 @@ export default function ItemSaleReport() {
 										menuIsOpen={menuStoreIsOpen}
 										onMenuOpen={() => setMenuStoreIsOpen(true)}
 										onMenuClose={() => setMenuStoreIsOpen(false)}
-									/>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					{/* ------------3rd row */}
-					<div
-						className="row"
-						style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-					>
-						<div
-							style={{
-								width: "100%",
-								display: "flex",
-								alignItems: "center",
-								margin: "0px",
-								padding: "0px",
-								justifyContent: "space-between",
-							}}
-						>
-							{/* Category Select  */}
-							<div
-								className="d-flex align-items-center  "
-								style={{ marginRight: "20px" }}
-							>
-								<div
-									style={{
-										width: "100px",
-										display: "flex",
-										justifyContent: "end",
-									}}
-								>
-									<label htmlFor="fromDatePicker">
-										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
-											Category:&nbsp;&nbsp;
-										</span>{" "}
-										<br />
-									</label>
-								</div>
-								<div>
-									<Select
-										className="List-select-class "
-										ref={categoryRef}
-										options={optionCategory}
-										onKeyDown={handleCategoryEnter}
-										id="selectedsale"
-										onChange={(selectedOption) => {
-											if (selectedOption && selectedOption.value) {
-												setCategoryType(selectedOption.value);
-											} else {
-												setCategoryType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
-											}
-										}}
-										components={{ Option: DropdownOption }}
-										// styles={customStylesStore}
-										styles={customStylesCategory()}
-										isClearable
-										placeholder="Search or select..."
-										menuIsOpen={menuCategoryIsOpen}
-										onMenuOpen={() => setMenuCategoryIsOpen(true)}
-										onMenuClose={() => setMenuCategoryIsOpen(false)}
-									/>
-								</div>
-							</div>
-
-							{/* Type */}
-							<div
-								className="d-flex align-items-center"
-								style={{ marginRight: "20px" }}
-							>
-								<div
-									style={{
-										width: "60px",
-										display: "flex",
-										justifyContent: "end",
-									}}
-								>
-									<label htmlFor="transactionType">
-										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
-											Type:&nbsp;&nbsp;
-										</span>
-									</label>
-								</div>
-								<select
-									ref={typeRef}
-									onKeyDown={handleTypeEnter}
-									id="submitButton"
-									name="type"
-									onFocus={(e) =>
-										(e.currentTarget.style.border = "4px solid red")
-									}
-									onBlur={(e) =>
-										(e.currentTarget.style.border = `1px solid ${fontcolor}`)
-									}
-									value={transectionType}
-									onChange={handleTransactionTypeChange}
-									style={{
-										width: "275px",
-										height: "24px",
-										// marginLeft: "15px",
-										backgroundColor: getcolor,
-										border: `1px solid ${fontcolor}`,
-										fontSize: "12px",
-										color: fontcolor,
-									}}
-								>
-									<option value="">All</option>
-									<option value="INV">Sale</option>
-									<option value="SRN">Sale Return</option>
-								</select>
-							</div>
-						</div>
-					</div>
-
-					{/* ------------4th row */}
-					<div
-						className="row"
-						style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-					>
-						<div
-							style={{
-								width: "100%",
-								display: "flex",
-								alignItems: "center",
-								margin: "0px",
-								padding: "0px",
-								justifyContent: "space-between",
-							}}
-						>
-							{/* Capacity Select */}
-							<div
-								className="d-flex align-items-center  "
-								// style={{ marginRight: "20px" }}
-							>
-								<div
-									style={{
-										width: "100px",
-										display: "flex",
-										justifyContent: "end",
-									}}
-								>
-									<label htmlFor="fromDatePicker">
-										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
-											Capacity:&nbsp;&nbsp;
-										</span>{" "}
-										<br />
-									</label>
-								</div>
-								<div>
-									<Select
-										className="List-select-class "
-										ref={capacityRef}
-										options={optionCapacity}
-										onKeyDown={handleCapacityEnter}
-										id="selectedsale"
-										onChange={(selectedOption) => {
-											if (selectedOption && selectedOption.value) {
-												setCapacityType(selectedOption.value);
-											} else {
-												setCapacityType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
-											}
-										}}
-										components={{ Option: DropdownOption }}
-										// styles={customStylesStore}
-										styles={customStylesCapacity()}
-										isClearable
-										placeholder="Search or select..."
-										menuIsOpen={menuCapacityIsOpen}
-										onMenuOpen={() => setMenuCapacityIsOpen(true)}
-										onMenuClose={() => setMenuCapacityIsOpen(false)}
 									/>
 								</div>
 							</div>
@@ -1989,12 +1410,13 @@ export default function ItemSaleReport() {
 							</div>
 						</div>
 					</div>
+
 					<div>
 						{/* Table Head */}
 						<div
 							style={{
 								overflowY: "auto",
-								width: "98.5%",
+								width: "98.6%",
 							}}
 						>
 							<table
@@ -2004,7 +1426,7 @@ export default function ItemSaleReport() {
 									fontSize: "12px",
 									width: "100%",
 									position: "relative",
-									paddingRight: "2%",
+									// paddingRight: "2%",
 								}}
 							>
 								<thead
@@ -2024,27 +1446,25 @@ export default function ItemSaleReport() {
 										}}
 									>
 										<td className="border-dark" style={firstColWidth}>
-											Date
+											Code
 										</td>
 										<td className="border-dark" style={secondColWidth}>
-											Trn#
+											Company{" "}
 										</td>
 										<td className="border-dark" style={thirdColWidth}>
-											Type
+											Qnty
 										</td>
 										<td className="border-dark" style={forthColWidth}>
-											Description
+											Amount
 										</td>
 										<td className="border-dark" style={fifthColWidth}>
-											Rate
-										</td>
-										<td className="border-dark" style={sixthColWidth}>
-											Qnty
+											Margin
 										</td>
 									</tr>
 								</thead>
 							</table>
 						</div>
+
 						{/* Table Body */}
 						<div
 							className="table-scroll"
@@ -2074,7 +1494,7 @@ export default function ItemSaleReport() {
 													backgroundColor: getcolor,
 												}}
 											>
-												<td colSpan="6" className="text-center">
+												<td colSpan="5" className="text-center">
 													<Spinner animation="border" variant="primary" />
 												</td>
 											</tr>
@@ -2087,7 +1507,7 @@ export default function ItemSaleReport() {
 															color: fontcolor,
 														}}
 													>
-														{Array.from({ length: 6 }).map((_, colIndex) => (
+														{Array.from({ length: 5 }).map((_, colIndex) => (
 															<td key={`blank-${rowIndex}-${colIndex}`}>
 																&nbsp;
 															</td>
@@ -2101,7 +1521,6 @@ export default function ItemSaleReport() {
 												<td style={thirdColWidth}></td>
 												<td style={forthColWidth}></td>
 												<td style={fifthColWidth}></td>
-												<td style={sixthColWidth}></td>
 											</tr>
 										</>
 									) : (
@@ -2121,23 +1540,20 @@ export default function ItemSaleReport() {
 															color: fontcolor,
 														}}
 													>
-														<td className="text-start" style={firstColWidth}>
-															{item.Date}
+														<td className="text-center" style={firstColWidth}>
+															{item.tcmpcod}
 														</td>
-														<td className="text-end" style={secondColWidth}>
-															{item["Trn#"]}
+														<td className="text-start" style={secondColWidth}>
+															{item.Company}
 														</td>
-														<td className="text-center" style={thirdColWidth}>
-															{item.Type}
+														<td className="text-end" style={thirdColWidth}>
+															{item.Qnty}
 														</td>
-														<td className="text-start" style={forthColWidth}>
-															{item.Description}
+														<td className="text-end" style={forthColWidth}>
+															{item.Amount}
 														</td>
 														<td className="text-end" style={fifthColWidth}>
-															{item["Rate"]}
-														</td>
-														<td className="text-end" style={sixthColWidth}>
-															{item["Qnty"]}
+															{item.Margin}
 														</td>
 													</tr>
 												);
@@ -2152,7 +1568,7 @@ export default function ItemSaleReport() {
 														color: fontcolor,
 													}}
 												>
-													{Array.from({ length: 6 }).map((_, colIndex) => (
+													{Array.from({ length: 5 }).map((_, colIndex) => (
 														<td key={`blank-${rowIndex}-${colIndex}`}>
 															&nbsp;
 														</td>
@@ -2165,7 +1581,6 @@ export default function ItemSaleReport() {
 												<td style={thirdColWidth}></td>
 												<td style={forthColWidth}></td>
 												<td style={fifthColWidth}></td>
-												<td style={sixthColWidth}></td>
 											</tr>
 										</>
 									)}
@@ -2173,6 +1588,7 @@ export default function ItemSaleReport() {
 							</table>
 						</div>
 					</div>
+
 					{/* Table Footer */}
 					<div
 						style={{
@@ -2180,7 +1596,7 @@ export default function ItemSaleReport() {
 							borderTop: `1px solid ${fontcolor}`,
 							height: "24px",
 							display: "flex",
-							paddingRight: "1.7%",
+							paddingRight: "1.4%",
 						}}
 					>
 						<div
@@ -2203,17 +1619,12 @@ export default function ItemSaleReport() {
 								background: getcolor,
 								borderRight: `1px solid ${fontcolor}`,
 							}}
-						></div>
+						>
+							<span className="mobileledger_total">{totalQnty}</span>
+						</div>
 						<div
 							style={{
 								...forthColWidth,
-								background: getcolor,
-								borderRight: `1px solid ${fontcolor}`,
-							}}
-						></div>
-						<div
-							style={{
-								...fifthColWidth,
 								background: getcolor,
 								borderRight: `1px solid ${fontcolor}`,
 							}}
@@ -2222,14 +1633,15 @@ export default function ItemSaleReport() {
 						</div>
 						<div
 							style={{
-								...sixthColWidth,
+								...fifthColWidth,
 								background: getcolor,
 								borderRight: `1px solid ${fontcolor}`,
 							}}
 						>
-							<span className="mobileledger_total">{totalQnty}</span>
+							<span className="mobileledger_total">{totalMargin}</span>
 						</div>
 					</div>
+
 					{/* Action Buttons */}
 					<div
 						style={{
@@ -2268,7 +1680,7 @@ export default function ItemSaleReport() {
 							id="searchsubmit"
 							text="Select"
 							ref={selectButtonRef}
-							onClick={fetchItemSaleReport}
+							onClick={fetchCompanySaleComparison}
 							style={{ backgroundColor: "#186DB7", width: "120px" }}
 							onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
 							onBlur={(e) =>
