@@ -44,8 +44,7 @@ import PayableReport from "./Component/Reports/MiscReports/PayableReport.jsx";
 import InstallarPayableReport from "./Component/Reports/InstallationReports/InstallarPayableReport.jsx";
 import DailyCashBankBalance from "./Component/Reports/DailyReports/DailyCashBankBalance.jsx";
 import DailyCollectionReport from "./Component/Reports/DailyReports/DailyCollectionReport.jsx";
-import ItemSaleReport from "./Component/Reports/ItemReports/ItemSaleReport.jsx";
-import ItemPurchaseReport from "./Component/Reports/ItemReports/ItemPurchaseReport.jsx";
+import ItemPurchaseSummary from "./Component/Reports/ItemReports/ItemPurchaseSummary.jsx";
 import DailySaleReport from "./Component/Reports/DailyReports/DailySaleReport.jsx";
 import DailyPurchaseReport from "./Component/Reports/DailyReports/DailyPurchaseReport.jsx";
 import InstallarPaymentReport from "./Component/Reports/InstallationReports/InstallarPaymentReport.jsx";
@@ -61,6 +60,9 @@ import SupplierActivity from "./Component/Reports/ItemReports/SupplierActivity.j
 import CustomerActivity from "./Component/Reports/ItemReports/CustomerActivity.jsx";
 import SupplierPurchaseComparison from "./Component/Reports/ItemReports/SupplierPurchaseComparison.jsx";
 import CustomerSaleComparison from "./Component/Reports/ItemReports/CustomerSaleComparison.jsx";
+import ItemSaleSummary from "./Component/Reports/ItemReports/ItemSaleSummary.jsx";
+import ItemSaleReport from "./Component/Reports/ItemReports/ItemSaleReport.jsx";
+import ItemPurchaseReport from "./Component/Reports/ItemReports/ItemPurchaseReport.jsx";
 
 function App() {
 	const queryClient = new QueryClient();
@@ -233,10 +235,21 @@ function App() {
 								/>
 
 								{/* Item Reports */}
+
+								<Route
+									exact
+									path="/ItemSaleSummary"
+									element={<ItemSaleSummary />}
+								/>
 								<Route
 									exact
 									path="/ItemSaleReport"
 									element={<ItemSaleReport />}
+								/>
+								<Route
+									exact
+									path="/ItemPurchaseSummary"
+									element={<ItemPurchaseSummary />}
 								/>
 								<Route
 									exact
