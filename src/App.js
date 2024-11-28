@@ -65,6 +65,12 @@ import ItemSaleReport from "./Component/Reports/ItemReports/ItemSaleReport.jsx";
 import ItemPurchaseReport from "./Component/Reports/ItemReports/ItemPurchaseReport.jsx";
 import ItemSaleComparison from "./Component/Reports/ItemReports/ItemSaleComparison.jsx";
 import CompanySaleComparison from "./Component/Reports/ItemReports/CompanySaleComparison.jsx";
+import ItemPurchaseComparison from "./Component/Reports/ItemReports/ItemPurchaseComparison.jsx";
+import CompanyPurchaseComparison from "./Component/Reports/ItemReports/CompanyPurchaseComparison.jsx";
+import ItemMonthlySaleComparison from "./Component/Reports/ItemReports/ItemMonthlySaleComparison.jsx";
+import ItemMonthlyPurchaseComparison from "./Component/Reports/ItemReports/ItemMonthlyPurchaseComparison.jsx";
+import CompanyMonthlySaleComparison from "./Component/Reports/ItemReports/CompanyMonthlySaleComparison.jsx";
+import CompanyMonthlyPurchaseComparison from "./Component/Reports/ItemReports/CompanyMonthlyPurchaseComparison.jsx";
 
 function App() {
 	const queryClient = new QueryClient();
@@ -295,8 +301,38 @@ function App() {
 								/>
 								<Route
 									exact
+									path="/ItemPurchaseComparison"
+									element={<ItemPurchaseComparison />}
+								/>
+								<Route
+									exact
 									path="/CompanySaleComparison"
 									element={<CompanySaleComparison />}
+								/>
+								<Route
+									exact
+									path="/CompanyPurchaseComparison"
+									element={<CompanyPurchaseComparison />}
+								/>
+								<Route
+									exact
+									path="/ItemMonthlySaleComparison"
+									element={<ItemMonthlySaleComparison />}
+								/>
+								<Route
+									exact
+									path="/ItemMonthlyPurchaseComparison"
+									element={<ItemMonthlyPurchaseComparison />}
+								/>
+								<Route
+									exact
+									path="/CompanyMonthlySaleComparison"
+									element={<CompanyMonthlySaleComparison />}
+								/>
+								<Route
+									exact
+									path="/CompanyMonthlyPurchaseComparison"
+									element={<CompanyMonthlyPurchaseComparison />}
 								/>
 							</Route>
 						</Routes>
