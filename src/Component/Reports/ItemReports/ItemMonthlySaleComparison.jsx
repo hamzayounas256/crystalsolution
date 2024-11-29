@@ -718,11 +718,37 @@ export default function ItemMonthlySaleComparison() {
 		};
 	}, []);
 
+	// const contentStyle = {
+	// 	backgroundColor: getcolor,
+	// 	width: isSidebarVisible ? "calc(65vw - 0%)" : "65vw",
+	// 	position: "relative",
+	// 	top: "35%",
+	// 	left: isSidebarVisible ? "50%" : "50%",
+	// 	transform: "translate(-50%, -50%)",
+	// 	transition: isSidebarVisible
+	// 		? "left 3s ease-in-out, width 2s ease-in-out"
+	// 		: "left 3s ease-in-out, width 2s ease-in-out",
+	// 	display: "flex",
+	// 	justifyContent: "center",
+	// 	alignItems: "start",
+	// 	overflowX: "hidden",
+	// 	overflowY: "hidden",
+	// 	wordBreak: "break-word",
+	// 	textAlign: "center",
+	// 	maxWidth: "1400px",
+	// 	fontSize: "15px",
+	// 	fontStyle: "normal",
+	// 	fontWeight: "400",
+	// 	lineHeight: "23px",
+	// 	fontFamily: '"Poppins", sans-serif',
+	// };
+
 	const contentStyle = {
 		backgroundColor: getcolor,
-		width: isSidebarVisible ? "calc(65vw - 0%)" : "65vw",
+		height: "100vh",
+		width: isSidebarVisible ? "calc(100vw - 5%)" : "100vw",
 		position: "relative",
-		top: "35%",
+		top: "50%",
 		left: isSidebarVisible ? "50%" : "50%",
 		transform: "translate(-50%, -50%)",
 		transition: isSidebarVisible
@@ -735,7 +761,7 @@ export default function ItemMonthlySaleComparison() {
 		overflowY: "hidden",
 		wordBreak: "break-word",
 		textAlign: "center",
-		maxWidth: "1400px",
+		maxWidth: "1200px",
 		fontSize: "15px",
 		fontStyle: "normal",
 		fontWeight: "400",
@@ -858,10 +884,7 @@ export default function ItemMonthlySaleComparison() {
 					<NavComponent textdata="Item Monthly Sale Comparison" />
 
 					{/* ------------1st row */}
-					<div
-						className="row"
-						style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-					>
+					<div className="row" style={{ height: "20px", margin: "8px" }}>
 						<div
 							style={{
 								width: "100%",
@@ -879,7 +902,7 @@ export default function ItemMonthlySaleComparison() {
 							>
 								<div
 									style={{
-										width: "120px",
+										// width: "120px",
 										display: "flex",
 										justifyContent: "end",
 									}}
@@ -924,7 +947,7 @@ export default function ItemMonthlySaleComparison() {
 							>
 								<div
 									style={{
-										width: "60px",
+										// width: "60px",
 										display: "flex",
 										justifyContent: "end",
 									}}
@@ -967,7 +990,7 @@ export default function ItemMonthlySaleComparison() {
 							{/* Search */}
 							<div
 								className="d-flex align-items-center"
-								style={{ marginRight: "20px" }}
+								// style={{ marginRight: "20px" }}
 							>
 								<div>
 									<label for="searchInput">
@@ -1012,7 +1035,7 @@ export default function ItemMonthlySaleComparison() {
 						<div
 							style={{
 								overflowY: "auto",
-								width: "98.8%",
+								width: "99%",
 							}}
 						>
 							<table
@@ -1173,7 +1196,7 @@ export default function ItemMonthlySaleComparison() {
 														<td className="text-start" style={firstColWidth}>
 															{item.Category}
 														</td>
-														<td className="text-start" style={secondColWidth}>
+														<td className="text-end" style={secondColWidth}>
 															{item["Jan"]}
 														</td>
 														<td className="text-end" style={thirdColWidth}>
@@ -1261,7 +1284,7 @@ export default function ItemMonthlySaleComparison() {
 							borderTop: `1px solid ${fontcolor}`,
 							height: "24px",
 							display: "flex",
-							paddingRight: "1.2%",
+							paddingRight: "1%",
 						}}
 					>
 						<div
