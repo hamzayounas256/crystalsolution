@@ -982,7 +982,7 @@ export default function ItemMonthlySaleComparison() {
 									}}
 								>
 									<option value="">All</option>
-									<option value="AQ">Quality</option>
+									<option value="Q">Quantity</option>
 									<option value="A">Amount</option>
 								</select>
 							</div>
