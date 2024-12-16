@@ -929,7 +929,7 @@ export default function ItemPurchaseReport() {
 		const time = getCurrentTime();
 
 		handlePagination();
-		// doc.save("ItemPurchaseReport.pdf");
+		doc.save("ItemPurchaseReport.pdf");
 
 		const pdfBlob = doc.output("blob");
 		const pdfFile = new File([pdfBlob], "table_data.pdf", {
@@ -939,10 +939,244 @@ export default function ItemPurchaseReport() {
 		return pdfBlob;
 	};
 
+	const exportWhatsappHandler = () => {
+		const doc = new jsPDF({ orientation: "portrait" });
+		const rows = tableData.map((item) => [
+			item.Date,
+			item["Trn#"],
+			item.Type,
+			item.Description,
+			item.Rate,
+			item.Qnty,
+		]);
+		rows.push(["", "", "", "Total", String(totalAmount), String(totalQnty)]);
+		const headers = ["Date", "Trn#", "Type", "Description", "Rate", "Qnty"];
+		const columnWidths = [20, 12, 10, 80, 20, 10];
+		const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
+		const pageHeight = doc.internal.pageSize.height;
+		const paddingTop = 15;
+		doc.setFont("verdana");
+		doc.setFontSize(10);
+
+		const addTableHeaders = (startX, startY) => {
+			doc.setFont("bold");
+			doc.setFontSize(10);
+			headers.forEach((header, index) => {
+				const cellWidth = columnWidths[index];
+				const cellHeight = 6;
+				const cellX = startX + cellWidth / 2;
+				const cellY = startY + cellHeight / 2 + 1.5;
+				doc.setFillColor(200, 200, 200);
+				doc.rect(startX, startY, cellWidth, cellHeight, "F");
+				doc.setLineWidth(0.2);
+				doc.rect(startX, startY, cellWidth, cellHeight);
+				doc.setTextColor(0);
+				doc.text(header, cellX, cellY, { align: "center" });
+				startX += columnWidths[index];
+			});
+			doc.setFont("verdana");
+			doc.setFontSize(10);
+		};
+
+		const addTableRows = (startX, startY, startIndex, endIndex) => {
+			const rowHeight = 5;
+			const fontSize = 8;
+			const boldFont = "verdana";
+			const normalFont = "verdana";
+			const tableWidth = getTotalTableWidth();
+			doc.setFontSize(fontSize);
+
+			for (let i = startIndex; i < endIndex; i++) {
+				const row = rows[i];
+				const isOddRow = i % 2 !== 0;
+				const isRedRow = row[0] && parseInt(row[0]) > 100;
+				let textColor = [0, 0, 0];
+				let fontName = normalFont;
+
+				// if (isRedRow) {
+				// 	textColor = [255, 0, 0];
+				// 	fontName = boldFont;
+				// }
+
+				doc.setDrawColor(0);
+				doc.rect(
+					startX,
+					startY + (i - startIndex + 2) * rowHeight,
+					tableWidth,
+					rowHeight
+				);
+
+				row.forEach((cell, cellIndex) => {
+					const cellY = startY + (i - startIndex + 2) * rowHeight + 3;
+					const cellX = startX + 2;
+					doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+					doc.setFont(fontName, "normal");
+					const cellValue = String(cell);
+
+					if (cellIndex === 1 || cellIndex === 4 || cellIndex === 5) {
+						const rightAlignX = startX + columnWidths[cellIndex] - 2;
+						doc.text(cellValue, rightAlignX, cellY, {
+							align: "right",
+							baseline: "middle",
+						});
+					} else {
+						doc.text(cellValue, cellX, cellY, { baseline: "middle" });
+					}
+
+					if (cellIndex < row.length - 1) {
+						doc.rect(
+							startX,
+							startY + (i - startIndex + 2) * rowHeight,
+							columnWidths[cellIndex],
+							rowHeight
+						);
+						startX += columnWidths[cellIndex];
+					}
+				});
+
+				doc.rect(
+					startX,
+					startY + (i - startIndex + 2) * rowHeight,
+					columnWidths[row.length - 1],
+					rowHeight
+				);
+				startX = (doc.internal.pageSize.width - tableWidth) / 2;
+			}
+
+			const lineWidth = tableWidth;
+			const lineX = (doc.internal.pageSize.width - tableWidth) / 2;
+			const lineY = pageHeight - 15;
+			doc.setLineWidth(0.3);
+			doc.line(lineX, lineY, lineX + lineWidth, lineY);
+			const headingFontSize = 12;
+			const headingX = lineX + 2;
+			const headingY = lineY + 5;
+			doc.setFontSize(headingFontSize);
+			doc.setTextColor(0);
+			doc.text(`Crystal Solution \t ${date} \t ${time}`, headingX, headingY);
+		};
+
+		const getTotalTableWidth = () => {
+			let totalWidth = 0;
+			columnWidths.forEach((width) => (totalWidth += width));
+			return totalWidth;
+		};
+
+		const addNewPage = (startY) => {
+			doc.addPage();
+			return paddingTop;
+		};
+
+		const rowsPerPage = 46;
+
+		const handlePagination = () => {
+			const addTitle = (
+				title,
+				date,
+				time,
+				pageNumber,
+				startY,
+				titleFontSize = 16,
+				dateTimeFontSize = 8,
+				pageNumberFontSize = 8
+			) => {
+				doc.setFontSize(titleFontSize);
+				doc.text(title, doc.internal.pageSize.width / 2, startY, {
+					align: "center",
+				});
+				const rightX = doc.internal.pageSize.width - 10;
+				if (date) {
+					doc.setFontSize(dateTimeFontSize);
+					if (time) {
+						doc.text(date + " " + time, rightX, startY, { align: "right" });
+					} else {
+						doc.text(date, rightX - 10, startY, { align: "right" });
+					}
+				}
+				doc.setFontSize(pageNumberFontSize);
+				doc.text(
+					`Page ${pageNumber}`,
+					rightX - 10,
+					doc.internal.pageSize.height - 10,
+					{ align: "right" }
+				);
+			};
+
+			let currentPageIndex = 0;
+			let startY = paddingTop;
+			let pageNumber = 1;
+
+			while (currentPageIndex * rowsPerPage < rows.length) {
+				addTitle(comapnyname, "", "", pageNumber, startY, 20, 10);
+				startY += 7;
+				addTitle(
+					`Item Purchase Report From: ${fromInputDate} To: ${toInputDate}`,
+					"",
+					"",
+					pageNumber,
+					startY,
+					14
+				);
+				startY += 13;
+
+				const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
+				const labelsY = startY + 2;
+				doc.setFontSize(14);
+				doc.setFont("verdana", "bold");
+				doc.setFont("verdana", "normal");
+				startY += 0;
+
+				addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 39);
+				const startIndex = currentPageIndex * rowsPerPage;
+				const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
+				startY = addTableRows(
+					(doc.internal.pageSize.width - totalWidth) / 2,
+					startY,
+					startIndex,
+					endIndex
+				);
+				if (endIndex < rows.length) {
+					startY = addNewPage(startY);
+					pageNumber++;
+				}
+				currentPageIndex++;
+			}
+		};
+
+		const getCurrentDate = () => {
+			const today = new Date();
+			const dd = String(today.getDate()).padStart(2, "0");
+			const mm = String(today.getMonth() + 1).padStart(2, "0");
+			const yyyy = today.getFullYear();
+			return dd + "/" + mm + "/" + yyyy;
+		};
+
+		const getCurrentTime = () => {
+			const today = new Date();
+			const hh = String(today.getHours()).padStart(2, "0");
+			const mm = String(today.getMinutes()).padStart(2, "0");
+			const ss = String(today.getSeconds()).padStart(2, "0");
+			return hh + ":" + mm + ":" + ss;
+		};
+
+		const date = getCurrentDate();
+		const time = getCurrentTime();
+
+		handlePagination();
+		// doc.save("ItemPurchaseReport.pdf");
+
+		const pdfBlob = doc.output("blob");
+		const pdfFile = new File([pdfBlob], "ItemPurchaseReport.pdf", {
+			type: "application/pdf",
+		});
+
+		return pdfBlob;
+	};
+
 	const handleWhatsAppShare = async () => {
 		try {
 			// Generate the PDF Blob
-			const pdfBlob = await exportPDFHandler();
+			const pdfBlob = await exportWhatsappHandler();
 
 			// Create FormData to upload the PDF
 			const formData = new FormData();
