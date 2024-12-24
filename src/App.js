@@ -77,6 +77,7 @@ import EmployeeSaleReport from "./Component/Reports/EmployeeReports/EmployeeSale
 import EmployeeSaleSummary from "./Component/Reports/EmployeeReports/EmployeeSaleSummary.jsx";
 import EmployeeSaleComparison from "./Component/Reports/EmployeeReports/EmployeeSaleComparison.jsx";
 import EmployeeAdvanceReport from "./Component/Reports/EmployeeReports/EmployeeAdvanceReport.jsx";
+import EmployeeMarginReport from "./Component/Reports/EmployeeReports/EmployeeMarginReport.jsx";
 
 function App() {
 	const queryClient = new QueryClient();
@@ -371,6 +372,11 @@ function App() {
 									exact
 									path="/EmployeeAdvanceReport"
 									element={<EmployeeAdvanceReport />}
+								/>
+								<Route
+									exact
+									path="/EmployeeMarginReport"
+									element={<EmployeeMarginReport />}
 								/>
 							</Route>
 						</Routes>

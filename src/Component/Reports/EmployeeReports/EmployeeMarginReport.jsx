@@ -20,8 +20,9 @@ import { fetchGetUser } from "../../Redux/action";
 import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+// import "./ItemReports.css";
 
-export default function EmployeeAdvanceReport() {
+export default function EmployeeMarginReport() {
 	const navigate = useNavigate();
 	const user = getUserData();
 	const organisation = getOrganisationData();
@@ -33,17 +34,39 @@ export default function EmployeeAdvanceReport() {
 
 	const toRef = useRef(null);
 	const fromRef = useRef(null);
+	const companyRef = useRef(null);
+	const categoryRef = useRef(null);
+	const capacityRef = useRef(null);
+	const storeRef = useRef(null);
+	const typeRef = useRef(null);
+	const rateRef = useRef(null);
+	const saleRef = useRef(null);
+	const searchRef = useRef(null);
+	const selectButtonRef = useRef(null);
 
 	const [saleType, setSaleType] = useState("");
 	const [searchQuery, setSearchQuery] = useState("");
 	const [transectionType, settransectionType] = useState("");
-	const [supplierList, setSupplierList] = useState([]);
+	const [rateTransectionType, setRateTransectionType] = useState("");
+	const [saleTransectionType, setSaleTransectionType] = useState("");
+
+	const [storeType, setStoreType] = useState("");
+	const [companyType, setCompanyType] = useState("");
+	const [categoryType, setCategoryType] = useState("");
+	const [capacityType, setCapacityType] = useState("");
+
+	const [storeList, setStoreList] = useState([]);
+	const [companyList, setCompanyList] = useState([]);
+	const [categoryList, setCategoryList] = useState([]);
+	const [capacityList, setCapacityList] = useState([]);
 
 	const [totalQnty, setTotalQnty] = useState(0);
 	const [totalOpening, setTotalOpening] = useState(0);
 	const [totalDebit, setTotalDebit] = useState(0);
 	const [totalCredit, setTotalCredit] = useState(0);
 	const [closingBalance, setClosingBalance] = useState(0);
+	const [totalAmount, setTotalAmount] = useState(0);
+	const [totalMargin, setTotalMargin] = useState(0);
 
 	// state for from DatePicker
 	const [selectedfromDate, setSelectedfromDate] = useState(null);
@@ -53,6 +76,8 @@ export default function EmployeeAdvanceReport() {
 	const [selectedToDate, setSelectedToDate] = useState(null);
 	const [toInputDate, settoInputDate] = useState("");
 	const [toCalendarOpen, settoCalendarOpen] = useState(false);
+
+	const [selectedRadio, setSelectedRadio] = useState("custom"); // State to track selected radio button
 
 	const {
 		isSidebarVisible,
@@ -67,9 +92,11 @@ export default function EmployeeAdvanceReport() {
 		gettodate,
 	} = useTheme();
 
-	const comapnyname = organisation.description;
+	useEffect(() => {
+		document.documentElement.style.setProperty("--background-color", getcolor);
+	}, [getcolor]);
 
-	const [selectedRadio, setSelectedRadio] = useState("custom"); // State to track selected radio button
+	const comapnyname = organisation.description;
 
 	//////////////////////// CUSTOM DATE LIMITS ////////////////////////////
 
@@ -117,126 +144,6 @@ export default function EmployeeAdvanceReport() {
 		setfromInputDate(e.target.value);
 	};
 
-	const handlefromKeyPress = (e, inputId) => {
-		if (e.key === "Enter") {
-			e.preventDefault();
-			const fromDateElement = document.getElementById("fromdatevalidation");
-			const formattedInput = fromInputDate.replace(
-				/^(\d{2})(\d{2})(\d{4})$/,
-				"$1-$2-$3"
-			);
-			const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
-
-			if (formattedInput.length === 10 && datePattern.test(formattedInput)) {
-				const [day, month, year] = formattedInput.split("-").map(Number);
-
-				if (month > 12 || month === 0) {
-					toast.error("Please enter a valid month (MM) between 01 and 12");
-					return;
-				}
-
-				const daysInMonth = new Date(year, month, 0).getDate();
-				if (day > daysInMonth || day === 0) {
-					toast.error(`Please enter a valid day (DD) for month ${month}`);
-					return;
-				}
-
-				const currentDate = new Date();
-				const enteredDate = new Date(year, month - 1, day);
-
-				if (GlobalfromDate && enteredDate < GlobalfromDate) {
-					toast.error(
-						`Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-					);
-					return;
-				}
-				if (GlobalfromDate && enteredDate > GlobaltoDate) {
-					toast.error(
-						`Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-					);
-					return;
-				}
-
-				fromDateElement.style.border = `1px solid ${fontcolor}`;
-				setfromInputDate(formattedInput);
-
-				const nextInput = document.getElementById(inputId);
-				if (nextInput) {
-					nextInput.focus();
-					nextInput.select();
-				} else {
-					document.getElementById("submitButton").click();
-				}
-			} else {
-				toast.error("Date must be in the format dd-mm-yyyy");
-			}
-		}
-	};
-
-	const handleToKeyPress = (e) => {
-		if (e.key === "Enter") {
-			e.preventDefault();
-			const toDateElement = document.getElementById("todatevalidation");
-			const formattedInput = toInputDate.replace(
-				/^(\d{2})(\d{2})(\d{4})$/,
-				"$1-$2-$3"
-			);
-			const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
-
-			if (formattedInput.length === 10 && datePattern.test(formattedInput)) {
-				const [day, month, year] = formattedInput.split("-").map(Number);
-
-				if (month > 12 || month === 0) {
-					toast.error("Please enter a valid month (MM) between 01 and 12");
-					return;
-				}
-
-				const daysInMonth = new Date(year, month, 0).getDate();
-				if (day > daysInMonth || day === 0) {
-					toast.error(`Please enter a valid day (DD) for month ${month}`);
-					return;
-				}
-
-				const currentDate = new Date();
-				const enteredDate = new Date(year, month - 1, day);
-
-				if (GlobaltoDate && enteredDate > GlobaltoDate) {
-					toast.error(
-						`Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-					);
-					return;
-				}
-
-				if (GlobaltoDate && enteredDate < GlobalfromDate) {
-					toast.error(
-						`Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-					);
-					return;
-				}
-
-				if (fromInputDate) {
-					const fromDate = new Date(
-						fromInputDate.split("-").reverse().join("-")
-					);
-					if (enteredDate <= fromDate) {
-						toast.error("To date must be after from date");
-						return;
-					}
-				}
-
-				toDateElement.style.border = `1px solid ${fontcolor}`;
-				settoInputDate(formattedInput);
-
-				if (input2Ref.current) {
-					e.preventDefault();
-					input2Ref.current.focus();
-				}
-			} else {
-				toast.error("Date must be in the format dd-mm-yyyy");
-			}
-		}
-	};
-
 	const handleToDateChange = (date) => {
 		setSelectedToDate(date);
 		settoInputDate(date ? formatDate(date) : "");
@@ -245,34 +152,8 @@ export default function EmployeeAdvanceReport() {
 	const handleToInputChange = (e) => {
 		settoInputDate(e.target.value);
 	};
-	const handleSaleKeypress = (event, inputId) => {
-		if (event.key === "Enter") {
-			const selectedOption = saleSelectRef.current.state.selectValue;
-			if (selectedOption && selectedOption.value) {
-				setSaleType(selectedOption.value);
-			}
-			const nextInput = document.getElementById(inputId);
-			if (nextInput) {
-				nextInput.focus();
-				nextInput.select();
-			} else {
-				document.getElementById("submitButton").click();
-			}
-		}
-	};
-	const handleKeyPress = (e, nextInputRef) => {
-		if (e.key === "Enter") {
-			e.preventDefault();
-			if (nextInputRef.current) {
-				nextInputRef.current.focus();
-			}
-		}
-	};
 
-	function fetchEmployeeAdvanceReport() {
-		const fromDateElement = document.getElementById("fromdatevalidation");
-		const toDateElement = document.getElementById("todatevalidation");
-
+	function fetchEmployeeMarginReport() {
 		const dateRegex = /^\d{2}-\d{2}-\d{4}$/;
 
 		let hasError = false;
@@ -369,7 +250,7 @@ export default function EmployeeAdvanceReport() {
 			FFnlDat: toInputDate,
 			FTrnTyp: transectionType,
 			FAccCod: saleType,
-			code: "EMART",
+			code: "NASIRTRD",
 			FLocCod: "001",
 			FYerDsc: "2024-2024",
 		};
@@ -381,26 +262,33 @@ export default function EmployeeAdvanceReport() {
 			"todatevalidation"
 		).style.border = `1px solid ${fontcolor}`;
 
-		const apiUrl = apiLinks + "/EmployeeAdvanceReport.php";
+		const apiMainUrl = apiLinks + "/EmployeeMarginReport.php";
 		setIsLoading(true);
-		const formData = new URLSearchParams({
+		const formMainData = new URLSearchParams({
 			code: "NASIRTRD",
 			FLocCod: "001",
 			FYerDsc: "2024-2024",
 			FIntDat: fromInputDate,
 			FFnlDat: toInputDate,
+			FTrnTyp: saleTransectionType,
+			FEmpCod: storeType,
+			FCapCod: capacityType,
+			FCmpCod: companyType,
+			FCtgCod: categoryType,
+			FRepTyp: transectionType,
+			FRepRat: rateTransectionType,
 			FSchTxt: "",
 		}).toString();
 
 		axios
-			.post(apiUrl, formData)
+			.post(apiMainUrl, formMainData)
 			.then((response) => {
 				setIsLoading(false);
 				// console.log("Response:", response.data);
-				setTotalOpening(response.data["Total Opening"]);
-				setTotalDebit(response.data["Total Debit"]);
-				setTotalCredit(response.data["Total Credit"]);
-				setClosingBalance(response.data["Total Balance"]);
+
+				setTotalQnty(response.data["Total Qnty"]);
+				setTotalAmount(response.data["Total Amount"]);
+				setTotalMargin(response.data["Total Margin"]);
 
 				if (response.data && Array.isArray(response.data.Detail)) {
 					setTableData(response.data.Detail);
@@ -447,24 +335,94 @@ export default function EmployeeAdvanceReport() {
 	}, []);
 
 	useEffect(() => {
-		const apiUrl = apiLinks + "/GetActiveAccounts.php";
-		const formData = new URLSearchParams({
-			FLocCod: getLocationNumber,
+		//----------------- store dropdown
+		const apiStoreUrl = apiLinks + "/GetEmployee.php";
+		const formStoreData = new URLSearchParams({
+			code: organisation.code,
+			FLocCod: "001",
+		}).toString();
+		axios
+			.post(apiStoreUrl, formStoreData)
+			.then((response) => {
+				setStoreList(response.data);
+				// console.log("STORE"+response.data);
+			})
+			.catch((error) => {
+				console.error("Error fetching data:", error);
+			});
+
+		//-------------- capacity dropdown
+		const apiCapacityUrl = apiLinks + "/GetCapacity.php";
+		const formCapacityData = new URLSearchParams({
+			// FLocCod: getLocationNumber,
+			// code: organisation.code,
+			code: "NASIRTRD",
+		}).toString();
+		axios
+			.post(apiCapacityUrl, formCapacityData)
+			.then((response) => {
+				setCapacityList(response.data);
+				// console.log("CAPACITY" + response.data);
+			})
+			.catch((error) => {
+				console.error("Error fetching data:", error);
+			});
+
+		// ------------company dropdown
+		const apiCompanyUrl = apiLinks + "/GetCompany.php";
+		const formCompanyData = new URLSearchParams({
 			code: organisation.code,
 		}).toString();
 		axios
-			.post(apiUrl, formData)
+			.post(apiCompanyUrl, formCompanyData)
 			.then((response) => {
-				setSupplierList(response.data);
+				setCompanyList(response.data);
+				// console.log("COMPANY" + response.data);
+			})
+			.catch((error) => {
+				console.error("Error fetching data:", error);
+			});
+
+		// -----------category dropdown
+		const apiCategoryUrl = apiLinks + "/GetCatg.php";
+		const formCategoryData = new URLSearchParams({
+			// FLocCod: getLocationNumber,
+			// code: organisation.code,
+			code: "NASIRTRD",
+		}).toString();
+		axios
+			.post(apiCategoryUrl, formCategoryData)
+			.then((response) => {
+				setCategoryList(response.data);
+				// console.log("CATEGORY" + response.data);
 			})
 			.catch((error) => {
 				console.error("Error fetching data:", error);
 			});
 	}, []);
 
-	const options = supplierList.map((item) => ({
-		value: item.tacccod,
-		label: `${item.tacccod}-${item.taccdsc.trim()}`,
+	// Store List array
+	const optionStore = storeList.map((item) => ({
+		value: item.tempcod,
+		label: `${item.tempcod}-${item.tempnam.trim()}`,
+	}));
+
+	// Capacity List array
+	const optionCapacity = capacityList.map((item) => ({
+		value: item.tcapcod,
+		label: `${item.tcapcod}-${item.tcapdsc.trim()}`,
+	}));
+
+	// Company List array
+	const optionCompany = companyList.map((item) => ({
+		value: item.tcmpcod,
+		label: `${item.tcmpcod}-${item.tcmpdsc.trim()}`,
+	}));
+
+	// Category List array
+	const optionCategory = categoryList.map((item) => ({
+		value: item.tctgcod,
+		label: `${item.tctgcod}-${item.tctgdsc.trim()}`,
 	}));
 
 	const DropdownOption = (props) => {
@@ -484,24 +442,116 @@ export default function EmployeeAdvanceReport() {
 			</components.Option>
 		);
 	};
-	const customStyles1 = (hasError) => ({
+
+	// ------------ store style customization
+	const customStylesStore = () => ({
 		control: (base, state) => ({
 			...base,
 			height: "24px",
 			minHeight: "unset",
-			width: 418,
+			width: "275px",
 			fontSize: "12px",
 			backgroundColor: getcolor,
 			color: fontcolor,
 			borderRadius: 0,
-			border: hasError ? "2px solid red" : `1px solid ${fontcolor}`,
+			// border: hasError ? "2px solid red" : `1px solid ${fontcolor}`,
 			transition: "border-color 0.15s ease-in-out",
 			"&:hover": {
 				borderColor: state.isFocused ? base.borderColor : "black",
 			},
 			padding: "0 8px",
 			display: "flex",
-			alignItems: "center",
+			// alignItems: "center",
+			justifyContent: "space-between",
+		}),
+		dropdownIndicator: (base) => ({
+			...base,
+			padding: 0,
+			fontSize: "18px",
+			display: "flex",
+			textAlign: "center !important",
+		}),
+	});
+
+	// ------------ capacity style customization
+	const customStylesCapacity = () => ({
+		control: (base, state) => ({
+			...base,
+			height: "24px",
+			minHeight: "unset",
+			width: 275,
+			fontSize: "12px",
+			backgroundColor: getcolor,
+			color: fontcolor,
+			borderRadius: 0,
+			// border: hasError ? "2px solid red" : `1px solid ${fontcolor}`,
+			transition: "border-color 0.15s ease-in-out",
+			"&:hover": {
+				borderColor: state.isFocused ? base.borderColor : "black",
+			},
+			padding: "0 8px",
+			display: "flex",
+			// alignItems: "center",
+			justifyContent: "space-between",
+		}),
+		dropdownIndicator: (base) => ({
+			...base,
+			padding: 0,
+			fontSize: "18px",
+			display: "flex",
+			textAlign: "center !important",
+		}),
+	});
+
+	// ------------ company style customization
+	const customStylesCompany = () => ({
+		control: (base, state) => ({
+			...base,
+			height: "24px",
+			minHeight: "unset",
+			width: 275,
+			fontSize: "12px",
+			backgroundColor: getcolor,
+			color: fontcolor,
+			borderRadius: 0,
+			// border: hasError ? "2px solid red" : `1px solid ${fontcolor}`,
+			transition: "border-color 0.15s ease-in-out",
+			"&:hover": {
+				borderColor: state.isFocused ? base.borderColor : "black",
+			},
+			padding: "0 8px",
+			display: "flex",
+			// alignItems: "center",
+			justifyContent: "space-between",
+		}),
+		dropdownIndicator: (base) => ({
+			...base,
+			padding: 0,
+			fontSize: "18px",
+			display: "flex",
+			textAlign: "center !important",
+		}),
+	});
+
+	// ------------ category style customization
+	const customStylesCategory = () => ({
+		control: (base, state) => ({
+			...base,
+			height: "24px",
+			minHeight: "unset",
+			width: 275,
+			fontSize: "12px",
+			backgroundColor: getcolor,
+			color: fontcolor,
+			borderRadius: 0,
+			// border: hasError ? "2px solid red" : `1px solid ${fontcolor}`,
+			transition: "border-color 0.15s ease-in-out",
+			"&:hover": {
+				borderColor: state.isFocused ? base.borderColor : "black",
+			},
+			padding: "0 8px",
+			display: "flex",
+			// alignItems: "center",
 			justifyContent: "space-between",
 		}),
 		dropdownIndicator: (base) => ({
@@ -518,33 +568,55 @@ export default function EmployeeAdvanceReport() {
 		settransectionType(selectedTransactionType);
 	};
 
+	const handleSaleTransactionTypeChange = (event) => {
+		const selectedSaleTransactionType = event.target.value;
+		setSaleTransectionType(selectedSaleTransactionType);
+	};
+
+	const handleRateTransactionTypeChange = (event) => {
+		const selectedRateTransactionType = event.target.value;
+		setRateTransectionType(selectedRateTransactionType);
+	};
+
 	const exportPDFHandler = () => {
-		const doc = new jsPDF({ orientation: "portrait" });
+		const doc = new jsPDF({ orientation: "landscape" });
 		const rows = tableData.map((item) => [
-			item.code,
-			item.Description,
-			item.Opening,
-			item.Debit,
-			item.Credit,
-			item.Balance,
+			item["Date"],
+			item["Trn#"],
+			item["Type"],
+			item["Description"],
+			item["code"],
+			item["Rate"],
+			item["Cost Rate"],
+			item["Qnty"],
+			item["Sale Amount"],
+			item["Margin"],
 		]);
 		rows.push([
 			"",
+			"",
+			"",
 			"Total",
-			String(totalOpening),
-			String(totalDebit),
-			String(totalCredit),
-			String(closingBalance),
+			"",
+			"",
+			"",
+			totalQnty,
+			totalAmount,
+			totalMargin,
 		]);
 		const headers = [
-			"Code",
+			"Date",
+			"Trn#",
+			"Type",
 			"Description",
-			"Opening",
-			"Debit",
-			"Credit",
-			"Balance",
+			"Code",
+			"Rate",
+			"Cost Rate",
+			"Qnty",
+			"Sale Amount",
+			"Margin",
 		];
-		const columnWidths = [18, 80, 20, 20, 20, 25];
+		const columnWidths = [20, 12, 9, 80, 30, 20, 20, 10, 20, 20];
 		const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
 		const pageHeight = doc.internal.pageSize.height;
 		const paddingTop = 15;
@@ -586,10 +658,10 @@ export default function EmployeeAdvanceReport() {
 				let textColor = [0, 0, 0];
 				let fontName = normalFont;
 
-				if (isRedRow) {
-					textColor = [255, 0, 0];
-					fontName = boldFont;
-				}
+				// if (isRedRow) {
+				// 	textColor = [255, 0, 0];
+				// 	fontName = boldFont;
+				// }
 
 				doc.setDrawColor(0);
 				doc.rect(
@@ -607,10 +679,12 @@ export default function EmployeeAdvanceReport() {
 					const cellValue = String(cell);
 
 					if (
-						cellIndex === 2 ||
-						cellIndex === 3 ||
-						cellIndex === 4 ||
-						cellIndex === 5
+						cellIndex === 1 ||
+						cellIndex === 5 ||
+						cellIndex === 6 ||
+						cellIndex === 7 ||
+						cellIndex === 8 ||
+						cellIndex === 9
 					) {
 						const rightAlignX = startX + columnWidths[cellIndex] - 2;
 						doc.text(cellValue, rightAlignX, cellY, {
@@ -708,7 +782,7 @@ export default function EmployeeAdvanceReport() {
 				addTitle(comapnyname, "", "", pageNumber, startY, 20, 10);
 				startY += 7;
 				addTitle(
-					`Employee Advance Report From: ${fromInputDate} To: ${toInputDate}`,
+					`Employee Margin Report From: ${fromInputDate} To: ${toInputDate}`,
 					"",
 					"",
 					pageNumber,
@@ -761,7 +835,7 @@ export default function EmployeeAdvanceReport() {
 		const time = getCurrentTime();
 
 		handlePagination();
-		doc.save("EmployeeAdvanceReport.pdf");
+		doc.save("EmployeeMarginReport.pdf");
 
 		const pdfBlob = doc.output("blob");
 		const pdfFile = new File([pdfBlob], "table_data.pdf", {
@@ -772,14 +846,18 @@ export default function EmployeeAdvanceReport() {
 	const handleDownloadCSV = async () => {
 		const workbook = new ExcelJS.Workbook();
 		const worksheet = workbook.addWorksheet("Sheet1");
-		const numColumns = 6;
+		const numColumns = 10;
 		const titleStyle = {
 			font: { bold: true, size: 12 },
 			alignment: { horizontal: "center" },
 		};
 		const columnAlignments = [
+			"left",
+			"right",
 			"center",
 			"left",
+			"left",
+			"right",
 			"right",
 			"right",
 			"right",
@@ -788,7 +866,7 @@ export default function EmployeeAdvanceReport() {
 		worksheet.addRow([]);
 		[
 			comapnyname,
-			`Employee Advance Report From ${fromInputDate} To ${toInputDate}`,
+			`Employee Margin Report From ${fromInputDate} To ${toInputDate}`,
 		].forEach((title, index) => {
 			worksheet.addRow([title]).eachCell((cell) => (cell.style = titleStyle));
 			worksheet.mergeCells(
@@ -812,12 +890,16 @@ export default function EmployeeAdvanceReport() {
 			},
 		};
 		const headers = [
-			"Code",
+			"Date",
+			"Trn#",
+			"Type",
 			"Description",
-			"Opening",
-			"Debit",
-			"Credit",
-			"Balance",
+			"Code",
+			"Rate",
+			"Cost Rate",
+			"Qnty",
+			"Sale Amount",
+			"Margin",
 		];
 		const headerRow = worksheet.addRow(headers);
 		headerRow.eachCell((cell) => {
@@ -825,26 +907,34 @@ export default function EmployeeAdvanceReport() {
 		});
 		tableData.forEach((item) => {
 			worksheet.addRow([
-				item.code,
-				item.Description,
-				item.Opening,
-				item.Debit,
-				item.Credit,
-				item.Balance,
+				item["Date"],
+				item["Trn#"],
+				item["Type"],
+				item["Description"],
+				item["code"],
+				item["Rate"],
+				item["Cost Rate"],
+				item["Qnty"],
+				item["Sale Amount"],
+				item["Margin"],
 			]);
 		});
 		const totalRow = worksheet.addRow([
 			"",
+			"",
+			"",
 			"Total",
-			totalOpening,
-			totalDebit,
-			totalCredit,
-			closingBalance,
+			"",
+			"",
+			"",
+			totalQnty,
+			totalAmount,
+			totalMargin,
 		]);
 		totalRow.eachCell((cell) => {
 			cell.font = { bold: true };
 		});
-		[10, 45, 12, 12, 12, 15].forEach((width, index) => {
+		[12, 7, 7, 45, 20, 12, 12, 7, 12, 12].forEach((width, index) => {
 			worksheet.getColumn(index + 1).width = width;
 		});
 		worksheet.eachRow((row, rowNumber) => {
@@ -868,7 +958,7 @@ export default function EmployeeAdvanceReport() {
 		const blob = new Blob([buffer], {
 			type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 		});
-		saveAs(blob, "EmployeeAdvanceReport.xlsx");
+		saveAs(blob, "EmployeeMarginReport.xlsx");
 	};
 
 	const dispatch = useDispatch();
@@ -902,25 +992,37 @@ export default function EmployeeAdvanceReport() {
 	};
 
 	const firstColWidth = {
-		width: "10%",
+		width: "7%",
 	};
 	const secondColWidth = {
-		width: "42%",
+		width: "5%",
 	};
 	const thirdColWidth = {
-		width: "12%",
+		width: "4%",
 	};
 	const forthColWidth = {
-		width: "12%",
+		width: "38%",
 	};
 	const fifthColWidth = {
-		width: "12%",
+		width: "10%",
 	};
 	const sixthColWidth = {
-		width: "12%",
+		width: "8%",
+	};
+	const seventhColWidth = {
+		width: "8%",
+	};
+	const eighthColWidth = {
+		width: "4%",
+	};
+	const ninthColWidth = {
+		width: "8%",
+	};
+	const tenthColWidth = {
+		width: "8%",
 	};
 
-	useHotkeys("s", fetchEmployeeAdvanceReport);
+	useHotkeys("s", fetchEmployeeMarginReport);
 	useHotkeys("alt+p", exportPDFHandler);
 	useHotkeys("alt+e", handleDownloadCSV);
 	useHotkeys("esc", () => navigate("/MainPage"));
@@ -939,9 +1041,10 @@ export default function EmployeeAdvanceReport() {
 
 	const contentStyle = {
 		backgroundColor: getcolor,
-		width: isSidebarVisible ? "calc(65vw - 0%)" : "65vw",
+		height: "100vh",
+		width: isSidebarVisible ? "calc(100vw - 5%)" : "100vw",
 		position: "relative",
-		top: "35%",
+		top: "50%",
 		left: isSidebarVisible ? "50%" : "50%",
 		transform: "translate(-50%, -50%)",
 		transition: isSidebarVisible
@@ -954,7 +1057,7 @@ export default function EmployeeAdvanceReport() {
 		overflowY: "hidden",
 		wordBreak: "break-word",
 		textAlign: "center",
-		maxWidth: "800px",
+		maxWidth: "1200px",
 		fontSize: "15px",
 		fontStyle: "normal",
 		fontWeight: "400",
@@ -982,6 +1085,7 @@ export default function EmployeeAdvanceReport() {
 	const handleRowClick = (index) => {
 		setSelectedIndex(index);
 	};
+
 	useEffect(() => {
 		if (selectedRowId !== null) {
 			const newIndex = tableData.findIndex(
@@ -990,6 +1094,7 @@ export default function EmployeeAdvanceReport() {
 			setSelectedIndex(newIndex);
 		}
 	}, [tableData, selectedRowId]);
+
 	const handleKeyDown = (e) => {
 		if (selectedIndex === -1 || e.target.id === "searchInput") return;
 		if (e.key === "ArrowUp") {
@@ -1004,6 +1109,7 @@ export default function EmployeeAdvanceReport() {
 			scrollToSelectedRow();
 		}
 	};
+
 	const scrollToSelectedRow = () => {
 		if (selectedIndex !== -1 && rowRefs.current[selectedIndex]) {
 			rowRefs.current[selectedIndex].scrollIntoView({
@@ -1012,12 +1118,14 @@ export default function EmployeeAdvanceReport() {
 			});
 		}
 	};
+
 	useEffect(() => {
 		window.addEventListener("keydown", handleKeyDown);
 		return () => {
 			window.removeEventListener("keydown", handleKeyDown);
 		};
 	}, [selectedIndex]);
+
 	useEffect(() => {
 		if (selectedIndex !== -1 && rowRefs.current[selectedIndex]) {
 			rowRefs.current[selectedIndex].scrollIntoView({
@@ -1060,6 +1168,160 @@ export default function EmployeeAdvanceReport() {
 		}
 	}, [selectedRadio]);
 
+	const [menuCompanyIsOpen, setMenuCompanyIsOpen] = useState(false);
+	const [menuCategoryIsOpen, setMenuCategoryIsOpen] = useState(false);
+	const [menuCapacityIsOpen, setMenuCapacityIsOpen] = useState(false);
+	const [menuStoreIsOpen, setMenuStoreIsOpen] = useState(false);
+
+	const focusNextElement = (currentRef, nextRef) => {
+		if (currentRef.current && nextRef.current) {
+			currentRef.current.focus();
+			nextRef.current.focus();
+		}
+	};
+
+	const handleFromDateEnter = (e) => {
+		if (e.key !== "Enter") return;
+		e.preventDefault();
+
+		const inputDate = e.target.value;
+		const formattedDate = inputDate.replace(
+			/^(\d{2})(\d{2})(\d{4})$/,
+			"$1-$2-$3"
+		);
+
+		// Basic format validation (dd-mm-yyyy)
+		if (
+			!/^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/.test(formattedDate)
+		) {
+			toast.error("Date must be in the format dd-mm-yyyy");
+			return;
+		}
+
+		const [day, month, year] = formattedDate.split("-").map(Number);
+		const enteredDate = new Date(year, month - 1, day);
+		const daysInMonth = new Date(year, month, 0).getDate();
+
+		// Validate month, day, and date range
+		if (month < 1 || month > 12 || day < 1 || day > daysInMonth) {
+			toast.error("Invalid date. Please check the day and month.");
+			return;
+		}
+		if (enteredDate < GlobalfromDate || enteredDate > GlobaltoDate) {
+			toast.error(
+				`Date must be between ${GlobalfromDate1} and ${GlobaltoDate1}`
+			);
+			return;
+		}
+
+		// Update input value and state
+		e.target.value = formattedDate;
+		setfromInputDate(formattedDate); // Update the state with formatted date
+
+		// Move focus to the next element
+		focusNextElement(fromRef, toRef);
+	};
+
+	const handleToDateEnter = (e) => {
+		if (e.key === "Enter") {
+			if (e.key !== "Enter") return;
+			e.preventDefault();
+
+			const inputDate = e.target.value;
+			const formattedDate = inputDate.replace(
+				/^(\d{2})(\d{2})(\d{4})$/,
+				"$1-$2-$3"
+			);
+
+			// Basic format validation (dd-mm-yyyy)
+			if (
+				!/^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/.test(formattedDate)
+			) {
+				toast.error("Date must be in the format dd-mm-yyyy");
+				return;
+			}
+
+			const [day, month, year] = formattedDate.split("-").map(Number);
+			const enteredDate = new Date(year, month - 1, day);
+			const daysInMonth = new Date(year, month, 0).getDate();
+
+			// Validate month, day, and date range
+			if (month < 1 || month > 12 || day < 1 || day > daysInMonth) {
+				toast.error("Invalid date. Please check the day and month.");
+				return;
+			}
+			if (enteredDate < GlobalfromDate || enteredDate > GlobaltoDate) {
+				toast.error(
+					`Date must be between ${GlobalfromDate1} and ${GlobaltoDate1}`
+				);
+				return;
+			}
+
+			// Update input value and state
+			e.target.value = formattedDate;
+			settoInputDate(formattedDate); // Update the state with formatted date
+
+			// Move focus to the next element
+			focusNextElement(toRef, storeRef);
+		}
+	};
+
+	const handleStoreEnter = (e) => {
+		if (e.key === "Enter" && !menuStoreIsOpen) {
+			e.preventDefault();
+			focusNextElement(storeRef, companyRef);
+		}
+	};
+
+	const handleCompanyEnter = (e) => {
+		if (e.key === "Enter" && !menuCompanyIsOpen) {
+			e.preventDefault();
+			focusNextElement(companyRef, categoryRef);
+		}
+	};
+
+	const handleCategoryEnter = (e) => {
+		if (e.key === "Enter" && !menuCategoryIsOpen) {
+			e.preventDefault();
+			focusNextElement(categoryRef, capacityRef);
+		}
+	};
+
+	const handleCapacityEnter = (e) => {
+		if (e.key === "Enter" && !menuCapacityIsOpen) {
+			e.preventDefault();
+			focusNextElement(capacityRef, rateRef);
+		}
+	};
+
+	const handleRateEnter = (e) => {
+		if (e.key === "Enter") {
+			e.preventDefault();
+			focusNextElement(rateRef, typeRef);
+		}
+	};
+
+	const handleTypeEnter = (e) => {
+		if (e.key === "Enter") {
+			e.preventDefault();
+			focusNextElement(typeRef, saleRef);
+		}
+	};
+
+	const handleSaleEnter = (e) => {
+		if (e.key === "Enter") {
+			e.preventDefault();
+			focusNextElement(saleRef, searchRef);
+		}
+	};
+
+	const handleSearchEnter = (e) => {
+		if (e.key === "Enter") {
+			e.preventDefault();
+			focusNextElement(searchRef, selectButtonRef);
+		}
+	};
+
 	return (
 		<>
 			<ToastContainer />
@@ -1073,108 +1335,9 @@ export default function EmployeeAdvanceReport() {
 						borderRadius: "9px",
 					}}
 				>
-					<NavComponent textdata="Employee Advance Report" />
-					<div
-						className="row"
-						style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
-					>
-						<div
-							style={{
-								width: "100%",
-								display: "flex",
-								alignItems: "center",
-								margin: "0px",
-								padding: "0px",
-								justifyContent: "space-between",
-							}}
-						>
-							<div className="d-flex align-items-center justify-content-center">
-								<div className="mx-5"></div>
-								<div
-									className="d-flex align-items-center"
-									style={{ marginRight: "15px" }}
-								>
-									<div
-										style={{
-											display: "flex",
-											justifyContent: "evenly",
-										}}
-									>
-										<div className="d-flex align-items-baseline mx-2">
-											<input
-												type="radio"
-												name="dateRange"
-												id="custom"
-												checked={selectedRadio === "custom"}
-												onChange={() => handleRadioChange(0)}
-												onFocus={(e) =>
-													(e.currentTarget.style.border = "2px solid red")
-												}
-												onBlur={(e) =>
-													(e.currentTarget.style.border = `1px solid ${fontcolor}`)
-												}
-											/>
-											&nbsp;
-											<label htmlFor="custom">Custom</label>
-										</div>
-										<div className="d-flex align-items-baseline mx-2">
-											<input
-												type="radio"
-												name="dateRange"
-												id="30"
-												checked={selectedRadio === "30days"}
-												onChange={() => handleRadioChange(30)}
-												onFocus={(e) =>
-													(e.currentTarget.style.border = "2px solid red")
-												}
-												onBlur={(e) =>
-													(e.currentTarget.style.border = `1px solid ${fontcolor}`)
-												}
-											/>
-											&nbsp;
-											<label htmlFor="30">30 Days</label>
-										</div>
-										<div className="d-flex align-items-baseline mx-2">
-											<input
-												type="radio"
-												name="dateRange"
-												id="60"
-												checked={selectedRadio === "60days"}
-												onChange={() => handleRadioChange(60)}
-												onFocus={(e) =>
-													(e.currentTarget.style.border = "2px solid red")
-												}
-												onBlur={(e) =>
-													(e.currentTarget.style.border = `1px solid ${fontcolor}`)
-												}
-											/>
-											&nbsp;
-											<label htmlFor="60">60 Days</label>
-										</div>
-										<div className="d-flex align-items-baseline mx-2">
-											<input
-												type="radio"
-												name="dateRange"
-												id="90"
-												checked={selectedRadio === "90days"}
-												onChange={() => handleRadioChange(90)}
-												onFocus={(e) =>
-													(e.currentTarget.style.border = "2px solid red")
-												}
-												onBlur={(e) =>
-													(e.currentTarget.style.border = `1px solid ${fontcolor}`)
-												}
-											/>
-											&nbsp;
-											<label htmlFor="90">90 Days</label>
-										</div>
-									</div>
-								</div>
-							</div>
+					<NavComponent textdata="Employee Margin Report" />
 
-							<div></div>
-						</div>
-					</div>
+					{/* ------------1st row */}
 					<div
 						className="row"
 						style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
@@ -1189,7 +1352,11 @@ export default function EmployeeAdvanceReport() {
 								justifyContent: "space-between",
 							}}
 						>
-							<div className="d-flex align-items-center">
+							{/* From Date */}
+							<div
+								className="d-flex align-items-center"
+								style={{ marginLeft: "20px" }}
+							>
 								<div
 									style={{
 										width: "80px",
@@ -1199,7 +1366,7 @@ export default function EmployeeAdvanceReport() {
 								>
 									<label htmlFor="fromDatePicker">
 										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
-											From:
+											From:&nbsp;&nbsp;
 										</span>
 									</label>
 								</div>
@@ -1212,7 +1379,6 @@ export default function EmployeeAdvanceReport() {
 										alignItems: "center",
 										height: "24px",
 										justifyContent: "center",
-										marginLeft: "3px",
 										background: getcolor,
 									}}
 									onFocus={(e) =>
@@ -1240,7 +1406,7 @@ export default function EmployeeAdvanceReport() {
 										value={fromInputDate}
 										ref={fromRef}
 										onChange={handlefromInputChange}
-										onKeyDown={(e) => handlefromKeyPress(e, "toDatePicker")}
+										onKeyDown={handleFromDateEnter}
 										autoComplete="off"
 										placeholder="dd-mm-yyyy"
 										aria-label="Date Input"
@@ -1280,10 +1446,9 @@ export default function EmployeeAdvanceReport() {
 									/>
 								</div>
 							</div>
-							<div
-								className="d-flex align-items-center"
-								style={{ marginLeft: "15px" }}
-							>
+
+							{/* To Date */}
+							<div className="d-flex align-items-center">
 								<div
 									style={{
 										width: "60px",
@@ -1293,7 +1458,7 @@ export default function EmployeeAdvanceReport() {
 								>
 									<label htmlFor="toDatePicker">
 										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
-											To:
+											To:&nbsp;&nbsp;
 										</span>
 									</label>
 								</div>
@@ -1306,7 +1471,6 @@ export default function EmployeeAdvanceReport() {
 										alignItems: "center",
 										height: "24px",
 										justifyContent: "center",
-										marginLeft: "15px",
 										background: getcolor,
 									}}
 									onFocus={(e) =>
@@ -1333,7 +1497,7 @@ export default function EmployeeAdvanceReport() {
 										}}
 										value={toInputDate}
 										onChange={handleToInputChange}
-										onKeyDown={(e) => handleToKeyPress(e, "input2Ref")}
+										onKeyDown={handleToDateEnter}
 										id="toDatePicker"
 										autoComplete="off"
 										placeholder="dd-mm-yyyy"
@@ -1374,46 +1538,530 @@ export default function EmployeeAdvanceReport() {
 									/>
 								</div>
 							</div>
-							<div id="lastDiv" style={{ marginRight: "1px" }}>
-								<label for="searchInput" style={{ marginRight: "15px" }}>
-									<span style={{ fontSize: "15px", fontWeight: "bold" }}>
-										Search :
-									</span>{" "}
-								</label>
-								<input
-									ref={input2Ref}
-									onKeyDown={(e) => handleKeyPress(e, input3Ref)}
-									type="text"
-									id="searchsubmit"
-									placeholder="Item description"
-									value={searchQuery}
+
+							{/* radio checks */}
+							<div
+								className="d-flex align-items-center"
+								style={{ marginRight: "15px" }}
+							>
+								<div
 									style={{
-										marginRight: "20px",
-										width: "200px",
-										height: "24px",
-										fontSize: "12px",
-										color: fontcolor,
-										backgroundColor: getcolor,
-										border: `1px solid ${fontcolor}`,
-										outline: "none",
-										paddingLeft: "10px",
+										display: "flex",
+										justifyContent: "evenly",
 									}}
+								>
+									<div className="d-flex align-items-baseline mx-2">
+										<input
+											type="radio"
+											name="dateRange"
+											id="custom"
+											checked={selectedRadio === "custom"}
+											onChange={() => handleRadioChange(0)}
+											onFocus={(e) =>
+												(e.currentTarget.style.border = "2px solid red")
+											}
+											onBlur={(e) =>
+												(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+											}
+										/>
+										&nbsp;
+										<label htmlFor="custom" style={{ fontSize: "14px" }}>
+											Custom
+										</label>
+									</div>
+									<div className="d-flex align-items-baseline mx-2">
+										<input
+											type="radio"
+											name="dateRange"
+											id="30"
+											checked={selectedRadio === "30days"}
+											onChange={() => handleRadioChange(30)}
+											onFocus={(e) =>
+												(e.currentTarget.style.border = "2px solid red")
+											}
+											onBlur={(e) =>
+												(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+											}
+										/>
+										&nbsp;
+										<label htmlFor="30" style={{ fontSize: "14px" }}>
+											30 Days
+										</label>
+									</div>
+									<div className="d-flex align-items-baseline mx-2">
+										<input
+											type="radio"
+											name="dateRange"
+											id="60"
+											checked={selectedRadio === "60days"}
+											onChange={() => handleRadioChange(60)}
+											onFocus={(e) =>
+												(e.currentTarget.style.border = "2px solid red")
+											}
+											onBlur={(e) =>
+												(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+											}
+										/>
+										&nbsp;
+										<label htmlFor="60" style={{ fontSize: "14px" }}>
+											60 Days
+										</label>
+									</div>
+									<div className="d-flex align-items-baseline mx-2">
+										<input
+											type="radio"
+											name="dateRange"
+											id="90"
+											checked={selectedRadio === "90days"}
+											onChange={() => handleRadioChange(90)}
+											onFocus={(e) =>
+												(e.currentTarget.style.border = "2px solid red")
+											}
+											onBlur={(e) =>
+												(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+											}
+										/>
+										&nbsp;
+										<label htmlFor="90" style={{ fontSize: "14px" }}>
+											90 Days
+										</label>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					{/* --------2nd row */}
+					<div
+						className="row"
+						style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+					>
+						<div
+							style={{
+								width: "100%",
+								display: "flex",
+								alignItems: "center",
+								margin: "0px",
+								padding: "0px",
+								justifyContent: "space-between",
+							}}
+						>
+							{/* Store Select */}
+							<div
+								className="d-flex align-items-center"
+								style={{ marginRight: "20px" }}
+							>
+								<div
+									style={{
+										width: "100px",
+										display: "flex",
+										justifyContent: "end",
+									}}
+								>
+									<label htmlFor="fromDatePicker">
+										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+											Employee:&nbsp;&nbsp;
+										</span>{" "}
+										<br />
+									</label>
+								</div>
+								<div>
+									<Select
+										className="List-select-class "
+										ref={storeRef}
+										options={optionStore}
+										onKeyDown={handleStoreEnter}
+										id="selectedsale"
+										onChange={(selectedOption) => {
+											if (selectedOption && selectedOption.value) {
+												setStoreType(selectedOption.value);
+											} else {
+												setStoreType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+											}
+										}}
+										components={{ Option: DropdownOption }}
+										// styles={customStylesStore}
+										styles={customStylesStore()}
+										isClearable
+										placeholder="Search or select..."
+										menuIsOpen={menuStoreIsOpen}
+										onMenuOpen={() => setMenuStoreIsOpen(true)}
+										onMenuClose={() => setMenuStoreIsOpen(false)}
+									/>
+								</div>
+							</div>
+
+							{/* Rate Type */}
+							<div
+								className="d-flex align-items-center"
+								style={{ marginRight: "20px" }}
+							>
+								<div
+									style={{
+										width: "60px",
+										display: "flex",
+										justifyContent: "end",
+									}}
+								>
+									<label htmlFor="transactionType">
+										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+											Rate:&nbsp;&nbsp;
+										</span>
+									</label>
+								</div>
+								<select
+									ref={rateRef}
+									onKeyDown={handleRateEnter}
+									id="submitButton"
+									name="type"
 									onFocus={(e) =>
-										(e.currentTarget.style.border = "2px solid red")
+										(e.currentTarget.style.border = "4px solid red")
 									}
 									onBlur={(e) =>
 										(e.currentTarget.style.border = `1px solid ${fontcolor}`)
 									}
-									onChange={(e) => setSearchQuery(e.target.value)}
-								/>
+									value={rateTransectionType}
+									onChange={handleRateTransactionTypeChange}
+									style={{
+										width: "275px",
+										height: "24px",
+										// marginLeft: "15px",
+										backgroundColor: getcolor,
+										border: `1px solid ${fontcolor}`,
+										fontSize: "12px",
+										color: fontcolor,
+									}}
+								>
+									<option value="P">Purchase</option>
+									<option value="S">Saleman</option>
+								</select>
 							</div>
 						</div>
 					</div>
+
+					{/* --------3rd row */}
+					<div
+						className="row"
+						style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+					>
+						<div
+							style={{
+								width: "100%",
+								display: "flex",
+								alignItems: "center",
+								margin: "0px",
+								padding: "0px",
+								justifyContent: "space-between",
+							}}
+						>
+							{/* Company Select */}
+							<div className="d-flex align-items-center">
+								<div
+									style={{
+										width: "100px",
+										display: "flex",
+										justifyContent: "end",
+									}}
+								>
+									<label htmlFor="fromDatePicker">
+										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+											Company:&nbsp;&nbsp;
+										</span>{" "}
+										<br />
+									</label>
+								</div>
+								<div>
+									<Select
+										className="List-select-class "
+										ref={companyRef}
+										options={optionCompany}
+										onKeyDown={handleCompanyEnter}
+										id="selectedsale"
+										onChange={(selectedOption) => {
+											if (selectedOption && selectedOption.value) {
+												setCompanyType(selectedOption.value);
+											} else {
+												setCompanyType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+											}
+										}}
+										components={{ Option: DropdownOption }}
+										// styles={customStylesStore}
+										styles={customStylesCompany()}
+										isClearable
+										placeholder="Search or select..."
+										menuIsOpen={menuCompanyIsOpen}
+										onMenuOpen={() => setMenuCompanyIsOpen(true)}
+										onMenuClose={() => setMenuCompanyIsOpen(false)}
+									/>
+								</div>
+							</div>
+
+							{/* Type */}
+							<div
+								className="d-flex align-items-center"
+								style={{ marginRight: "20px" }}
+							>
+								<div
+									style={{
+										width: "60px",
+										display: "flex",
+										justifyContent: "end",
+									}}
+								>
+									<label htmlFor="transactionType">
+										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+											Type:&nbsp;&nbsp;
+										</span>
+									</label>
+								</div>
+								<select
+									ref={typeRef}
+									onKeyDown={handleTypeEnter}
+									id="submitButton"
+									name="type"
+									onFocus={(e) =>
+										(e.currentTarget.style.border = "4px solid red")
+									}
+									onBlur={(e) =>
+										(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+									}
+									value={transectionType}
+									onChange={handleTransactionTypeChange}
+									style={{
+										width: "275px",
+										height: "24px",
+										// marginLeft: "15px",
+										backgroundColor: getcolor,
+										border: `1px solid ${fontcolor}`,
+										fontSize: "12px",
+										color: fontcolor,
+									}}
+								>
+									<option value="">All</option>
+									<option value="C">Cash</option>
+									<option value="R">Credit</option>
+								</select>
+							</div>
+						</div>
+					</div>
+
+					{/* ------------4th row */}
+					<div
+						className="row"
+						style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+					>
+						<div
+							style={{
+								width: "100%",
+								display: "flex",
+								alignItems: "center",
+								margin: "0px",
+								padding: "0px",
+								justifyContent: "space-between",
+							}}
+						>
+							{/* Category Select  */}
+							<div
+								className="d-flex align-items-center  "
+								style={{ marginRight: "20px" }}
+							>
+								<div
+									style={{
+										width: "100px",
+										display: "flex",
+										justifyContent: "end",
+									}}
+								>
+									<label htmlFor="fromDatePicker">
+										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+											Category:&nbsp;&nbsp;
+										</span>{" "}
+										<br />
+									</label>
+								</div>
+								<div>
+									<Select
+										className="List-select-class "
+										ref={categoryRef}
+										options={optionCategory}
+										onKeyDown={handleCategoryEnter}
+										id="selectedsale"
+										onChange={(selectedOption) => {
+											if (selectedOption && selectedOption.value) {
+												setCategoryType(selectedOption.value);
+											} else {
+												setCategoryType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+											}
+										}}
+										components={{ Option: DropdownOption }}
+										// styles={customStylesStore}
+										styles={customStylesCategory()}
+										isClearable
+										placeholder="Search or select..."
+										menuIsOpen={menuCategoryIsOpen}
+										onMenuOpen={() => setMenuCategoryIsOpen(true)}
+										onMenuClose={() => setMenuCategoryIsOpen(false)}
+									/>
+								</div>
+							</div>
+
+							{/* Sale Type */}
+							<div
+								className="d-flex align-items-center"
+								style={{ marginRight: "20px" }}
+							>
+								<div
+									style={{
+										width: "60px",
+										display: "flex",
+										justifyContent: "end",
+									}}
+								>
+									<label htmlFor="transactionType">
+										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+											Sale:&nbsp;&nbsp;
+										</span>
+									</label>
+								</div>
+								<select
+									ref={saleRef}
+									onKeyDown={handleSaleEnter}
+									id="submitButton"
+									name="type"
+									onFocus={(e) =>
+										(e.currentTarget.style.border = "4px solid red")
+									}
+									onBlur={(e) =>
+										(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+									}
+									value={saleTransectionType}
+									onChange={handleSaleTransactionTypeChange}
+									style={{
+										width: "275px",
+										height: "24px",
+										// marginLeft: "15px",
+										backgroundColor: getcolor,
+										border: `1px solid ${fontcolor}`,
+										fontSize: "12px",
+										color: fontcolor,
+									}}
+								>
+									<option value="">All</option>
+									<option value="INV">Sale</option>
+									<option value="SRN">Sale Return</option>
+								</select>
+							</div>
+						</div>
+					</div>
+
+					{/* ------------5th row */}
+					<div
+						className="row"
+						style={{ height: "20px", marginTop: "8px", marginBottom: "8px" }}
+					>
+						<div
+							style={{
+								width: "100%",
+								display: "flex",
+								alignItems: "center",
+								margin: "0px",
+								padding: "0px",
+								justifyContent: "space-between",
+							}}
+						>
+							{/* Capacity Select */}
+							<div
+								className="d-flex align-items-center  "
+								// style={{ marginRight: "20px" }}
+							>
+								<div
+									style={{
+										width: "100px",
+										display: "flex",
+										justifyContent: "end",
+									}}
+								>
+									<label htmlFor="fromDatePicker">
+										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+											Capacity:&nbsp;&nbsp;
+										</span>{" "}
+										<br />
+									</label>
+								</div>
+								<div>
+									<Select
+										className="List-select-class "
+										ref={capacityRef}
+										options={optionCapacity}
+										onKeyDown={handleCapacityEnter}
+										id="selectedsale"
+										onChange={(selectedOption) => {
+											if (selectedOption && selectedOption.value) {
+												setCapacityType(selectedOption.value);
+											} else {
+												setCapacityType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+											}
+										}}
+										components={{ Option: DropdownOption }}
+										// styles={customStylesStore}
+										styles={customStylesCapacity()}
+										isClearable
+										placeholder="Search or select..."
+										menuIsOpen={menuCapacityIsOpen}
+										onMenuOpen={() => setMenuCapacityIsOpen(true)}
+										onMenuClose={() => setMenuCapacityIsOpen(false)}
+									/>
+								</div>
+							</div>
+
+							{/* Search */}
+							<div
+								className="d-flex align-items-center"
+								style={{ marginRight: "20px" }}
+							>
+								<div>
+									<label for="searchInput">
+										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+											Search:&nbsp;&nbsp;
+										</span>
+									</label>
+								</div>
+								<div>
+									<input
+										ref={searchRef}
+										onKeyDown={handleSearchEnter}
+										type="text"
+										id="searchsubmit"
+										placeholder="Item description"
+										value={searchQuery}
+										style={{
+											width: "275px",
+											height: "24px",
+											fontSize: "12px",
+											color: fontcolor,
+											backgroundColor: getcolor,
+											border: `1px solid ${fontcolor}`,
+											outline: "none",
+											paddingLeft: "10px",
+										}}
+										onFocus={(e) =>
+											(e.currentTarget.style.border = "2px solid red")
+										}
+										onBlur={(e) =>
+											(e.currentTarget.style.border = `1px solid ${fontcolor}`)
+										}
+										onChange={(e) => setSearchQuery(e.target.value)}
+									/>
+								</div>
+							</div>
+						</div>
+					</div>
+
 					<div>
+						{/* Table Head */}
 						<div
 							style={{
 								overflowY: "auto",
-								width: "98.4%",
+								width: "98.9%",
 							}}
 						>
 							<table
@@ -1423,7 +2071,7 @@ export default function EmployeeAdvanceReport() {
 									fontSize: "12px",
 									width: "100%",
 									position: "relative",
-									// paddingRight: "1%",
+									// paddingRight: "1.1%",
 								}}
 							>
 								<thead
@@ -1443,27 +2091,40 @@ export default function EmployeeAdvanceReport() {
 										}}
 									>
 										<td className="border-dark" style={firstColWidth}>
-											Code
+											Date
 										</td>
 										<td className="border-dark" style={secondColWidth}>
-											Description
+											Trn#
 										</td>
 										<td className="border-dark" style={thirdColWidth}>
-											Opening
+											Type
 										</td>
 										<td className="border-dark" style={forthColWidth}>
-											Debit
+											Description
 										</td>
 										<td className="border-dark" style={fifthColWidth}>
-											Credit
+											Code
 										</td>
 										<td className="border-dark" style={sixthColWidth}>
-											Balance
+											Rate
+										</td>
+										<td className="border-dark" style={seventhColWidth}>
+											Cost Rate
+										</td>
+										<td className="border-dark" style={eighthColWidth}>
+											Qnty
+										</td>
+										<td className="border-dark" style={ninthColWidth}>
+											Sale Amount
+										</td>
+										<td className="border-dark" style={tenthColWidth}>
+											Margin
 										</td>
 									</tr>
 								</thead>
 							</table>
 						</div>
+						{/* Table Body */}
 						<div
 							className="table-scroll"
 							style={{
@@ -1492,7 +2153,7 @@ export default function EmployeeAdvanceReport() {
 													backgroundColor: getcolor,
 												}}
 											>
-												<td colSpan="6" className="text-center">
+												<td colSpan="10" className="text-center">
 													<Spinner animation="border" variant="primary" />
 												</td>
 											</tr>
@@ -1505,7 +2166,7 @@ export default function EmployeeAdvanceReport() {
 															color: fontcolor,
 														}}
 													>
-														{Array.from({ length: 6 }).map((_, colIndex) => (
+														{Array.from({ length: 10 }).map((_, colIndex) => (
 															<td key={`blank-${rowIndex}-${colIndex}`}>
 																&nbsp;
 															</td>
@@ -1520,6 +2181,10 @@ export default function EmployeeAdvanceReport() {
 												<td style={forthColWidth}></td>
 												<td style={fifthColWidth}></td>
 												<td style={sixthColWidth}></td>
+												<td style={seventhColWidth}></td>
+												<td style={eighthColWidth}></td>
+												<td style={ninthColWidth}></td>
+												<td style={tenthColWidth}></td>
 											</tr>
 										</>
 									) : (
@@ -1536,26 +2201,38 @@ export default function EmployeeAdvanceReport() {
 														}
 														style={{
 															backgroundColor: getcolor,
-															color: fontcolor,
+															color: item.Type === "SRN" ? "red" : fontcolor,
 														}}
 													>
 														<td className="text-start" style={firstColWidth}>
-															{item.code}
+															{item.Date}
 														</td>
-														<td className="text-start" style={secondColWidth}>
-															{item.Description}
+														<td className="text-end" style={secondColWidth}>
+															{item["Trn#"]}
 														</td>
-														<td className="text-end" style={thirdColWidth}>
-															{item.Opening}
+														<td className="text-center" style={thirdColWidth}>
+															{item["Type"]}
 														</td>
-														<td className="text-end" style={forthColWidth}>
-															{item.Debit}
+														<td className="text-start" style={forthColWidth}>
+															{item["Description"]}
 														</td>
-														<td className="text-end" style={fifthColWidth}>
-															{item.Credit}
+														<td className="text-start" style={fifthColWidth}>
+															{item["code"]}
 														</td>
 														<td className="text-end" style={sixthColWidth}>
-															{item.Balance}
+															{item["Rate"]}
+														</td>
+														<td className="text-end" style={seventhColWidth}>
+															{item["Cost Rate"]}
+														</td>
+														<td className="text-center" style={eighthColWidth}>
+															{item["Qnty"]}
+														</td>
+														<td className="text-end" style={ninthColWidth}>
+															{item["Sale Amount"]}
+														</td>
+														<td className="text-end" style={tenthColWidth}>
+															{item["Margin"]}
 														</td>
 													</tr>
 												);
@@ -1570,7 +2247,7 @@ export default function EmployeeAdvanceReport() {
 														color: fontcolor,
 													}}
 												>
-													{Array.from({ length: 6 }).map((_, colIndex) => (
+													{Array.from({ length: 10 }).map((_, colIndex) => (
 														<td key={`blank-${rowIndex}-${colIndex}`}>
 															&nbsp;
 														</td>
@@ -1584,6 +2261,10 @@ export default function EmployeeAdvanceReport() {
 												<td style={forthColWidth}></td>
 												<td style={fifthColWidth}></td>
 												<td style={sixthColWidth}></td>
+												<td style={seventhColWidth}></td>
+												<td style={eighthColWidth}></td>
+												<td style={ninthColWidth}></td>
+												<td style={tenthColWidth}></td>
 											</tr>
 										</>
 									)}
@@ -1591,13 +2272,14 @@ export default function EmployeeAdvanceReport() {
 							</table>
 						</div>
 					</div>
+					{/* Table Footer */}
 					<div
 						style={{
 							borderBottom: `1px solid ${fontcolor}`,
 							borderTop: `1px solid ${fontcolor}`,
 							height: "24px",
 							display: "flex",
-							paddingRight: "1.6%",
+							paddingRight: "1.1%",
 						}}
 					>
 						<div
@@ -1620,37 +2302,65 @@ export default function EmployeeAdvanceReport() {
 								background: getcolor,
 								borderRight: `1px solid ${fontcolor}`,
 							}}
-						>
-							<span className="mobileledger_total">{totalOpening}</span>
-						</div>
+						></div>
+
 						<div
 							style={{
 								...forthColWidth,
 								background: getcolor,
 								borderRight: `1px solid ${fontcolor}`,
 							}}
-						>
-							<span className="mobileledger_total">{totalDebit}</span>
-						</div>
+						></div>
 						<div
 							style={{
 								...fifthColWidth,
 								background: getcolor,
 								borderRight: `1px solid ${fontcolor}`,
 							}}
-						>
-							<span className="mobileledger_total">{totalCredit}</span>
-						</div>
+						></div>
 						<div
 							style={{
 								...sixthColWidth,
 								background: getcolor,
 								borderRight: `1px solid ${fontcolor}`,
 							}}
+						></div>
+						<div
+							style={{
+								...seventhColWidth,
+								background: getcolor,
+								borderRight: `1px solid ${fontcolor}`,
+							}}
+						></div>
+						<div
+							style={{
+								...eighthColWidth,
+								background: getcolor,
+								borderRight: `1px solid ${fontcolor}`,
+							}}
 						>
-							<span className="mobileledger_total">{closingBalance}</span>
+							<span className="mobileledger_total">{totalQnty}</span>
+						</div>
+						<div
+							style={{
+								...ninthColWidth,
+								background: getcolor,
+								borderRight: `1px solid ${fontcolor}`,
+							}}
+						>
+							<span className="mobileledger_total">{totalAmount}</span>
+						</div>
+						<div
+							style={{
+								...tenthColWidth,
+								background: getcolor,
+								borderRight: `1px solid ${fontcolor}`,
+							}}
+						>
+							<span className="mobileledger_total">{totalMargin}</span>
 						</div>
 					</div>
+					{/* Action Buttons */}
 					<div
 						style={{
 							margin: "5px",
@@ -1687,8 +2397,8 @@ export default function EmployeeAdvanceReport() {
 						<SingleButton
 							id="searchsubmit"
 							text="Select"
-							ref={input3Ref}
-							onClick={fetchEmployeeAdvanceReport}
+							ref={selectButtonRef}
+							onClick={fetchEmployeeMarginReport}
 							style={{ backgroundColor: "#186DB7", width: "120px" }}
 							onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
 							onBlur={(e) =>
