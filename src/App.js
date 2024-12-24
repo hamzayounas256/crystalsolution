@@ -75,6 +75,8 @@ import MonthlyPurchaseComparison from "./Component/Reports/ItemReports/MonthlyPu
 import MonthlySaleComparison from "./Component/Reports/ItemReports/MonthlySaleComparison.jsx";
 import EmployeeSaleReport from "./Component/Reports/EmployeeReports/EmployeeSaleReport.jsx";
 import EmployeeSaleSummary from "./Component/Reports/EmployeeReports/EmployeeSaleSummary.jsx";
+import EmployeeSaleComparison from "./Component/Reports/EmployeeReports/EmployeeSaleComparison.jsx";
+import EmployeeAdvanceReport from "./Component/Reports/EmployeeReports/EmployeeAdvanceReport.jsx";
 
 function App() {
 	const queryClient = new QueryClient();
@@ -359,6 +361,16 @@ function App() {
 									exact
 									path="/EmployeeSaleSummary"
 									element={<EmployeeSaleSummary />}
+								/>
+								<Route
+									exact
+									path="/EmployeeSaleComparison"
+									element={<EmployeeSaleComparison />}
+								/>
+								<Route
+									exact
+									path="/EmployeeAdvanceReport"
+									element={<EmployeeAdvanceReport />}
 								/>
 							</Route>
 						</Routes>
