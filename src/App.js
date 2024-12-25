@@ -79,6 +79,7 @@ import EmployeeSaleComparison from "./Component/Reports/EmployeeReports/Employee
 import EmployeeAdvanceReport from "./Component/Reports/EmployeeReports/EmployeeAdvanceReport.jsx";
 import EmployeeMarginReport from "./Component/Reports/EmployeeReports/EmployeeMarginReport.jsx";
 import EmployeeMarginComparison from "./Component/Reports/EmployeeReports/EmployeeMarginComparison.jsx";
+import EmployeeMarginSummary from "./Component/Reports/EmployeeReports/EmployeeMarginSummary.jsx";
 
 function App() {
 	const queryClient = new QueryClient();
@@ -384,6 +385,11 @@ function App() {
 									exact
 									path="/EmployeeMarginComparison"
 									element={<EmployeeMarginComparison />}
+								/>
+								<Route
+									exact
+									path="/EmployeeMarginSummary"
+									element={<EmployeeMarginSummary />}
 								/>
 							</Route>
 						</Routes>
