@@ -47,7 +47,7 @@ export default function EmployeeMarginComparison() {
 	const [saleType, setSaleType] = useState("");
 	const [searchQuery, setSearchQuery] = useState("");
 	const [transectionType, settransectionType] = useState("");
-	const [rateTransectionType, setRateTransectionType] = useState("");
+	const [rateTransectionType, setRateTransectionType] = useState("P");
 	const [saleTransectionType, setSaleTransectionType] = useState("");
 
 	const [storeType, setStoreType] = useState("");
@@ -2104,7 +2104,7 @@ export default function EmployeeMarginComparison() {
 															color: item.Type === "SRN" ? "red" : fontcolor,
 														}}
 													>
-														<td className="text-right" style={firstColWidth}>
+														<td className="text-start" style={firstColWidth}>
 															{item["code"]}
 														</td>
 														<td className="text-start" style={secondColWidth}>
@@ -2113,10 +2113,10 @@ export default function EmployeeMarginComparison() {
 														<td className="text-center" style={thirdColWidth}>
 															{item["Qnty"]}
 														</td>
-														<td className="text-right" style={forthColWidth}>
+														<td className="text-end" style={forthColWidth}>
 															{item["Amount"]}
 														</td>
-														<td className="text-right" style={fifthColWidth}>
+														<td className="text-end" style={fifthColWidth}>
 															{item["Margin"]}
 														</td>
 													</tr>

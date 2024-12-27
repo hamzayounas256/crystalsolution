@@ -47,7 +47,7 @@ export default function EmployeeMarginReport() {
 	const [saleType, setSaleType] = useState("");
 	const [searchQuery, setSearchQuery] = useState("");
 	const [transectionType, settransectionType] = useState("");
-	const [rateTransectionType, setRateTransectionType] = useState("");
+	const [rateTransectionType, setRateTransectionType] = useState("P");
 	const [saleTransectionType, setSaleTransectionType] = useState("");
 
 	const [storeType, setStoreType] = useState("");
@@ -739,7 +739,7 @@ export default function EmployeeMarginReport() {
 			return paddingTop;
 		};
 
-		const rowsPerPage = 46;
+		const rowsPerPage = 29;
 
 		const handlePagination = () => {
 			const addTitle = (

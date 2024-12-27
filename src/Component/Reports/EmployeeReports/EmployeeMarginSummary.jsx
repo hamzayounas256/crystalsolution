@@ -47,7 +47,7 @@ export default function EmployeeMarginSummary() {
 	const [saleType, setSaleType] = useState("");
 	const [searchQuery, setSearchQuery] = useState("");
 	const [transectionType, settransectionType] = useState("");
-	const [rateTransectionType, setRateTransectionType] = useState("");
+	const [rateTransectionType, setRateTransectionType] = useState("P");
 	const [saleTransectionType, setSaleTransectionType] = useState("");
 
 	const [storeType, setStoreType] = useState("");
@@ -579,44 +579,25 @@ export default function EmployeeMarginSummary() {
 	};
 
 	const exportPDFHandler = () => {
-		const doc = new jsPDF({ orientation: "landscape" });
+		const doc = new jsPDF({ orientation: "portrait" });
 		const rows = tableData.map((item) => [
-			item["Date"],
-			item["Trn#"],
-			item["Type"],
-			item["Description"],
 			item["code"],
+			item["Description"],
 			item["Rate"],
-			item["Cost Rate"],
 			item["Qnty"],
 			item["Sale Amount"],
 			item["Margin"],
 		]);
-		rows.push([
-			"",
-			"",
-			"",
-			"Total",
-			"",
-			"",
-			"",
-			totalQnty,
-			totalAmount,
-			totalMargin,
-		]);
+		rows.push(["", "Total", "", totalQnty, totalAmount, totalMargin]);
 		const headers = [
-			"Date",
-			"Trn#",
-			"Type",
-			"Description",
 			"Code",
+			"Description",
 			"Rate",
-			"Cost Rate",
 			"Qnty",
 			"Sale Amount",
 			"Margin",
 		];
-		const columnWidths = [20, 12, 9, 80, 30, 20, 20, 10, 20, 20];
+		const columnWidths = [30, 80, 20, 10, 20, 20];
 		const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
 		const pageHeight = doc.internal.pageSize.height;
 		const paddingTop = 15;
@@ -679,12 +660,10 @@ export default function EmployeeMarginSummary() {
 					const cellValue = String(cell);
 
 					if (
-						cellIndex === 1 ||
-						cellIndex === 5 ||
-						cellIndex === 6 ||
-						cellIndex === 7 ||
-						cellIndex === 8 ||
-						cellIndex === 9
+						cellIndex === 2 ||
+						cellIndex === 3 ||
+						cellIndex === 4 ||
+						cellIndex === 5
 					) {
 						const rightAlignX = startX + columnWidths[cellIndex] - 2;
 						doc.text(cellValue, rightAlignX, cellY, {
@@ -846,20 +825,16 @@ export default function EmployeeMarginSummary() {
 	const handleDownloadCSV = async () => {
 		const workbook = new ExcelJS.Workbook();
 		const worksheet = workbook.addWorksheet("Sheet1");
-		const numColumns = 10;
+		const numColumns = 6;
 		const titleStyle = {
 			font: { bold: true, size: 12 },
 			alignment: { horizontal: "center" },
 		};
 		const columnAlignments = [
 			"left",
+			"left",
 			"right",
 			"center",
-			"left",
-			"left",
-			"right",
-			"right",
-			"right",
 			"right",
 			"right",
 		];
@@ -890,13 +865,9 @@ export default function EmployeeMarginSummary() {
 			},
 		};
 		const headers = [
-			"Date",
-			"Trn#",
-			"Type",
-			"Description",
 			"Code",
+			"Description",
 			"Rate",
-			"Cost Rate",
 			"Qnty",
 			"Sale Amount",
 			"Margin",
@@ -907,13 +878,9 @@ export default function EmployeeMarginSummary() {
 		});
 		tableData.forEach((item) => {
 			worksheet.addRow([
-				item["Date"],
-				item["Trn#"],
-				item["Type"],
-				item["Description"],
 				item["code"],
+				item["Description"],
 				item["Rate"],
-				item["Cost Rate"],
 				item["Qnty"],
 				item["Sale Amount"],
 				item["Margin"],
@@ -921,11 +888,7 @@ export default function EmployeeMarginSummary() {
 		});
 		const totalRow = worksheet.addRow([
 			"",
-			"",
-			"",
 			"Total",
-			"",
-			"",
 			"",
 			totalQnty,
 			totalAmount,
@@ -934,7 +897,7 @@ export default function EmployeeMarginSummary() {
 		totalRow.eachCell((cell) => {
 			cell.font = { bold: true };
 		});
-		[12, 7, 7, 45, 20, 12, 12, 7, 12, 12].forEach((width, index) => {
+		[15, 45, 12, 7, 12, 12].forEach((width, index) => {
 			worksheet.getColumn(index + 1).width = width;
 		});
 		worksheet.eachRow((row, rowNumber) => {
@@ -992,34 +955,22 @@ export default function EmployeeMarginSummary() {
 	};
 
 	const firstColWidth = {
-		width: "7%",
+		width: "13%",
 	};
 	const secondColWidth = {
-		width: "5%",
+		width: "51%",
 	};
 	const thirdColWidth = {
-		width: "4%",
+		width: "10%",
 	};
 	const forthColWidth = {
-		width: "38%",
+		width: "6%",
 	};
 	const fifthColWidth = {
 		width: "10%",
 	};
 	const sixthColWidth = {
-		width: "8%",
-	};
-	const seventhColWidth = {
-		width: "8%",
-	};
-	const eighthColWidth = {
-		width: "4%",
-	};
-	const ninthColWidth = {
-		width: "8%",
-	};
-	const tenthColWidth = {
-		width: "8%",
+		width: "10%",
 	};
 
 	useHotkeys("s", fetchEmployeeMarginSummary);
@@ -1057,7 +1008,7 @@ export default function EmployeeMarginSummary() {
 		overflowY: "hidden",
 		wordBreak: "break-word",
 		textAlign: "center",
-		maxWidth: "1200px",
+		maxWidth: "900px",
 		fontSize: "15px",
 		fontStyle: "normal",
 		fontWeight: "400",
@@ -1630,6 +1581,7 @@ export default function EmployeeMarginSummary() {
 							</div>
 						</div>
 					</div>
+
 					{/* --------2nd row */}
 					<div
 						className="row"
@@ -2061,7 +2013,7 @@ export default function EmployeeMarginSummary() {
 						<div
 							style={{
 								overflowY: "auto",
-								width: "98.9%",
+								width: "98.6%",
 							}}
 						>
 							<table
@@ -2091,33 +2043,21 @@ export default function EmployeeMarginSummary() {
 										}}
 									>
 										<td className="border-dark" style={firstColWidth}>
-											Date
-										</td>
-										<td className="border-dark" style={secondColWidth}>
-											Trn#
-										</td>
-										<td className="border-dark" style={thirdColWidth}>
-											Type
-										</td>
-										<td className="border-dark" style={forthColWidth}>
-											Description
-										</td>
-										<td className="border-dark" style={fifthColWidth}>
 											Code
 										</td>
-										<td className="border-dark" style={sixthColWidth}>
+										<td className="border-dark" style={secondColWidth}>
+											Description
+										</td>
+										<td className="border-dark" style={thirdColWidth}>
 											Rate
 										</td>
-										<td className="border-dark" style={seventhColWidth}>
-											Cost Rate
-										</td>
-										<td className="border-dark" style={eighthColWidth}>
+										<td className="border-dark" style={forthColWidth}>
 											Qnty
 										</td>
-										<td className="border-dark" style={ninthColWidth}>
-											Sale Amount
+										<td className="border-dark" style={fifthColWidth}>
+											Amount
 										</td>
-										<td className="border-dark" style={tenthColWidth}>
+										<td className="border-dark" style={sixthColWidth}>
 											Margin
 										</td>
 									</tr>
@@ -2153,7 +2093,7 @@ export default function EmployeeMarginSummary() {
 													backgroundColor: getcolor,
 												}}
 											>
-												<td colSpan="10" className="text-center">
+												<td colSpan="6" className="text-center">
 													<Spinner animation="border" variant="primary" />
 												</td>
 											</tr>
@@ -2166,7 +2106,7 @@ export default function EmployeeMarginSummary() {
 															color: fontcolor,
 														}}
 													>
-														{Array.from({ length: 10 }).map((_, colIndex) => (
+														{Array.from({ length: 6 }).map((_, colIndex) => (
 															<td key={`blank-${rowIndex}-${colIndex}`}>
 																&nbsp;
 															</td>
@@ -2181,10 +2121,6 @@ export default function EmployeeMarginSummary() {
 												<td style={forthColWidth}></td>
 												<td style={fifthColWidth}></td>
 												<td style={sixthColWidth}></td>
-												<td style={seventhColWidth}></td>
-												<td style={eighthColWidth}></td>
-												<td style={ninthColWidth}></td>
-												<td style={tenthColWidth}></td>
 											</tr>
 										</>
 									) : (
@@ -2201,37 +2137,28 @@ export default function EmployeeMarginSummary() {
 														}
 														style={{
 															backgroundColor: getcolor,
-															color: item.Type === "SRN" ? "red" : fontcolor,
+															color:
+																item["Sale Amount"]?.[0] === "-"
+																	? "red"
+																	: fontcolor,
 														}}
 													>
 														<td className="text-start" style={firstColWidth}>
-															{item.Date}
-														</td>
-														<td className="text-end" style={secondColWidth}>
-															{item["Trn#"]}
-														</td>
-														<td className="text-center" style={thirdColWidth}>
-															{item["Type"]}
-														</td>
-														<td className="text-start" style={forthColWidth}>
-															{item["Description"]}
-														</td>
-														<td className="text-start" style={fifthColWidth}>
 															{item["code"]}
 														</td>
-														<td className="text-end" style={sixthColWidth}>
+														<td className="text-start" style={secondColWidth}>
+															{item["Description"]}
+														</td>
+														<td className="text-end" style={thirdColWidth}>
 															{item["Rate"]}
 														</td>
-														<td className="text-end" style={seventhColWidth}>
-															{item["Cost Rate"]}
-														</td>
-														<td className="text-center" style={eighthColWidth}>
+														<td className="text-center" style={forthColWidth}>
 															{item["Qnty"]}
 														</td>
-														<td className="text-end" style={ninthColWidth}>
+														<td className="text-end" style={fifthColWidth}>
 															{item["Sale Amount"]}
 														</td>
-														<td className="text-end" style={tenthColWidth}>
+														<td className="text-end" style={sixthColWidth}>
 															{item["Margin"]}
 														</td>
 													</tr>
@@ -2247,7 +2174,7 @@ export default function EmployeeMarginSummary() {
 														color: fontcolor,
 													}}
 												>
-													{Array.from({ length: 10 }).map((_, colIndex) => (
+													{Array.from({ length: 6 }).map((_, colIndex) => (
 														<td key={`blank-${rowIndex}-${colIndex}`}>
 															&nbsp;
 														</td>
@@ -2261,10 +2188,6 @@ export default function EmployeeMarginSummary() {
 												<td style={forthColWidth}></td>
 												<td style={fifthColWidth}></td>
 												<td style={sixthColWidth}></td>
-												<td style={seventhColWidth}></td>
-												<td style={eighthColWidth}></td>
-												<td style={ninthColWidth}></td>
-												<td style={tenthColWidth}></td>
 											</tr>
 										</>
 									)}
@@ -2279,7 +2202,7 @@ export default function EmployeeMarginSummary() {
 							borderTop: `1px solid ${fontcolor}`,
 							height: "24px",
 							display: "flex",
-							paddingRight: "1.1%",
+							paddingRight: "1.4%",
 						}}
 					>
 						<div
@@ -2310,40 +2233,12 @@ export default function EmployeeMarginSummary() {
 								background: getcolor,
 								borderRight: `1px solid ${fontcolor}`,
 							}}
-						></div>
-						<div
-							style={{
-								...fifthColWidth,
-								background: getcolor,
-								borderRight: `1px solid ${fontcolor}`,
-							}}
-						></div>
-						<div
-							style={{
-								...sixthColWidth,
-								background: getcolor,
-								borderRight: `1px solid ${fontcolor}`,
-							}}
-						></div>
-						<div
-							style={{
-								...seventhColWidth,
-								background: getcolor,
-								borderRight: `1px solid ${fontcolor}`,
-							}}
-						></div>
-						<div
-							style={{
-								...eighthColWidth,
-								background: getcolor,
-								borderRight: `1px solid ${fontcolor}`,
-							}}
 						>
 							<span className="mobileledger_total">{totalQnty}</span>
 						</div>
 						<div
 							style={{
-								...ninthColWidth,
+								...fifthColWidth,
 								background: getcolor,
 								borderRight: `1px solid ${fontcolor}`,
 							}}
@@ -2352,7 +2247,7 @@ export default function EmployeeMarginSummary() {
 						</div>
 						<div
 							style={{
-								...tenthColWidth,
+								...sixthColWidth,
 								background: getcolor,
 								borderRight: `1px solid ${fontcolor}`,
 							}}
