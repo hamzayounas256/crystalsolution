@@ -80,6 +80,7 @@ import EmployeeAdvanceReport from "./Component/Reports/EmployeeReports/EmployeeA
 import EmployeeMarginReport from "./Component/Reports/EmployeeReports/EmployeeMarginReport.jsx";
 import EmployeeMarginComparison from "./Component/Reports/EmployeeReports/EmployeeMarginComparison.jsx";
 import EmployeeMarginSummary from "./Component/Reports/EmployeeReports/EmployeeMarginSummary.jsx";
+import CustomerMaintenance from "./Component/File/Customer_Maintenance/CustomerMaintenance.jsx";
 
 function App() {
 	const queryClient = new QueryClient();
@@ -109,6 +110,11 @@ function App() {
 									exact
 									path="/AccountCodeMaintenance"
 									element={<Account_Code_Maintenance />}
+								/>
+								<Route
+									exact
+									path="/CustomerMaintenance"
+									element={<CustomerMaintenance />}
 								/>
 								<Route
 									exact
