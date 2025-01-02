@@ -22,7 +22,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 // import "./ItemReports.css";
 
-export default function EmployeeCommissionReport() {
+export default function EmployeeCommissionSummary() {
 	const navigate = useNavigate();
 	const user = getUserData();
 	const organisation = getOrganisationData();
@@ -156,7 +156,7 @@ export default function EmployeeCommissionReport() {
 		settoInputDate(e.target.value);
 	};
 
-	function fetchEmployeeCommissionReport() {
+	function fetchEmployeeCommissionSummary() {
 		const dateRegex = /^\d{2}-\d{2}-\d{4}$/;
 
 		let hasError = false;
@@ -265,7 +265,7 @@ export default function EmployeeCommissionReport() {
 			"todatevalidation"
 		).style.border = `1px solid ${fontcolor}`;
 
-		const apiMainUrl = apiLinks + "/EmployeeCommissionReport.php";
+		const apiMainUrl = apiLinks + "/EmployeeCommissionSummary.php";
 		setIsLoading(true);
 		const formMainData = new URLSearchParams({
 			code: "NASIRTRD",
@@ -584,15 +584,11 @@ export default function EmployeeCommissionReport() {
 	};
 
 	const exportPDFHandler = () => {
-		const doc = new jsPDF({ orientation: "landscape" });
+		const doc = new jsPDF({ orientation: "portrait" });
 		const rows = tableData.map((item) => [
-			item["Date"],
-			item["Trn#"],
-			item["Type"],
-			item["Description"],
 			item["code"],
+			item["Description"],
 			item["Rate"],
-			item["Cost Rate"],
 			item["Qnty"],
 			item["Sale Amount"],
 			item["Margin"],
@@ -600,11 +596,7 @@ export default function EmployeeCommissionReport() {
 		]);
 		rows.push([
 			"",
-			"",
-			"",
 			"Total",
-			"",
-			"",
 			"",
 			totalQnty,
 			totalAmount,
@@ -612,19 +604,15 @@ export default function EmployeeCommissionReport() {
 			totalComm,
 		]);
 		const headers = [
-			"Date",
-			"Trn#",
-			"Type",
-			"Description",
 			"Code",
+			"Description",
 			"Rate",
-			"Cost Rate",
 			"Qnty",
-			"Sale Amount",
+			"Amount",
 			"Margin",
 			"Comm",
 		];
-		const columnWidths = [20, 12, 9, 80, 30, 20, 20, 10, 20, 20, 20];
+		const columnWidths = [25, 75, 18, 10, 18, 18, 18];
 		const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
 		const pageHeight = doc.internal.pageSize.height;
 		const paddingTop = 15;
@@ -687,13 +675,11 @@ export default function EmployeeCommissionReport() {
 					const cellValue = String(cell);
 
 					if (
-						cellIndex === 1 ||
+						cellIndex === 2 ||
+						cellIndex === 3 ||
+						cellIndex === 4 ||
 						cellIndex === 5 ||
-						cellIndex === 6 ||
-						cellIndex === 7 ||
-						cellIndex === 8 ||
-						cellIndex === 9 ||
-						cellIndex === 10
+						cellIndex === 6
 					) {
 						const rightAlignX = startX + columnWidths[cellIndex] - 2;
 						doc.text(cellValue, rightAlignX, cellY, {
@@ -748,7 +734,7 @@ export default function EmployeeCommissionReport() {
 			return paddingTop;
 		};
 
-		const rowsPerPage = 29;
+		const rowsPerPage = 45;
 
 		const handlePagination = () => {
 			const addTitle = (
@@ -791,7 +777,7 @@ export default function EmployeeCommissionReport() {
 				addTitle(comapnyname, "", "", pageNumber, startY, 20, 10);
 				startY += 7;
 				addTitle(
-					`Employee Commission Report From: ${fromInputDate} To: ${toInputDate}`,
+					`Employee Commission Summary From: ${fromInputDate} To: ${toInputDate}`,
 					"",
 					"",
 					pageNumber,
@@ -844,7 +830,7 @@ export default function EmployeeCommissionReport() {
 		const time = getCurrentTime();
 
 		handlePagination();
-		doc.save("EmployeeCommissionReport.pdf");
+		doc.save("EmployeeCommissionSummary.pdf");
 
 		const pdfBlob = doc.output("blob");
 		const pdfFile = new File([pdfBlob], "table_data.pdf", {
@@ -855,20 +841,16 @@ export default function EmployeeCommissionReport() {
 	const handleDownloadCSV = async () => {
 		const workbook = new ExcelJS.Workbook();
 		const worksheet = workbook.addWorksheet("Sheet1");
-		const numColumns = 11;
+		const numColumns = 7;
 		const titleStyle = {
 			font: { bold: true, size: 12 },
 			alignment: { horizontal: "center" },
 		};
 		const columnAlignments = [
 			"left",
+			"left",
 			"right",
 			"center",
-			"left",
-			"left",
-			"right",
-			"right",
-			"right",
 			"right",
 			"right",
 			"right",
@@ -876,7 +858,7 @@ export default function EmployeeCommissionReport() {
 		worksheet.addRow([]);
 		[
 			comapnyname,
-			`Employee Commission Report From ${fromInputDate} To ${toInputDate}`,
+			`Employee Commission Summary From ${fromInputDate} To ${toInputDate}`,
 		].forEach((title, index) => {
 			worksheet.addRow([title]).eachCell((cell) => (cell.style = titleStyle));
 			worksheet.mergeCells(
@@ -900,13 +882,9 @@ export default function EmployeeCommissionReport() {
 			},
 		};
 		const headers = [
-			"Date",
-			"Trn#",
-			"Type",
-			"Description",
 			"Code",
+			"Description",
 			"Rate",
-			"Cost Rate",
 			"Qnty",
 			"Sale Amount",
 			"Margin",
@@ -918,13 +896,9 @@ export default function EmployeeCommissionReport() {
 		});
 		tableData.forEach((item) => {
 			worksheet.addRow([
-				item["Date"],
-				item["Trn#"],
-				item["Type"],
-				item["Description"],
 				item["code"],
+				item["Description"],
 				item["Rate"],
-				item["Cost Rate"],
 				item["Qnty"],
 				item["Sale Amount"],
 				item["Margin"],
@@ -933,11 +907,7 @@ export default function EmployeeCommissionReport() {
 		});
 		const totalRow = worksheet.addRow([
 			"",
-			"",
-			"",
 			"Total",
-			"",
-			"",
 			"",
 			totalQnty,
 			totalAmount,
@@ -947,7 +917,7 @@ export default function EmployeeCommissionReport() {
 		totalRow.eachCell((cell) => {
 			cell.font = { bold: true };
 		});
-		[12, 7, 7, 45, 20, 12, 12, 7, 12, 12, 12].forEach((width, index) => {
+		[18, 47, 12, 7, 12, 12, 12].forEach((width, index) => {
 			worksheet.getColumn(index + 1).width = width;
 		});
 		worksheet.eachRow((row, rowNumber) => {
@@ -971,7 +941,7 @@ export default function EmployeeCommissionReport() {
 		const blob = new Blob([buffer], {
 			type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 		});
-		saveAs(blob, "EmployeeCommissionReport.xlsx");
+		saveAs(blob, "EmployeeCommissionSummary.xlsx");
 	};
 
 	const dispatch = useDispatch();
@@ -1005,40 +975,28 @@ export default function EmployeeCommissionReport() {
 	};
 
 	const firstColWidth = {
-		width: "7%",
+		width: "14%",
 	};
 	const secondColWidth = {
-		width: "5%",
+		width: "41%",
 	};
 	const thirdColWidth = {
-		width: "4%",
+		width: "10%",
 	};
 	const forthColWidth = {
-		width: "30%",
+		width: "5%",
 	};
 	const fifthColWidth = {
 		width: "10%",
 	};
 	const sixthColWidth = {
-		width: "8%",
+		width: "10%",
 	};
 	const seventhColWidth = {
-		width: "8%",
-	};
-	const eighthColWidth = {
-		width: "4%",
-	};
-	const ninthColWidth = {
-		width: "8%",
-	};
-	const tenthColWidth = {
-		width: "8%",
-	};
-	const eleventhColWidth = {
-		width: "8%",
+		width: "10%",
 	};
 
-	useHotkeys("s", fetchEmployeeCommissionReport);
+	useHotkeys("s", fetchEmployeeCommissionSummary);
 	useHotkeys("alt+p", exportPDFHandler);
 	useHotkeys("alt+e", handleDownloadCSV);
 	useHotkeys("esc", () => navigate("/MainPage"));
@@ -1073,7 +1031,7 @@ export default function EmployeeCommissionReport() {
 		overflowY: "hidden",
 		wordBreak: "break-word",
 		textAlign: "center",
-		maxWidth: "1300px",
+		maxWidth: "900px",
 		fontSize: "15px",
 		fontStyle: "normal",
 		fontWeight: "400",
@@ -1358,7 +1316,7 @@ export default function EmployeeCommissionReport() {
 						borderRadius: "9px",
 					}}
 				>
-					<NavComponent textdata="Employee Commission Report" />
+					<NavComponent textdata="Employee Commission Summary" />
 
 					{/* ------------1st row */}
 					<div
@@ -1653,6 +1611,7 @@ export default function EmployeeCommissionReport() {
 							</div>
 						</div>
 					</div>
+
 					{/* --------2nd row */}
 					<div
 						className="row"
@@ -2153,7 +2112,7 @@ export default function EmployeeCommissionReport() {
 						<div
 							style={{
 								overflowY: "auto",
-								width: "99.1%",
+								width: "98.6%",
 							}}
 						>
 							<table
@@ -2183,36 +2142,24 @@ export default function EmployeeCommissionReport() {
 										}}
 									>
 										<td className="border-dark" style={firstColWidth}>
-											Date
-										</td>
-										<td className="border-dark" style={secondColWidth}>
-											Trn#
-										</td>
-										<td className="border-dark" style={thirdColWidth}>
-											Type
-										</td>
-										<td className="border-dark" style={forthColWidth}>
-											Description
-										</td>
-										<td className="border-dark" style={fifthColWidth}>
 											Code
 										</td>
-										<td className="border-dark" style={sixthColWidth}>
+										<td className="border-dark" style={secondColWidth}>
+											Description
+										</td>
+										<td className="border-dark" style={thirdColWidth}>
 											Rate
 										</td>
-										<td className="border-dark" style={seventhColWidth}>
-											Cost Rate
-										</td>
-										<td className="border-dark" style={eighthColWidth}>
+										<td className="border-dark" style={forthColWidth}>
 											Qnty
 										</td>
-										<td className="border-dark" style={ninthColWidth}>
-											Sale Amount
+										<td className="border-dark" style={fifthColWidth}>
+											Amount
 										</td>
-										<td className="border-dark" style={tenthColWidth}>
+										<td className="border-dark" style={sixthColWidth}>
 											Margin
 										</td>
-										<td className="border-dark" style={eleventhColWidth}>
+										<td className="border-dark" style={seventhColWidth}>
 											Comm
 										</td>
 									</tr>
@@ -2248,7 +2195,7 @@ export default function EmployeeCommissionReport() {
 													backgroundColor: getcolor,
 												}}
 											>
-												<td colSpan="11" className="text-center">
+												<td colSpan="7" className="text-center">
 													<Spinner animation="border" variant="primary" />
 												</td>
 											</tr>
@@ -2261,7 +2208,7 @@ export default function EmployeeCommissionReport() {
 															color: fontcolor,
 														}}
 													>
-														{Array.from({ length: 11 }).map((_, colIndex) => (
+														{Array.from({ length: 7 }).map((_, colIndex) => (
 															<td key={`blank-${rowIndex}-${colIndex}`}>
 																&nbsp;
 															</td>
@@ -2277,10 +2224,6 @@ export default function EmployeeCommissionReport() {
 												<td style={fifthColWidth}></td>
 												<td style={sixthColWidth}></td>
 												<td style={seventhColWidth}></td>
-												<td style={eighthColWidth}></td>
-												<td style={ninthColWidth}></td>
-												<td style={tenthColWidth}></td>
-												<td style={eleventhColWidth}></td>
 											</tr>
 										</>
 									) : (
@@ -2304,36 +2247,24 @@ export default function EmployeeCommissionReport() {
 														}}
 													>
 														<td className="text-start" style={firstColWidth}>
-															{item.Date}
-														</td>
-														<td className="text-end" style={secondColWidth}>
-															{item["Trn#"]}
-														</td>
-														<td className="text-center" style={thirdColWidth}>
-															{item["Type"]}
-														</td>
-														<td className="text-start" style={forthColWidth}>
-															{item["Description"]}
-														</td>
-														<td className="text-start" style={fifthColWidth}>
 															{item["code"]}
 														</td>
-														<td className="text-end" style={sixthColWidth}>
+														<td className="text-start" style={secondColWidth}>
+															{item["Description"]}
+														</td>
+														<td className="text-end" style={thirdColWidth}>
 															{item["Rate"]}
 														</td>
-														<td className="text-end" style={seventhColWidth}>
-															{item["Cost Rate"]}
-														</td>
-														<td className="text-center" style={eighthColWidth}>
+														<td className="text-center" style={forthColWidth}>
 															{item["Qnty"]}
 														</td>
-														<td className="text-end" style={ninthColWidth}>
+														<td className="text-end" style={fifthColWidth}>
 															{item["Sale Amount"]}
 														</td>
-														<td className="text-end" style={tenthColWidth}>
+														<td className="text-end" style={sixthColWidth}>
 															{item["Margin"]}
 														</td>
-														<td className="text-end" style={eleventhColWidth}>
+														<td className="text-end" style={seventhColWidth}>
 															{item["Comm"]}
 														</td>
 													</tr>
@@ -2349,7 +2280,7 @@ export default function EmployeeCommissionReport() {
 														color: fontcolor,
 													}}
 												>
-													{Array.from({ length: 11 }).map((_, colIndex) => (
+													{Array.from({ length: 7 }).map((_, colIndex) => (
 														<td key={`blank-${rowIndex}-${colIndex}`}>
 															&nbsp;
 														</td>
@@ -2364,10 +2295,6 @@ export default function EmployeeCommissionReport() {
 												<td style={fifthColWidth}></td>
 												<td style={sixthColWidth}></td>
 												<td style={seventhColWidth}></td>
-												<td style={eighthColWidth}></td>
-												<td style={ninthColWidth}></td>
-												<td style={tenthColWidth}></td>
-												<td style={eleventhColWidth}></td>
 											</tr>
 										</>
 									)}
@@ -2382,7 +2309,7 @@ export default function EmployeeCommissionReport() {
 							borderTop: `1px solid ${fontcolor}`,
 							height: "24px",
 							display: "flex",
-							paddingRight: "0.9%",
+							paddingRight: "1.4%",
 						}}
 					>
 						<div
@@ -2413,40 +2340,12 @@ export default function EmployeeCommissionReport() {
 								background: getcolor,
 								borderRight: `1px solid ${fontcolor}`,
 							}}
-						></div>
-						<div
-							style={{
-								...fifthColWidth,
-								background: getcolor,
-								borderRight: `1px solid ${fontcolor}`,
-							}}
-						></div>
-						<div
-							style={{
-								...sixthColWidth,
-								background: getcolor,
-								borderRight: `1px solid ${fontcolor}`,
-							}}
-						></div>
-						<div
-							style={{
-								...seventhColWidth,
-								background: getcolor,
-								borderRight: `1px solid ${fontcolor}`,
-							}}
-						></div>
-						<div
-							style={{
-								...eighthColWidth,
-								background: getcolor,
-								borderRight: `1px solid ${fontcolor}`,
-							}}
 						>
 							<span className="mobileledger_total">{totalQnty}</span>
 						</div>
 						<div
 							style={{
-								...ninthColWidth,
+								...fifthColWidth,
 								background: getcolor,
 								borderRight: `1px solid ${fontcolor}`,
 							}}
@@ -2455,7 +2354,7 @@ export default function EmployeeCommissionReport() {
 						</div>
 						<div
 							style={{
-								...tenthColWidth,
+								...sixthColWidth,
 								background: getcolor,
 								borderRight: `1px solid ${fontcolor}`,
 							}}
@@ -2464,7 +2363,7 @@ export default function EmployeeCommissionReport() {
 						</div>
 						<div
 							style={{
-								...eleventhColWidth,
+								...seventhColWidth,
 								background: getcolor,
 								borderRight: `1px solid ${fontcolor}`,
 							}}
@@ -2510,7 +2409,7 @@ export default function EmployeeCommissionReport() {
 							id="searchsubmit"
 							text="Select"
 							ref={selectButtonRef}
-							onClick={fetchEmployeeCommissionReport}
+							onClick={fetchEmployeeCommissionSummary}
 							style={{ backgroundColor: "#186DB7", width: "120px" }}
 							onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
 							onBlur={(e) =>

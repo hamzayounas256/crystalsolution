@@ -82,6 +82,8 @@ import EmployeeMarginComparison from "./Component/Reports/EmployeeReports/Employ
 import EmployeeMarginSummary from "./Component/Reports/EmployeeReports/EmployeeMarginSummary.jsx";
 import CustomerMaintenance from "./Component/File/Customer_Maintenance/CustomerMaintenance.jsx";
 import EmployeeCommissionReport from "./Component/Reports/EmployeeReports/EmployeeCommissionReport.jsx";
+import EmployeeCommissionSummary from "./Component/Reports/EmployeeReports/EmployeeCommissionSummary.jsx";
+import EmployeeCommissionComparison from "./Component/Reports/EmployeeReports/EmployeeCommissionComparison.jsx";
 
 function App() {
 	const queryClient = new QueryClient();
@@ -402,6 +404,16 @@ function App() {
 									exact
 									path="/EmployeeCommissionReport"
 									element={<EmployeeCommissionReport />}
+								/>
+								<Route
+									exact
+									path="/EmployeeCommissionSummary"
+									element={<EmployeeCommissionSummary />}
+								/>
+								<Route
+									exact
+									path="/EmployeeCommissionComparison"
+									element={<EmployeeCommissionComparison />}
 								/>
 							</Route>
 						</Routes>
