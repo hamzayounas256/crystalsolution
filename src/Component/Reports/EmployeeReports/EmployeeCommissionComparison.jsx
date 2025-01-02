@@ -831,7 +831,7 @@ export default function EmployeeCommissionComparison() {
 		const columnAlignments = [
 			"left",
 			"left",
-			"center",
+			"right",
 			"right",
 			"right",
 			"right",
@@ -1963,7 +1963,7 @@ export default function EmployeeCommissionComparison() {
 								</div>
 							</div>
 
-							{/* Search */}
+							{/* Comm */}
 							<div
 								className="d-flex align-items-center"
 								style={{ marginRight: "20px" }}
