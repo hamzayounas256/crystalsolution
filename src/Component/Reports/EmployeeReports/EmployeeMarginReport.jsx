@@ -277,7 +277,7 @@ export default function EmployeeMarginReport() {
 			FCtgCod: categoryType,
 			FRepTyp: transectionType,
 			FRepRat: rateTransectionType,
-			FSchTxt: "",
+			FSchTxt: searchQuery,
 		}).toString();
 
 		axios
