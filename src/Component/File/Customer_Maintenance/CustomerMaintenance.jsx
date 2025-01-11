@@ -166,23 +166,23 @@ function CustomerMaintenance() {
 	const [selectedCompany, setSelectedCompany] = useState(null);
 	const handleCompanyChange = (selectedOption) => {
 		setSelectedCompany(selectedOption);
-		console.log("Selected technician:", selectedOption);
+		// console.log("Selected technician:", selectedOption);
 	};
 	const [selectedCategory, setSelectedCategory] = useState(null);
 	const handleCategoryChange = (selectedOption) => {
 		setSelectedCategory(selectedOption);
-		console.log("Selected technician:", selectedOption);
+		// console.log("Selected technician:", selectedOption);
 	};
 
 	const [selectedCapacity, setSelectedCapacity] = useState(null);
 	const handleCapacityChange = (selectedOption) => {
 		setSelectedCapacity(selectedOption);
-		console.log("Selected technician:", selectedOption);
+		// console.log("Selected technician:", selectedOption);
 	};
 	const [selectedType, setSelectedType] = useState(null);
 	const handleTypeChange = (selectedOption) => {
 		setSelectedType(selectedOption);
-		console.log("Selected technician:", selectedOption);
+		// console.log("Selected technician:", selectedOption);
 	};
 
 	const [dropdownKey, setDropdownKey] = useState(0);
@@ -236,7 +236,7 @@ function CustomerMaintenance() {
 			AccountCodeform: formData.AccountCodeform,
 			Descriptionform: formData.Descriptionform,
 		};
-		console.log("Form Data:", data);
+		// console.log("Form Data:", data);
 		// Prepare form data for submission
 		const formDataa = new FormData();
 		formDataa.append("FItmCod", formData.AccountCodeform);
