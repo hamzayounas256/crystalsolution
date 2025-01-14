@@ -1,0 +1,58 @@
+.label-field {
+	display: flex;
+	align-items: start;
+	justify-content: flex-end;
+	font-size: var(--font-fontsize) !important;
+	font-family: var(--font-family) !important;
+	font-style: normal !important;
+	font-weight: bold;
+}
+
+.form-control-field {
+	font-family: var(--font-family) !important;
+	font-weight: 400;
+	font-size: var(--font-fontsize) !important;
+	line-height: 23px;
+	color: var(--font-color) !important;
+	background-color: var(--getcolor) !important;
+	height: 24px !important;
+	box-shadow: none !important;
+	border-radius: 0px !important;
+	margin-bottom: 4px !important;
+	margin-left: -10px !important;
+}
+
+.table-item-file {
+	align-items: center;
+	text-align: center;
+	border: 1px solid white !important;
+	font-size: var(--font-fontsize) !important;
+	font-family: var(--font-family) !important;
+	font-style: normal !important;
+	font-weight: bold;
+}
+.my-modal-file {
+	width: 35vw;
+	max-width: 35vw;
+	border: 1px solid white;
+}
+
+.custom-table-file {
+	display: block;
+	max-height: 60vh;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+
+.custom-table-file::-webkit-scrollbar {
+	width: 0.2em;
+}
+
+.custom-table-file::-webkit-scrollbar-thumb {
+	background-color: var(--headercolor-color) !important;
+	border-radius: 8px;
+}
+
+.custom-table-file::-webkit-scrollbar-track {
+	background: var(--background-color) !important;
+}

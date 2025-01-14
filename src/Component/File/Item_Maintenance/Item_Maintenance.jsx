@@ -1,1354 +1,1123 @@
 import { Form } from "react-bootstrap";
 import Alert from "@mui/material/Alert";
-import Header from "../../MainComponent/Header/Header";
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import "./Item_Maintenance.css";
-import Footer from "../../MainComponent/Footer/Footer";
 import NavComponent from "../../MainComponent/Navform/navbarform";
 import ButtonGroupp from "../../MainComponent/Button/ButtonGroup/ButtonGroup";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import StatusSelect from "../../MainComponent/StatusSelected/StatusSelected";
-import { isLoggedIn, getUserData } from "../../Auth";
-import GeneralTwoFieldsModal from "./Item_Maintenance_Modal";
-import CustomDropdown from "../../MainComponent/Dropdown/Dropdown";
-import { newCompanyData, getcompanyData } from "./Item_Maintenance_Api";
+import { isLoggedIn, getUserData, getOrganisationData } from "../../Auth";
 import { useMutation } from "@tanstack/react-query";
+import { useTheme } from "../../../ThemeContext";
+import {
+	fetchGetBranches,
+	fetchGetCrystalCustomer,
+	fetchGetWorkShopItemMaintenance,
+	fetchNewWorkShopItemMaintenance,
+} from "../../Redux/action";
+import { useSelector, useDispatch } from "react-redux";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus, faMinus } from "@fortawesome/free-solid-svg-icons";
+import CustomDropdown from "../../MainComponent/Dropdown/Dropdown";
+import TwoColumnModel from "../../MainComponent/Models/TwoColumnModel";
+import IncrementDecrementButtons from "../../MainComponent/Button/IncrementDecrementButton/IncrementDecrementButton";
 function Item_Maintenance() {
-  const user = getUserData();
-  const navigate = useNavigate();
+	const dispatch = useDispatch();
+	const user = getUserData();
 
-  useEffect(() => {
-    if (!isLoggedIn()) {
-      // If user is not logged in, redirect to login page
-      navigate("/login");
-    }
-  }, [navigate]);
-  const formatAmount = (value) => {
-    let cleanedValue = value.replace(/[^0-9.]/g, "");
-    let num = parseFloat(cleanedValue);
-    if (isNaN(num)) {
-      return value;
-    }
-    return num.toLocaleString();
-  };
-  const removeCommas = (value) => {
-    if (typeof value !== "string") {
-      value = String(value);
-    }
-    return value.replace(/,/g, "");
-  };
-  const queryClient = useQueryClient();
+	const organisation = getOrganisationData();
+	// const { apiLinks } = useTheme();
 
-  const [formData, setFormData] = useState({
-    AccountCodeform: "",
-    Descriptionform: "",
-    UrduFormDescription: "",
+	const {
+		// getcolor,
+		// fontcolor,
+		getdatafontsize,
+		getfontstyle,
+		getnavbarbackgroundcolor,
+		getnavbarfontcolor,
+		// isSidebarVisible,
+		apiLinks,
+	} = useTheme();
+	const navigate = useNavigate();
+	const [formData, setFormData] = useState({
+		AccountCodeform: "",
+		Descriptionform: "",
+		UrduFormDescription: "",
+		Status: "A",
+		inputform4: "",
+		inputform5: "",
+		inputform6: "",
+		inputform7: "",
+		inputform8: "",
+		inputform9: "",
+		inputform10: "",
+		inputform11: "",
+		inputform12: "",
+		inputform13: "",
+		inputform14: "",
+	});
 
-    UOM: "",
-    Status: "",
-    inputform4: "",
-    inputform5: "",
-    inputform6: "",
-    inputform7: 0.0,
-    inputform8: 0.0,
-    inputform9: 0.0,
-    inputform10: "",
-    // inputform11: "",
-    // inputform12: "",
-  });
-  const [dataa, setDataa] = useState([]);
+	const getcompanydataState = useSelector(
+		(state) => state.getworkshopitemmaintenance || {}
+	);
+	const {
+		data: getworkshopitemmaintenance = [],
+		loading: getcategoryloading,
+		error: getcategoryerror,
+	} = getcompanydataState;
 
-  const mutation2 = useMutation({
-    mutationFn: getcompanyData,
-    onSuccess: (data) => {
-      if (Array.isArray(data)) {
-        setDataa(data);
-      } else {
-        console.warn(
-          "Technicians data is not available or not in the correct format."
-        );
-      }
+	const newcompanymaintenanceState = useSelector(
+		(state) => state.newworkshopitemmaintenance || {}
+	);
+	const {
+		data: newworkshopitemmaintenance = [],
+		loading: newcategoryloading,
+		error: newcategoryerror,
+	} = newcompanymaintenanceState;
 
-      if (data.error === 200) {
-      } else {
-      }
-    },
-    onError: (error) => {
-      console.error("Error:", error);
-    },
-  });
-  const mutation = useMutation({
-    mutationFn: newCompanyData,
-    onSuccess: (data) => {
-      setFormData((prevState) => ({
-        ...prevState,
-        AccountCodeform: data,
-      }));
+	const getactivecompanymaintenanceState = useSelector(
+		(state) => state.getactivecompanymantenance || {}
+	);
+	const {
+		data: getactivecompanymaintenance = [],
+		loading: getactiveloading,
+		error: getactiveerror,
+	} = getactivecompanymaintenanceState;
 
-      if (data.error === 200) {
-      } else {
-      }
-    },
-    onError: (error) => {
-      console.error("Error:", error);
-    },
-  });
+	function firstmovethecode() {
+		if (Code.current) {
+			Code.current.focus();
+			setTimeout(() => {
+				Code.current.select();
+			}, 1000);
+		}
+	}
+	useEffect(() => {
+		firstmovethecode();
+	}, []);
+	useEffect(() => {
+		console.log("===============", newworkshopitemmaintenance);
+		if (newworkshopitemmaintenance) {
+			setFormData((prevState) => ({
+				...prevState,
+				AccountCodeform: newworkshopitemmaintenance,
+			}));
+		}
+	}, [newworkshopitemmaintenance]);
+	useEffect(() => {
+		if (!isLoggedIn()) {
+			navigate("/login");
+		}
+	}, [navigate]);
 
-  const newcode = () => {
-    const data = {
-      FPrjId: user?.tprjid,
-    };
-    mutation.mutate(data);
-  };
-  const GetDataList = () => {
-    const data = {
-      FPrjId: user?.tprjid,
-    };
-    mutation2.mutate(data);
-  };
-  useEffect(() => {
-    GetDataList();
-    newcode();
-    if (Code.current) {
-      Code.current.focus();
-    }
-  }, []);
+	const [dataa, setDataa] = useState([]);
 
-  const [alertData, setAlertData] = useState(null);
-  const fontFamily = "verdana";
-  const apiLinks =
-    "https://crystalsolutions.com.pk/complaint/GetTechnician.php";
+	// Only fetch once when component mounts
+	useEffect(() => {
+		console.log("Code:", getworkshopitemmaintenance);
+		if (getworkshopitemmaintenance?.length === 0) {
+			dispatch(fetchGetWorkShopItemMaintenance(organisation.code));
+			dispatch(fetchNewWorkShopItemMaintenance(organisation.code));
+		}
+	}, [dispatch]);
 
-  //////////////////////// PRESS ENTER TO  MOVE THE NEXT FIELD //////////////////
+	useEffect(() => {
+		setDataa(getworkshopitemmaintenance);
+	}, [getworkshopitemmaintenance]);
 
-  const Code = useRef(null);
-  const Description = useRef(null);
-  const Status = useRef(null);
-  const inputform4ref = useRef(null);
-  const inputform5ref = useRef(null);
-  const inputform6ref = useRef(null);
-  const inputform7ref = useRef(null);
-  const inputform8ref = useRef(null);
-  const inputform9ref = useRef(null);
-  const inputform10ref = useRef(null);
-  const inputform11ref = useRef(null);
-  const UOMRef = useRef(null);
-  const Submit = useRef(null);
-  const Clear = useRef(null);
-  const Return = useRef(null);
-  const SearchBox = useRef(null);
-  const [accountdropdown, setAccountdropdown] = useState([]);
-  const [selectedOptionTechnician, setSelectedOptionTechnician] = useState("");
+	const Codefocus = () => {
+		if (Code.current) {
+			Code.current.focus();
+		}
+	};
+	const [alertData, setAlertData] = useState(null);
+	const fontFamily = "verdana";
+	const Code = useRef(null);
+	const Description = useRef(null);
+	const Status = useRef(null);
+	const inputform4ref = useRef(null);
+	const inputform5ref = useRef(null);
+	const inputform6ref = useRef(null);
+	const inputform7ref = useRef(null);
+	const inputform8ref = useRef(null);
+	const inputform9ref = useRef(null);
+	const inputform10ref = useRef(null);
+	const inputform11ref = useRef(null);
+	const inputform12ref = useRef(null);
+	const inputform13ref = useRef(null);
+	const inputform14ref = useRef(null);
+	const Submit = useRef(null);
+	const Clear = useRef(null);
+	const Return = useRef(null);
+	const SearchBox = useRef(null);
+	//////////////////////// PRESS ENTER TO MOVE THE NEXT FIELD //////////////////
 
-  //////////////////////// PRESS ENTER TO MOVE THE NEXT FIELD //////////////////
+	const focusNextInput = (ref) => {
+		if (ref.current) {
+			ref.current.focus();
+		}
+	};
 
-  const focusNextInput = (ref) => {
-    if (ref.current) {
-      ref.current.focus();
-    }
-  };
+	const [errors, setErrors] = useState({});
 
-  const [errors, setErrors] = useState({});
+	const [selectedImage1, setSelectedImage1] = useState(null);
 
-  const [selectedCompany, setSelectedCompany] = useState(null);
-  const [companyurdu, setCompanyurdu] = useState("");
-  const handleCompanyChange = (selectedOption) => {
-    setSelectedCompany(selectedOption);
-    handlePrediction(selectedOption.label).then((result) => {
-      setCompanyurdu(result);
-    });
-    console.log("Selected technician:", selectedOption);
-  };
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const [categoryurdu, setCategoryurdu] = useState("");
-  const handleCategoryChange = (selectedOption) => {
-    setSelectedCategory(selectedOption);
-    handlePrediction(selectedOption.label).then((result) => {
-      setCategoryurdu(result);
-    });
-    console.log("Selected technician:", selectedOption);
-  };
-  const [selectedImage1, setSelectedImage1] = useState(null);
+	const handleImageChange1 = (event) => {
+		const file = event.target.files[0];
+		if (file) {
+			setSelectedImage1(file);
+			console.log("file", file);
+			const imgElement = document.getElementById("pic1-preview");
+			imgElement.src = URL.createObjectURL(file);
+		}
+	};
 
-  const handleImageChange1 = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      setSelectedImage1(file);
-      const imgElement = document.getElementById("pic1-preview");
-      imgElement.src = URL.createObjectURL(file);
-    }
-  };
-  const [selectedImage2, setSelectedImage2] = useState(null);
+	const [geturdu, setGeturdu] = useState("");
+	const [dropdownKey, setDropdownKey] = useState(0);
+	const [selectedCategory, setSelectedCategory] = useState(null);
+	const [selectedType, setSelectedType] = useState(null);
 
-  const handleImageChange2 = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      setSelectedImage2(file);
-      const imgElement = document.getElementById("pic2-preview");
-      imgElement.src = URL.createObjectURL(file);
-    }
-  };
-  const [selectedImage3, setSelectedImage3] = useState(null);
+	const handleResetDropdown = () => {
+		setDropdownKey((prevKey) => prevKey + 1);
+		setSelectedCategory(null);
+		setSelectedType(null);
+	};
+	const handleCategoryChange = (selectedOption) => {
+		setSelectedCategory(selectedOption);
+	};
+	const handleTypeChange = (selectedOption) => {
+		setSelectedType(selectedOption);
+	};
+	const handleFormSubmit = (e) => {
+		e.preventDefault();
 
-  const handleImageChange3 = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      setSelectedImage3(file);
-      const imgElement = document.getElementById("pic3-preview");
-      imgElement.src = URL.createObjectURL(file);
-    }
-  };
-  const [geturdu, setGeturdu] = useState("");
+		// Prepare the data object
+		const data = {
+			FItmCod: formData.AccountCodeform,
+			FItmDsc: formData.Descriptionform,
+			FItmSts: formData.Status,
+			FCtgCod: selectedCategory?.value || formData.inputform4,
+			FTypCod: selectedType?.value || formData.inputform5,
+			FItmUom: formData.inputform6,
+			FPurRat: formData.inputform7,
+			FSalRat: formData.inputform8,
+			FItmRem: formData.inputform9,
+			code: organisation.code,
+			FUsrId: user.tusrid,
+		};
 
-  const handleFormSubmit = async (e) => {
-    e.preventDefault();
+		// console.log(data, "dataaaa");
 
-    const checks = [
-      {
-        value: formData?.Descriptionform,
-        message: "Please fill your description",
-      },
-      {
-        value: formData?.inputform4 || selectedCompany?.value,
-        message: "Please select a Company",
-      },
-      {
-        value: formData?.inputform5 || selectedCategory?.value,
-        message: "Please select a Category",
-      },
-    ];
+		const urlEncodedData = new URLSearchParams(data).toString();
 
-    for (const check of checks) {
-      if (!check.value) {
-        setAlertData({
-          type: "error",
-          message: check.message,
-        });
-        setTimeout(() => {
-          setAlertData(null);
-        }, 3000);
-        return;
-      }
-    }
-    try {
-      const formDataa = new FormData();
-      formDataa.append("FCmpCod", formData.AccountCodeform);
-      formDataa.append("FCmpDsc", formData.Descriptionform);
-      formDataa.append("FCmpSts", formData.Status);
-      formDataa.append("FUrdDsc", geturdu);
-      formDataa.append(
-        "company",
-        selectedCompany?.value || formData.inputform4 || ""
-      );
-      formDataa.append(
-        "category",
-        selectedCategory?.value || formData.inputform5 || ""
-      );
-      formDataa.append("webindex", formData.inputform6);
-      formDataa.append("purchase", formData.inputform7);
-      formDataa.append("sale", formData.inputform8);
-      formDataa.append("discount", formData.inputform9);
-      formDataa.append("FCmpRem", formData.inputform10);
-      formDataa.append("pic1", selectedImage1);
-      formDataa.append("pic2", selectedImage2);
-      formDataa.append("pic3", selectedImage3);
-      formDataa.append("FPrjId", user?.tprjid);
+		axios
+			.post(`${apiLinks}/SaveWorkshopItem.php`, urlEncodedData, {
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+				},
+			})
+			.then((response) => {
+				// console.log(response, "response");
 
-      console.log("Submitting Form Data:", formDataa);
+				if (response.data.error === 200) {
+					firstmovethecode();
+					setTimeout(() => {
+						Code.current.focus();
+						dispatch(fetchGetWorkShopItemMaintenance(organisation.code));
+						dispatch(fetchNewWorkShopItemMaintenance(organisation.code));
+					}, 500);
 
-      const response = await axios.post(
-        `https://crystalsolutions.com.pk/csorder3/files/companymaintenance/SaveCompany.php`,
-        formDataa,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+					// Clear form fields
+					setFormData({
+						...formData,
+						AccountCodeform: "",
+						Descriptionform: "",
+						Status: "A",
+						inputform4: "",
+						inputform5: "",
+						inputform6: "",
+						inputform7: "",
+						inputform8: "",
+						inputform9: "",
+						inputform10: "",
+						inputform11: "",
+						inputform12: "",
+					});
 
-      console.log("API Response:", response);
+					toast.success(`${response.data.message}`, {
+						autoClose: 3000,
+					});
 
-      if (response.data.error === 200) {
-        newcode();
-        GetDataList();
-        setFormData({
-          ...formData,
-          Descriptionform: "",
-          Status: "",
-          inputform4: "",
-          inputform5: "",
-          inputform6: "",
-          inputform7: "",
-          inputform8: "",
-          // inputform9: "",
-          // inputform10: "",
-          // inputform11: "",
-          // inputform12: "",
-        });
-        // imageblank
-        const imgElement = document.getElementById("pic-preview");
-        imgElement.src = "";
-        setSelectedImage1(null);
-        setAlertData({
-          type: "success",
-          message: `${response.data.message}`,
-        });
-        setTimeout(() => {
-          setAlertData(null);
-        }, 1000);
-      } else {
-        setAlertData({
-          type: "error",
-          message: `${response.data.message}`,
-        });
-        setTimeout(() => {
-          setAlertData(null);
-        }, 2000);
-      }
-    } catch (error) {
-      console.error("Error submitting form:", error);
-    } finally {
-      console.log("Form submission process completed.");
-    }
-  };
+					handleResetDropdown();
+				} else {
+					handleClear();
+					toast.error(`${response.data.message}`, {
+						autoClose: 3000,
+					});
+				}
+			})
+			.catch((error) => {
+				toast.error("An error occurred during login. Please try again.", {
+					autoClose: 3000,
+				});
+			});
+	};
 
-  // Function to handle Enter key press
-  const handleEnterKeyPress = (ref, e) => {
-    if (e.key === "Enter") {
-      e.preventDefault(); // Prevent form submission on Enter key press
-      if (ref && ref.current) {
-        ref.current.focus();
-      }
-    }
-  };
-  const [isModalOpen, setModalOpen] = useState(false);
-  const [searchText, setSearchText] = useState("");
-  const [data, setData] = useState({ columns: [], rows: [] });
-  const [textdata, settextdata] = useState(" Item Maintenance");
+	// Function to handle Enter key press
+	const handleEnterKeyPress = (ref, e) => {
+		if (e.key === "Enter") {
+			e.preventDefault(); // Prevent form submission on Enter key press
+			if (ref && ref.current) {
+				ref.current.focus();
+			}
+		}
+	};
+	const [isModalOpen, setModalOpen] = useState(false);
+	const [searchText, setSearchText] = useState("");
+	const [textdata, settextdata] = useState("Item Maintenance");
 
-  const handleCloseModal = () => {
-    setData({ columns: [], rows: [] });
-    setSearchText("");
-    setHighlightedRowIndex(0);
-    settextdata("Update Item Maintenance");
+	const handleCloseModal = () => {
+		setSearchText("");
+		// data
+		setHighlightedRowIndex(0);
+		settextdata("Item Maintenance");
+		dispatch(fetchGetWorkShopItemMaintenance(organisation.code));
 
-    setModalOpen(false);
-  };
+		setModalOpen(false);
+	};
 
-  const handleDoubleClick = (e) => {
-    focusNextInput(Code);
-    console.log("====== handle double click=======");
-    // setSearchText(e.target.value);
-    setModalOpen(true);
-  };
+	const handleDoubleClick = (e) => {
+		dispatch(fetchGetWorkShopItemMaintenance(organisation.code));
+		focusNextInput(Code);
+		console.log("====== handle double click=======");
+		setModalOpen(true);
+	};
 
-  // const { dataa, error, isLoading } = useQuery("chartOfAccounts", fetchData);
+	const handleBlurRVC = (e) => {
+		const value = String(formData.AccountCodeform).padStart(3, "0");
+		console.log("dataa item:", dataa);
 
-  const fetchDataAndDisplayy = async () => {};
-  useEffect(() => {
-    fetchDataAndDisplayy();
-  }, []);
+		setFormData({
+			...formData,
+			AccountCodeform: value,
+		});
+		console.log("value", value);
+		setTimeout(() => {
+			const selectedItem = getworkshopitemmaintenance.find(
+				(item) => item.titmcod === value
+			);
 
-  function formatToThreeDigits(number) {
-    // Convert the number to a string and pad with leading zeros if necessary
-    return number.toString().padStart(3, "0");
-  }
-  const handleBlurRVC = (e) => {
-    // Convert nextItemId to string before calling padStart
-    const value = String(formData.AccountCodeform).padStart(3, "0");
-    console.log("dataa item:", dataa);
+			console.log("Selected item:", selectedItem);
 
-    setFormData({
-      ...formData,
-      AccountCodeform: value,
-    });
-    console.log("value", value);
-    setTimeout(() => {
-      const selectedItem = dataa.find((item) => item.tcmpcod === value);
+			if (selectedItem) {
+				setFormData({
+					...formData,
+					AccountCodeform: selectedItem.titmcod || "",
+					Descriptionform: selectedItem.titmdsc || "",
+					Status: selectedItem.titmsts || "",
+					inputform4: selectedItem.tctgcod || "",
+					inputform5: selectedItem.ttypcod || "",
+					inputform6: selectedItem.titmuom || "",
+					inputform7: selectedItem.tpurrat || "",
+					inputform8: selectedItem.tsalrat || "",
+					inputform9: selectedItem.titmrem || "",
+				});
+				setSelectedCategory(selectedItem.tctgcod);
+				setSelectedType(selectedItem.ttypcod);
 
-      console.log("Selected item:", selectedItem);
+				handlePrediction(selectedItem.titmdsc).then((result) => {
+					setGeturdu(result);
+				});
+			} else {
+				setFormData({
+					...formData,
+					Descriptionform: "",
+					Status: "A",
+					inputform4: "",
+					inputform5: "",
+					inputform6: "",
+					inputform7: "",
+					inputform8: "",
+					inputform9: "",
+					inputform10: "",
+					inputform11: "",
+				});
+				handleResetDropdown();
+			}
+		}, 500);
+	};
+	const handleInputChangefetchdata = async (e) => {
+		console.log("show the value is:", e.target.value);
+		let inputValue = e.target.value;
+		setFormData({
+			...formData,
+			AccountCodeform: e.target.value,
+		});
+	};
 
-      if (selectedItem) {
-        setFormData({
-          ...formData,
-          AccountCodeform: selectedItem.tcmpcod,
-          Descriptionform: selectedItem.tcmpdsc,
-          Status: selectedItem.tcmpsts,
-          inputform4: selectedItem.twebind,
-          inputform5: selectedItem.tcmprem,
-          inputform6: selectedItem.tphnnum,
-          inputform7: selectedItem.tmobnum,
-          inputform8: selectedItem.temladd,
-        });
-        handlePrediction(selectedItem.tcmpdsc).then((result) => {
-          setGeturdu(result);
-        });
-        setSelectedImage1(selectedItem.tcmppic);
-        const imgElement = document.getElementById("pic-preview");
-        imgElement.src = selectedItem.tcmppic;
-      } else {
-        setFormData({
-          ...formData,
-          AccountCodeform: value,
-          Descriptionform: "",
-          inputform4: "",
-          inputform5: "",
-          inputform6: "",
-          inputform7: "",
-          inputform8: "",
-          //   inputform9: "",
-          //   inputform10: "",
-          //   inputform11: "",
-          //   inputform12: "",
-        });
-        //upload image null
-        const imgElement = document.getElementById("pic-preview");
-        imgElement.src = "";
-        setSelectedImage1(null);
-      }
-    }, 500);
-  };
-  const handleInputChangefetchdata = async (e) => {
-    console.log("show the value is:", e.target.value);
-    let inputValue = e.target.value;
-    if (inputValue.length > 3) {
-      return;
-    }
-    setFormData({
-      ...formData,
-      AccountCodeform: inputValue,
-    });
-  };
+	const handlePrediction = async (name) => {
+		const url = "https://rehman1603-english-to-urdu.hf.space/run/predict";
+		const payload = {
+			data: [name],
+		};
 
-  const handlePrediction = async (name) => {
-    const url = "https://rehman1603-english-to-urdu.hf.space/run/predict";
-    const payload = {
-      data: [name],
-    };
+		try {
+			const response = await axios.post(url, payload, {
+				headers: { "Content-Type": "application/json" },
+			});
 
-    try {
-      const response = await axios.post(url, payload, {
-        headers: { "Content-Type": "application/json" },
-      });
+			console.log(response, "response");
 
-      console.log(response, "response");
+			if (response.status === 200) {
+				const result = response.data.data[0];
 
-      if (response.status === 200) {
-        const result = response.data.data[0];
+				console.log(result, "result");
+				return result; // Return the result for use in the calling function
+			} else {
+				console.error("Failed to fetch prediction");
+				return null; // Return null or some default value if the request failed
+			}
+		} catch (error) {
+			console.error("Error during prediction:", error);
+			return null; // Return null or some default value in case of an error
+		}
+	};
+	const handleInputChange = (e) => {
+		const { name, value } = e.target;
+		const formattedValue = value;
+		const formattednormalvalue = value;
+		if (name === "Descriptionform") {
+			setFormData({
+				...formData,
+				Descriptionform: formattednormalvalue,
+			});
+			handlePrediction(formattedValue).then((result) => {
+				setGeturdu(result);
+				console.log("resulttttttttttt");
+			});
+		}
+		if (name === "inputform6") {
+			setFormData({
+				...formData,
+				inputform6: value,
+			});
+		}
+		if (name === "inputform7") {
+			setFormData({
+				...formData,
+				inputform7: value,
+			});
+		}
+		if (name === "inputform8") {
+			setFormData({
+				...formData,
+				inputform8: value,
+			});
+		}
+		if (name === "inputform9") {
+			setFormData({
+				...formData,
+				inputform9: value,
+			});
+		}
+		if (name === "AccountCodeform") {
+			console.log("Searching for:", value);
 
-        console.log(result, "result");
-        return result; // Return the result for use in the calling function
-      } else {
-        console.error("Failed to fetch prediction");
-        return null; // Return null or some default value if the request failed
-      }
-    } catch (error) {
-      console.error("Error during prediction:", error);
-      return null; // Return null or some default value in case of an error
-    }
-  };
+			const selectedItem = getworkshopitemmaintenance.find(
+				(item) => item.titmcod === value
+			);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    let formattedValue = value.toUpperCase(); // Trim and convert to uppercase
-    if (name === "Descriptionform") {
-      console.log("Searching for:", formattedValue);
-      handlePrediction(formattedValue).then((result) => {
-        setGeturdu(result);
-        console.log("resulttttttttttt");
-      });
-    }
-    if (name === "UrduFormDescription") {
-      console.log("Searching for:", formattedValue);
-      setGeturdu(formattedValue);
-    }
-    if (name === "AccountCodeform") {
-      console.log("Searching for:", formattedValue);
+			console.log("Selected item:", selectedItem);
 
-      const selectedItem = dataa.find(
-        (item) => item.tctgcod === formatToThreeDigits(formattedValue)
-      );
+			if (selectedItem) {
+				setFormData({
+					...formData,
+					AccountCodeform: selectedItem.titmcod || "",
+					Descriptionform: selectedItem.titmdsc || "",
+					Status: selectedItem.titmsts || "",
+					inputform4: selectedItem.tctgcod || "",
+					inputform5: selectedItem.ttypcod || "",
+					inputform6: selectedItem.titmuom || "",
+					inputform7: selectedItem.tpurrat || "",
+					inputform8: selectedItem.tsalrat || "",
+					inputform9: selectedItem.titmrem || "",
+				});
+				setSelectedCategory(selectedItem.tctgcod);
+				setSelectedType(selectedItem.ttypcod);
 
-      console.log("Selected item:", selectedItem);
+				handlePrediction(selectedItem.titmdsc).then((result) => {
+					setGeturdu(result);
+				});
+			} else {
+				setFormData({
+					...formData,
+					Descriptionform: "",
+					Status: "A",
+					inputform4: "",
+					inputform5: "",
+					inputform6: "",
+					inputform7: "",
+					inputform8: "",
+					inputform9: "",
+				});
+				handleResetDropdown();
+			}
+		}
+	};
 
-      if (selectedItem) {
-        setFormData({
-          ...formData,
-          AccountCodeform: selectedItem.tcmpcod,
-          Descriptionform: selectedItem.tcmpdsc,
-          Status: selectedItem.tcmpsts,
-          inputform4: selectedItem.twebind,
-          inputform5: selectedItem.tcmprem,
-          inputform6: selectedItem.tphnnum,
-          inputform7: selectedItem.tmobnum,
-          inputform8: selectedItem.temladd,
-        });
-        handlePrediction(selectedItem.tcmpdsc).then((result) => {
-          setGeturdu(result);
-        });
-        setSelectedImage1(selectedItem.tcmppic);
-        const imgElement = document.getElementById("pic-preview");
-        imgElement.src = selectedItem.tcmppic;
-      } else {
-        setFormData({
-          ...formData,
-          AccountCodeform: formattedValue,
-          Descriptionform: "",
-          inputform4: "",
-          inputform5: "",
-          inputform6: "",
-          inputform7: "",
-          inputform8: "",
-          //   inputform9: "",
-          //   inputform10: "",
-          //   inputform11: "",
-          //   inputform12: "",
-        });
-        const imgElement = document.getElementById("pic-preview");
-        imgElement.src = "";
-        setSelectedImage1(null);
-      }
-    }
-    if (name === "inputform7") {
-      formattedValue = formatAmount(formattedValue);
-      setFormData({
-        ...formData,
-        inputform7: formattedValue,
-      });
-    }
-    if (name === "inputform8") {
-      formattedValue = formatAmount(formattedValue);
-      setFormData({
-        ...formData,
-        inputform8: formattedValue,
-      });
-    }
-    if (name === "inputform9") {
-      formattedValue = formatAmount(formattedValue);
-      setFormData({
-        ...formData,
-        inputform9: formattedValue,
-      });
-    } else {
-      setFormData({
-        ...formData,
-        [name]: formattedValue,
-      });
-    }
-  };
+	const resetData = () => {
+		setSearchText("");
+	};
+	const [highlightedRowIndex, setHighlightedRowIndex] = useState(0);
+	const handleRowClick = (selectedItem, rowIndex) => {
+		console.log("handleRowClickAccount", selectedItem);
+		setModalOpen(false);
+		setFormData({
+			...formData,
+			AccountCodeform: selectedItem.titmcod || "",
+			Descriptionform: selectedItem.titmdsc || "",
+			Status: selectedItem.titmsts || "",
+			inputform4: selectedItem.tctgcod || "",
+			inputform5: selectedItem.ttypcod || "",
+			inputform6: selectedItem.titmuom || "",
+			inputform7: selectedItem.tpurrat || "",
+			inputform8: selectedItem.tsalrat || "",
+			inputform9: selectedItem.titmrem || "",
+		});
+		setSelectedCategory(selectedItem.tctgcod);
+		setSelectedType(selectedItem.ttypcod);
 
-  const resetData = () => {
-    setData({ columns: [], rows: [] });
-    setSearchText("");
-  };
-  const [highlightedRowIndex, setHighlightedRowIndex] = useState(0);
-  const handleRowClick = (selectedItem, rowIndex) => {
-    console.log("handleRowClickAccount", selectedItem);
-    setModalOpen(false);
-    setFormData({
-      ...formData,
-      AccountCodeform: selectedItem.tcmpcod,
-      Descriptionform: selectedItem.tcmpdsc,
-      Status: selectedItem.tcmpsts,
-      inputform4: selectedItem.twebind,
-      inputform5: selectedItem.tcmprem,
-      inputform6: selectedItem.tphnnum,
-      inputform7: selectedItem.tmobnum,
-      inputform8: selectedItem.temladd,
-    });
-    handlePrediction(selectedItem.tcmpdsc).then((result) => {
-      setGeturdu(result);
-    });
-    setSelectedImage1(selectedItem.tcmppic);
-    const imgElement = document.getElementById("pic-preview");
-    imgElement.src = selectedItem.tcmppic;
-    settextdata("Update Item Maintenance");
+		handlePrediction(selectedItem.titmdsc).then((result) => {
+			setGeturdu(result);
+		});
 
-    resetData();
-  };
+		resetData();
+	};
 
-  const handleFocus = (codeparam) => {
-    if (codeparam.current) {
-      codeparam.current.style.backgroundColor = "orange";
-    }
-  };
+	const handleFocus = (codeparam) => {
+		if (codeparam.current) {
+			codeparam.current.style.backgroundColor = "orange";
+		}
+	};
 
-  const handleSave = () => {
-    handleFormSubmit();
-  };
-  const handleClear = () => {
-    newcode();
-    setFormData({
-      ...formData,
-      Descriptionform: "",
-      SelectedStatus: "",
-      inputform4: "",
-      inputform5: "",
-      inputform6: "",
-      inputform7: "",
-      inputform8: "",
-      // inputform9: "",
-      // inputform10: "",
-      // inputform11: "",
-      // inputform12: "",
-    });
-    const imgElement = document.getElementById("pic-preview");
-    imgElement.src = "";
-    setSelectedImage1(null);
-    // Set focus to the input element with ref 'Code'
-    if (Code.current) {
-      Code.current.focus();
-    }
-  };
+	const handleSave = () => {
+		handleFormSubmit();
+	};
+	const handleClear = () => {
+		dispatch(fetchNewWorkShopItemMaintenance(organisation.code));
+		setFormData({
+			...formData,
+			Descriptionform: "",
+			Status: "A",
+			inputform4: "",
+			inputform5: "",
+			inputform6: "",
+			inputform7: "",
+			inputform8: "",
+			inputform9: "",
+			inputform10: "",
+			inputform11: "",
+			inputform12: "",
+			inputform13: "",
+			inputform14: "",
+		});
+		handleResetDropdown();
 
-  const handleReturn = () => {
-    navigate("/MainPage");
-  };
+		firstmovethecode();
+	};
 
-  const handleBlur = (codeparam) => {
-    if (codeparam.current) {
-      codeparam.current.style.backgroundColor = "#3368B5";
-    }
-  };
+	const handleReturn = () => {
+		navigate("/MainPage");
+	};
 
-  return (
-    <>
-      <div
-        if
-        style={{
-          position: "relative",
-          width: "100%",
-          height: "100vh",
-          overflow: "hidden",
-        }}
-      >
-        {alertData && (
-          <Alert
-            severity={alertData.type}
-            style={{
-              position: "fixed",
-              top: 0,
-              left: 0,
-              width: "30%",
-              marginLeft: "35%",
-              zIndex: 1000,
-              textAlign: "center",
-            }}
-          >
-            {alertData.message}
-          </Alert>
-        )}
-        <Header />
+	const handleBlur = (codeparam) => {
+		if (codeparam.current) {
+			codeparam.current.style.backgroundColor = "#3368B5";
+		}
+	};
+	const {
+		isSidebarVisible,
+		toggleSidebar,
+		getcolor,
+		fontcolor,
+		toggleChangeColor,
+	} = useTheme();
+	const headercolor = "#3368B5";
+	const contentStyle = {
+		backgroundColor: getcolor,
+		width: isSidebarVisible ? "calc(80vw - 0%)" : "80vw",
+		position: "absolute",
+		top: `calc(52% - ${window.innerHeight * 0}px)`,
+		left: isSidebarVisible ? "55%" : "50%",
+		transform: "translate(-50%, -50%)",
+		transition: isSidebarVisible
+			? "left 3s ease-in-out, width 2s ease-in-out"
+			: "left 3s ease-in-out, width 2s ease-in-out",
+		display: "flex",
+		justifyContent: "start",
+		alignItems: "start",
+		overflowX: "hidden",
+		overflowY: "hidden",
+		wordBreak: "break-word",
+		textAlign: "center",
+		maxWidth: "600px",
+		fontSize: "15px",
+		fontStyle: "normal",
+		fontWeight: "400",
+		lineHeight: "23px",
+		fontFamily: '"Poppins", sans-serif',
+		padding: "0px",
+		margin: "0px",
+	};
 
-        <div
-          className="col-12"
-          style={{
-            backgroundColor: "white",
+	const [nextItemId, setNextItemId] = useState("");
+	useEffect(() => {
+		setNextItemId(newworkshopitemmaintenance);
+	}, [newworkshopitemmaintenance]);
+	useEffect(() => {
+		if (nextItemId) {
+			handleInputChangefetchdatafunction(nextItemId);
+		}
+	}, [nextItemId]);
 
-            color: "black",
-            fontWeight: "bold",
-            fontFamily: fontFamily,
-          }}
-        >
-          <div
-            className="row"
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              padding: "5px",
-              // backgroundColor: "#f5f5f5",
-              minHeight: "100vh",
-            }}
-          >
-            <div className="col-md-12 form-item-container">
-              <NavComponent textdata={textdata} />
+	const handleInputChangefetchdatafunction = async (newValue) => {
+		const selectedItem = getworkshopitemmaintenance.find(
+			(item) => item.titmcod === newValue
+		);
 
-              <br />
-              <Form onSubmit={handleFormSubmit}>
-                <div className="row">
-                  <div className="col-sm-12">
-                    <br />
+		if (selectedItem) {
+			setFormData({
+				...formData,
+				AccountCodeform: selectedItem.titmcod || "",
+				Descriptionform: selectedItem.titmdsc || "",
+				Status: selectedItem.titmsts || "",
+				inputform4: selectedItem.tctgcod || "",
+				inputform5: selectedItem.ttypcod || "",
+				inputform6: selectedItem.titmuom || "",
+				inputform7: selectedItem.tpurrat || "",
+				inputform8: selectedItem.tsalrat || "",
+				inputform9: selectedItem.titmrem || "",
+			});
+			setSelectedCategory(selectedItem.tctgcod);
+			setSelectedType(selectedItem.ttypcod);
 
-                    <div className="row">
-                      <div className="col-sm-2 label-item">Code:</div>
-                      <div className="col-sm-2">
-                        <Form.Control
-                          type="number"
-                          className="form-control-account custom-input"
-                          placeholder="Code"
-                          name="AccountCodeform"
-                          value={formData.AccountCodeform}
-                          onChange={handleInputChangefetchdata}
-                          style={{
-                            fontSize: "15px",
-                            padding: "10px",
-                            textAlign: "center",
-                            borderRadius: "8px",
-                          }}
-                          maxLength={3}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              handleBlurRVC();
-                              handleEnterKeyPress(Status, e);
-                              const upperCaseValue =
-                                e.target.value.toUpperCase();
+			handlePrediction(selectedItem.tcmpdsc).then((result) => {
+				setGeturdu(result);
+			});
+		} else {
+			setFormData({
+				...formData,
+				Descriptionform: "",
+				Status: "A",
+			});
+		}
+	};
 
-                              if (dataa && dataa.length > 0) {
-                                const selectedItem = dataa.find(
-                                  (item) => item.tcmpcod === upperCaseValue
-                                );
+	useEffect(() => {
+		document.documentElement.style.setProperty("--background-color", getcolor);
+	}, [getcolor]);
+	useEffect(() => {
+		document.documentElement.style.setProperty("--font-color", fontcolor);
+	}, [fontcolor]);
+	useEffect(() => {
+		document.documentElement.style.setProperty(
+			"--headercolor-color",
+			headercolor
+		);
+	}, [headercolor]);
+	return (
+		<>
+			<ToastContainer />
+			<div>
+				<div style={contentStyle}>
+					<div
+						className="col-md-12 "
+						style={{
+							border: `1px solid ${fontcolor}`,
+							borderRadius: "9px",
+						}}
+					>
+						<NavComponent textdata={`${textdata}`} />
 
-                                if (selectedItem) {
-                                  console.log("selectedItem:", selectedItem);
-                                  handleEnterKeyPress(Status, e);
-                                } else if (upperCaseValue.length < 3) {
-                                  // setAlertData({
-                                  //   type: "success",
-                                  //   message: "Fetch Data",
-                                  // });
-                                  // setTimeout(() => {
-                                  //   setAlertData(null);
-                                  // }, 3000);
-                                } else {
-                                  handleEnterKeyPress(Status, e);
-                                }
-                              } else {
-                                console.warn(
-                                  "Data rows are not available or empty."
-                                );
-                              }
-                            }
-                          }}
-                          onFocus={(e) => {
-                            setTimeout(() => {
-                              e.target.select();
-                            }, 500);
-                          }}
-                          onDoubleClick={(e) => {
-                            if (e.target.value.length <= 5) {
-                              handleDoubleClick(e);
-                              setTimeout(() => {
-                                focusNextInput(SearchBox);
-                              }, 100);
-                            }
-                          }}
-                          ref={Code}
-                        />
-                      </div>
-                      <div className="col-sm-4"></div>
+						{/* <br /> */}
+						<div
+							onSubmit={handleFormSubmit}
+							style={{
+								padding: "20px 0px",
+								backgroundColor: getcolor,
+								color: fontcolor,
+							}}
+						>
+							<div className="row">
+								<div className="col-sm-12">
+									<br />
 
-                      <div className="col-sm-2 label-item">Status:</div>
-                      <div className="col-sm-2">
-                        <Form.Group
-                          controlId="status"
-                          style={{ display: "flex", alignItems: "center" }}
-                        >
-                          <StatusSelect
-                            formData={formData}
-                            handleInputChange={handleInputChange}
-                            errors={errors}
-                            handleEnterKeyPress={(e) =>
-                              handleEnterKeyPress(Description, e)
-                            }
-                            StatusRef={Status}
-                          />
-                        </Form.Group>
-                      </div>
-                    </div>
-                    <div className="row">
-                      <div
-                        className="col-sm-2 label-item"
-                        style={{ color: "red" }}
-                      >
-                        Description:
-                      </div>
-                      <div className="col-sm-6">
-                        <Form.Control
-                          type="text"
-                          id="Descriptionform"
-                          placeholder="Description"
-                          name="Descriptionform"
-                          className={`form-control-item ${
-                            errors.Descriptionform ? "border-red" : ""
-                          }`}
-                          style={{ width: "337px" }}
-                          value={formData.Descriptionform}
-                          ref={Description}
-                          onFocus={(e) => e.target.select()}
-                          onChange={handleInputChange}
-                          onKeyDown={(e) =>
-                            handleEnterKeyPress(inputform4ref, e)
-                          }
-                        />
-                      </div>
-                      <div className="col-sm-4">
-                        <Form.Control
-                          type="text"
-                          id="UrduFormDescription"
-                          placeholder="اردو میں"
-                          name="UrduFormDescription"
-                          className={`form-control-item ${
-                            errors.Descriptionform ? "border-red" : ""
-                          }`}
-                          style={{
-                            fontSize: "16px",
-                            fontWeight: "bold",
-                            marginRight: "10px",
-                            textAlign: "right",
-                            fontFamily: "Noto Nastaliq Urdu",
-                          }}
-                          value={geturdu}
-                          onFocus={(e) => e.target.select()}
-                          onChange={handleInputChange}
-                        />
-                      </div>
-                    </div>
-                    <div className="row">
-                      <div
-                        className="col-sm-2 label-item"
-                        style={{ color: "red" }}
-                      >
-                        Company:
-                      </div>
-                      <div className="col-sm-6">
-                        <Form.Group
-                          controlId="status"
-                          style={{ display: "flex", alignItems: "center" }}
-                        >
-                          <CustomDropdown
-                            value={selectedCompany}
-                            onChange={handleCompanyChange}
-                            fetchUrl="https://crystalsolutions.com.pk/csorder3/files/companymaintenance/GetCompany.php"
-                            valueKey="tcmpcod" // Custom key for value
-                            labelKey="tcmpdsc" // Custom key for label
-                            placeholder="Search or select..."
-                            isClearable={true}
-                            selectRef={inputform4ref}
-                            required
-                            className={errors.inputform4}
-                            width={337}
-                            styles={{
-                              placeholder: (base) => ({
-                                ...base,
-                                fontWeight: "normal",
-                              }),
-                            }}
-                            onKeyDown={(e) =>
-                              handleEnterKeyPress(inputform5ref, e)
-                            }
-                            postapi="https://crystalsolutions.com.pk/csorder3/files/companymaintenance/SaveCompany.php"
-                            postfisrt="FCmpCod"
-                            postsecond="FCmpDsc"
-                            postthird="FCmpSts"
-                            postfouth="FPrjId"
-                          />
-                        </Form.Group>
-                      </div>
-                      <div className="col-sm-4">
-                        <Form.Control
-                          type="text"
-                          id="companyurdu"
-                          placeholder="اردو میں"
-                          name="companyurdu"
-                          className={`form-control-item ${
-                            errors.Descriptionform ? "border-red" : ""
-                          }`}
-                          style={{
-                            fontSize: "16px",
-                            fontWeight: "bold",
-                            height: "30px",
-                            marginRight: "10px",
-                            textAlign: "right",
-                            fontFamily: "Noto Nastaliq Urdu",
-                          }}
-                          value={companyurdu}
-                          onFocus={(e) => e.target.select()}
-                          onChange={handleInputChange}
-                        />
-                      </div>
-                    </div>
-                    <div className="row">
-                      <div
-                        className="col-sm-2 label-item"
-                        style={{ color: "red" }}
-                      >
-                        Category:
-                      </div>
-                      <div className="col-sm-6">
-                        <Form.Group
-                          controlId="status"
-                          style={{ display: "flex", alignItems: "center" }}
-                        >
-                          <CustomDropdown
-                            value={selectedCategory}
-                            onChange={handleCategoryChange}
-                            fetchUrl="https://crystalsolutions.com.pk/csorder3/files/categorymaintenance/GetCategory.php"
-                            valueKey="tctgcod"
-                            labelKey="tctgdsc"
-                            placeholder="Search or select..."
-                            isClearable={true}
-                            selectRef={inputform5ref}
-                            required
-                            className={errors.inputform5}
-                            width={337}
-                            styles={{
-                              placeholder: (base) => ({
-                                ...base,
-                                fontWeight: "normal",
-                              }),
-                            }}
-                            onKeyDown={(e) =>
-                              handleEnterKeyPress(inputform6ref, e)
-                            }
-                            postapi="https://crystalsolutions.com.pk/csorder3/files/categorymaintenance/SaveCatg.php"
-                            postfisrt="FCtgCod"
-                            postsecond="FCtgDsc"
-                            postthird="FCtgSts"
-                            postfouth="FPrjId"
-                          />
-                        </Form.Group>
-                      </div>
-                      <div className="col-sm-4">
-                        <Form.Control
-                          type="text"
-                          id="categoryurdu"
-                          placeholder="اردو میں"
-                          name="categoryurdu"
-                          className={`form-control-item ${
-                            errors.Descriptionform ? "border-red" : ""
-                          }`}
-                          style={{
-                            fontSize: "16px",
-                            fontWeight: "bold",
-                            marginRight: "10px",
-                            height: "30px",
-                            textAlign: "right",
-                            fontFamily: "Noto Nastaliq Urdu",
-                          }}
-                          value={categoryurdu}
-                          onFocus={(e) => e.target.select()}
-                          onChange={handleInputChange}
-                        />
-                      </div>
-                    </div>
-                    <div className="row">
-                      <div className="col-sm-2 label-item">UOM:</div>
-                      <div className="col-sm-3">
-                        <Form.Control
-                          as="select"
-                          name="UOMRef"
-                          value={formData.UOMRef}
-                          onChange={handleInputChange}
-                          className={`form-control-item ${
-                            errors.Status ? "border-red" : ""
-                          }`}
-                          style={{
-                            height: "28px",
-                            fontSize: "11px",
-                            padding: "0px",
-                            paddingLeft: "5px",
-                          }}
-                          onKeyDown={(e) => handleEnterKeyPress(e)}
-                          ref={UOMRef}
-                        >
-                          <option value="NOS">NOS</option>
-                          <option value="KGS">KGS</option>
-                          <option value="LTR">LTR</option>
-                          <option value="FET">FET</option>
-                          <option value="MTR">MTR</option>
-                        </Form.Control>
-                      </div>
-                      <div className="col-sm-2"></div>
-                      <div className="col-sm-2 label-item">Index:</div>
-                      <div className="col-sm-3">
-                        <Form.Control
-                          type="text"
-                          id="inputform6"
-                          placeholder="Index"
-                          name="inputform6"
-                          className={`form-control-item ${
-                            errors.inputform6 ? "border-red" : ""
-                          }`}
-                          style={{ textAlign: "right" }}
-                          value={formData.inputform6}
-                          ref={inputform6ref}
-                          onFocus={(e) => e.target.select()}
-                          onChange={handleInputChange}
-                          onKeyDown={(e) =>
-                            handleEnterKeyPress(inputform7ref, e)
-                          }
-                        />
-                      </div>
-                    </div>
-                    <hr
-                      style={{
-                        border: "1px solid black",
-                        width: "96%",
-                        margin: "0 auto 2px auto",
-                        display: "block",
-                      }}
-                    />
-                    <div className="row">
-                      <div className="col-sm-2 label-item">Purchase:</div>
-                      <div className="col-sm-3" style={{ display: "flex" }}>
-                        <Form.Control
-                          type="text"
-                          id="inputform7"
-                          placeholder="Purchase Rate"
-                          name="inputform7"
-                          className={`form-control-item ${
-                            errors.inputform7 ? "border-red" : ""
-                          }`}
-                          style={{ textAlign: "right" }}
-                          value={formData.inputform7}
-                          ref={inputform7ref}
-                          onFocus={(e) => e.target.select()}
-                          onChange={handleInputChange}
-                          onKeyDown={(e) =>
-                            handleEnterKeyPress(inputform8ref, e)
-                          }
-                        />
-                      </div>
-                      <div className="col-sm-4 label-item">Sale:</div>
-                      <div className="col-sm-3" style={{ display: "flex" }}>
-                        <Form.Control
-                          type="text"
-                          id="inputform8"
-                          placeholder="Sale Rate"
-                          name="inputform8"
-                          className={`form-control-item ${
-                            errors.inputform8 ? "border-red" : ""
-                          }`}
-                          style={{ textAlign: "right" }}
-                          value={formData.inputform8}
-                          ref={inputform8ref}
-                          onFocus={(e) => e.target.select()}
-                          onChange={handleInputChange}
-                          onKeyDown={(e) =>
-                            handleEnterKeyPress(inputform9ref, e)
-                          }
-                        />
-                      </div>
-                    </div>
-                    <div className="row">
-                      <div className="col-sm-2 label-item">Discount:</div>
-                      <div className="col-sm-3" style={{ display: "flex" }}>
-                        <Form.Control
-                          type="text"
-                          id="inputform9"
-                          placeholder="Discount Rate"
-                          name="inputform9"
-                          className={`form-control-item ${
-                            errors.inputform9 ? "border-red" : ""
-                          }`}
-                          style={{ textAlign: "right" }}
-                          value={formData.inputform9}
-                          ref={inputform9ref}
-                          onFocus={(e) => e.target.select()}
-                          onChange={handleInputChange}
-                          onKeyDown={(e) =>
-                            handleEnterKeyPress(inputform10ref, e)
-                          }
-                        />
-                      </div>
-                    </div>
-                    <div className="row">
-                      <div
-                        className="col-sm-2 label-item"
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                        }}
-                      >
-                        Remarks:
-                      </div>
-                      <div className="col-sm-10">
-                        <Form.Control
-                          as="textarea"
-                          rows={4}
-                          placeholder="Remarks"
-                          name="inputform10"
-                          onFocus={(e) => e.target.select()}
-                          className="form-control-remarks"
-                          value={formData.inputform10}
-                          onKeyDown={(e) =>
-                            handleEnterKeyPress(inputform11ref, e)
-                          }
-                          ref={inputform10ref}
-                          style={{ width: "100%", height: "80px" }}
-                          onChange={handleInputChange}
-                        />
-                      </div>
-                    </div>
-                    <div className="row">
-                      <div
-                        className="col-sm-2 label-item"
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                        }}
-                      >
-                        Picture:
-                      </div>
-                      <div className="col-2">
-                        <div className="row">
-                          <label style={{ display: "block" }}>
-                            <div
-                              style={{
-                                width: "100%",
-                                height: "95px",
-                                border: "2px dashed #ababab",
-                                marginLeft: "-4%",
-                                borderRadius: "0px",
-                                display: "flex",
-                                justifyContent: "center",
-                                alignItems: "center",
-                                backgroundColor: "#E7E7E7",
-                                boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
-                                transition: "background-color 0.3s ease",
-                                // cursor: "pointer",
-                                overflow: "hidden",
-                              }}
-                              onMouseEnter={(e) =>
-                                (e.currentTarget.style.backgroundColor =
-                                  "#f0f0f0")
-                              }
-                              onMouseLeave={(e) =>
-                                (e.currentTarget.style.backgroundColor =
-                                  "#E7E7E7")
-                              }
-                            >
-                              <img
-                                id="pic1-preview"
-                                src=""
-                                alt="Upload"
-                                style={{
-                                  width: "100px",
-                                  height: "90px",
-                                  display: "block",
-                                }}
-                              />
-                            </div>
-                          </label>
-                        </div>
-                        <div className="row">
-                          <input
-                            type="file"
-                            id="pic1"
-                            style={{ display: "none" }}
-                            onChange={handleImageChange1}
-                          />
-                          <label
-                            htmlFor="pic1"
-                            style={{
-                              border: "1px solid #FFFFFF",
-                              width: "100%",
-                              marginLeft: "2px",
-                              height: "25px",
-                              marginTop: "2px",
-                              color: "black",
-                              backgroundColor: "#8ab7f7",
-                              display: "flex",
-                              justifyContent: "center",
-                              alignItems: "center",
-                              cursor: "pointer",
-                            }}
-                            ref={inputform11ref}
-                            onKeyDown={(e) => handleEnterKeyPress(Submit, e)}
-                          >
-                            <i
-                              className="fas fa-upload"
-                              style={{ marginRight: "5px" }}
-                            ></i>
-                            Image
-                          </label>
-                        </div>
-                      </div>
-                      <div className="col-2">
-                        <div className="row">
-                          <label style={{ display: "block" }}>
-                            <div
-                              style={{
-                                width: "100%",
-                                height: "95px",
-                                border: "2px dashed #ababab",
-                                marginLeft: "-4%",
-                                borderRadius: "0px",
-                                display: "flex",
-                                justifyContent: "center",
-                                alignItems: "center",
-                                backgroundColor: "#E7E7E7",
-                                boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
-                                transition: "background-color 0.3s ease",
-                                // cursor: "pointer",
-                                overflow: "hidden",
-                              }}
-                              onMouseEnter={(e) =>
-                                (e.currentTarget.style.backgroundColor =
-                                  "#f0f0f0")
-                              }
-                              onMouseLeave={(e) =>
-                                (e.currentTarget.style.backgroundColor =
-                                  "#E7E7E7")
-                              }
-                            >
-                              <img
-                                id="pic2-preview"
-                                src=""
-                                alt="Upload"
-                                style={{
-                                  width: "100px",
-                                  height: "90px",
-                                  display: "block",
-                                }}
-                              />
-                            </div>
-                          </label>
-                        </div>
-                        <div className="row">
-                          <input
-                            type="file"
-                            id="pic2"
-                            style={{ display: "none" }}
-                            onChange={handleImageChange2}
-                          />
-                          <label
-                            htmlFor="pic2"
-                            style={{
-                              border: "1px solid #FFFFFF",
-                              width: "100%",
-                              marginLeft: "2px",
-                              height: "25px",
-                              marginTop: "2px",
-                              color: "black",
-                              backgroundColor: "#8ab7f7",
-                              display: "flex",
-                              justifyContent: "center",
-                              alignItems: "center",
-                              cursor: "pointer",
-                            }}
-                            // ref={inputform10ref}
-                            // onKeyDown={(e) => handleEnterKeyPress(Submit, e)}
-                          >
-                            <i
-                              className="fas fa-upload"
-                              style={{ marginRight: "5px" }}
-                            ></i>
-                            Image
-                          </label>
-                        </div>
-                      </div>
-                      <div className="col-2">
-                        <div className="row">
-                          <label style={{ display: "block" }}>
-                            <div
-                              style={{
-                                width: "100%",
-                                height: "95px",
-                                border: "2px dashed #ababab",
-                                marginLeft: "-4%",
-                                borderRadius: "0px",
-                                display: "flex",
-                                justifyContent: "center",
-                                alignItems: "center",
-                                backgroundColor: "#E7E7E7",
-                                boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
-                                transition: "background-color 0.3s ease",
-                                // cursor: "pointer",
-                                overflow: "hidden",
-                              }}
-                              onMouseEnter={(e) =>
-                                (e.currentTarget.style.backgroundColor =
-                                  "#f0f0f0")
-                              }
-                              onMouseLeave={(e) =>
-                                (e.currentTarget.style.backgroundColor =
-                                  "#E7E7E7")
-                              }
-                            >
-                              <img
-                                id="pic3-preview"
-                                src=""
-                                alt="Upload"
-                                style={{
-                                  width: "100px",
-                                  height: "90px",
-                                  display: "block",
-                                }}
-                              />
-                            </div>
-                          </label>
-                        </div>
-                        <div className="row">
-                          <input
-                            type="file"
-                            id="pic3"
-                            style={{ display: "none" }}
-                            onChange={handleImageChange3}
-                          />
-                          <label
-                            htmlFor="pic3"
-                            style={{
-                              border: "1px solid #FFFFFF",
-                              width: "100%",
-                              marginLeft: "2px",
-                              height: "25px",
-                              marginTop: "2px",
-                              color: "black",
-                              backgroundColor: "#8ab7f7",
-                              display: "flex",
-                              justifyContent: "center",
-                              alignItems: "center",
-                              cursor: "pointer",
-                            }}
-                            ref={inputform6ref}
-                            onKeyDown={(e) => handleEnterKeyPress(Submit, e)}
-                          >
-                            <i
-                              className="fas fa-upload"
-                              style={{ marginRight: "5px" }}
-                            ></i>
-                            Image
-                          </label>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </Form>
+									<div className="row">
+										<div className="col-sm-3 label-field">Code:</div>
+										<div
+											className="col-sm-2"
+											style={{
+												display: "flex",
+												alignItems: "center",
+												justifyContent: "space-between",
+												padding: "0 10px",
+											}}
+										>
+											<Form.Control
+												type="text"
+												className="form-control-field custom-input"
+												placeholder="Code"
+												name="AccountCodeform"
+												value={formData.AccountCodeform}
+												onChange={(e) => {
+													const inputValue = e.target.value.toUpperCase();
+													if (inputValue.length > 3) {
+														toast.error(
+															"Code should not exceed 3 characters.",
+															{
+																autoClose: 3000,
+															}
+														);
 
-              {/* // three button in this  */}
-              <ButtonGroupp
-                Submit={Submit}
-                handleFocus={handleFocus}
-                handleBlur={handleBlur}
-                handleSave={handleSave}
-                handleReturn={handleReturn}
-                handleClear={handleClear}
-                handleFormSubmit={handleFormSubmit}
-              />
-              <GeneralTwoFieldsModal
-                isOpen={isModalOpen}
-                handleClose={handleCloseModal}
-                title="Select Item"
-                technicians={dataa}
-                searchRef={SearchBox}
-                handleRowClick={handleRowClick}
-                firstColKey="tcmpcod"
-                secondColKey="tcmpdsc"
-              />
-            </div>
-          </div>
-          <br />
-        </div>
-      </div>
-      <Footer />
-    </>
-  );
+														return;
+													}
+													if (!/^\d*$/.test(inputValue)) {
+														toast.error("Only numeric values are allowed.", {
+															autoClose: 3000,
+														});
+
+														return;
+													}
+													handleInputChangefetchdata({
+														target: {
+															value: inputValue,
+														},
+													});
+												}}
+												style={{
+													fontSize: "15px",
+													padding: "10px",
+													textAlign: "left",
+													borderRadius: "8px",
+												}}
+												maxLength={3}
+												onKeyDown={(e) => {
+													if (e.key === "Enter") {
+														handleBlurRVC();
+														handleEnterKeyPress(Status, e);
+														const upperCaseValue = e.target.value.toUpperCase();
+
+														if (
+															getworkshopitemmaintenance &&
+															getworkshopitemmaintenance.length > 0
+														) {
+															const selectedItem =
+																getworkshopitemmaintenance.find(
+																	(item) => item.titmcod === upperCaseValue
+																);
+
+															if (selectedItem) {
+																toast.success("Record found!", {
+																	autoClose: 3000,
+																});
+
+																handleEnterKeyPress(Status, e);
+															} else {
+																toast.error("Record not found!", {
+																	autoClose: 3000,
+																});
+
+																handleEnterKeyPress(Status, e);
+															}
+														} else {
+															toast.error(
+																"Data rows are not available or empty",
+																{
+																	autoClose: 3000,
+																}
+															);
+														}
+													}
+												}}
+												onFocus={(e) => {
+													e.target.select();
+												}}
+												onDoubleClick={(e) => {
+													handleDoubleClick(e);
+													setTimeout(() => {
+														dispatch(
+															fetchGetWorkShopItemMaintenance(organisation.code)
+														);
+														focusNextInput(SearchBox);
+													}, 100);
+												}}
+												ref={Code}
+											/>
+											<IncrementDecrementButtons
+												getnavbarbackgroundcolor={getnavbarbackgroundcolor}
+												getnavbarfontcolor={getnavbarfontcolor}
+												setNextItemId={setNextItemId}
+												formData={formData.AccountCodeform}
+												digit={3}
+											/>
+										</div>
+										<div className="col-sm-3"></div>
+										<div className="col-sm-2 label-field">Status:</div>
+										<div className="col-sm-2">
+											<Form.Control
+												as="select"
+												name="Status"
+												value={formData.Status}
+												onChange={handleInputChange}
+												className={`form-control-field ${
+													errors.Status ? "border-red" : ""
+												}`}
+												style={{
+													height: "28px",
+													padding: "0px",
+													paddingLeft: "5px",
+												}}
+												onKeyDown={(e) => handleEnterKeyPress(Description, e)}
+												ref={Status}
+											>
+												<option
+													style={{
+														backgroundColor: getcolor,
+														color: fontcolor,
+													}}
+													value="A"
+												>
+													Active
+												</option>
+												<option
+													style={{
+														backgroundColor: getcolor,
+														color: fontcolor,
+													}}
+													value="N"
+												>
+													Not Active
+												</option>
+											</Form.Control>
+										</div>
+									</div>
+
+									<div className="row">
+										<div className="col-sm-3 label-field">Description:</div>
+										<div className="col-sm-9 d-flex align-items-center">
+											<Form.Control
+												type="text"
+												id="Descriptionform"
+												placeholder="Description"
+												name="Descriptionform"
+												className={`form-control-field ${
+													errors.Descriptionform ? "border-red" : ""
+												}`}
+												value={formData.Descriptionform}
+												ref={Description}
+												onFocus={(e) => e.target.select()}
+												onChange={(e) =>
+													handleInputChange({
+														target: {
+															name: "Descriptionform",
+															value: e.target.value.toUpperCase(),
+														},
+													})
+												}
+												onKeyDown={(e) => handleEnterKeyPress(inputform4ref, e)}
+											/>
+										</div>
+									</div>
+
+									<div className="row">
+										<div className="col-sm-3 label-field">Category:</div>
+										<div className="col-sm-3 d-flex align-items-center">
+											<Form.Group
+												controlId="status"
+												style={{ display: "flex", alignItems: "center" }}
+											>
+												<CustomDropdown
+													key={dropdownKey}
+													value={selectedCategory}
+													width={250}
+													required
+													onChange={handleCategoryChange}
+													selectRef={inputform4ref}
+													className={errors.inputform4}
+													fetchUrl={`${apiLinks}/GetActiveCatg.php`}
+													valueKey="tctgcod"
+													labelKey="tctgdsc"
+													placeholder="Search or select..."
+													isClearable={true}
+													styles={{
+														placeholder: (base) => ({
+															...base,
+															fontWeight: "normal",
+														}),
+													}}
+													onKeyDown={(e) =>
+														handleEnterKeyPress(inputform5ref, e)
+													}
+													postapi={`${apiLinks}/SaveCategory.php`}
+													postfisrt="FCtgCod"
+													postsecond="FCtgDsc"
+													postthird="FCtgSts"
+													postfouth="FUsrId"
+													postfifth="code"
+												/>
+											</Form.Group>
+										</div>
+									</div>
+									<div className="row">
+										<div className="col-sm-3 label-field">Type:</div>
+										<div className="col-sm-3 d-flex align-items-center">
+											<Form.Group
+												controlId="status"
+												style={{ display: "flex", alignItems: "center" }}
+											>
+												<CustomDropdown
+													key={dropdownKey}
+													value={selectedType}
+													width={250}
+													required
+													onChange={handleTypeChange}
+													selectRef={inputform5ref}
+													className={errors.inputform5}
+													fetchUrl={`${apiLinks}/GetActiveType.php`}
+													valueKey="ttypcod"
+													labelKey="ttypdsc"
+													placeholder="Search or select..."
+													isClearable={true}
+													styles={{
+														placeholder: (base) => ({
+															...base,
+															fontWeight: "normal",
+														}),
+													}}
+													onKeyDown={(e) =>
+														handleEnterKeyPress(inputform6ref, e)
+													}
+													postapi={`${apiLinks}/SaveType.php`}
+													postfisrt="FTypCod"
+													postsecond="FTypDsc"
+													postthird="FTypSts"
+													postfouth="FUsrId"
+													postfifth="code"
+												/>
+											</Form.Group>
+										</div>
+									</div>
+									<div className="row">
+										<div className="col-sm-3 label-field">UOM:</div>
+										<div className="col-sm-2 d-flex align-items-center">
+											<Form.Control
+												type="text"
+												id="inputform6"
+												placeholder="UOM"
+												name="inputform6"
+												className={`form-control-field ${
+													errors.inputform6 ? "border-red" : ""
+												}`}
+												value={formData.inputform6}
+												ref={inputform6ref}
+												onFocus={(e) => e.target.select()}
+												onChange={(e) =>
+													handleInputChange({
+														target: {
+															name: "inputform6",
+															value: e.target.value,
+														},
+													})
+												}
+												onKeyDown={(e) => handleEnterKeyPress(inputform7ref, e)}
+											/>
+										</div>
+									</div>
+
+									<div className="row">
+										<div className="col-sm-3 label-field">Purchase:</div>
+										<div className="col-sm-3 d-flex align-items-center">
+											<Form.Control
+												type="text"
+												id="inputform7"
+												placeholder="Purchase Rate"
+												name="inputform7"
+												className={`form-control-field ${
+													errors.inputform7 ? "border-red" : ""
+												}`}
+												style={{
+													textAlign: "right",
+												}}
+												value={formData.inputform7}
+												ref={inputform7ref}
+												onFocus={(e) => e.target.select()}
+												onChange={(e) => {
+													const rawValue = e.target.value.replace(/,/g, "");
+													const parsedValue = rawValue
+														? parseInt(rawValue, 10)
+														: "";
+
+													if (!/^\d*$/.test(rawValue)) {
+														toast.error("Please enter numbers only.", {
+															autoClose: 3000,
+														});
+													} else if (parsedValue < 0) {
+														toast.error("Amount cannot be negative.", {
+															autoClose: 3000,
+														});
+													} else if (rawValue.length > 8) {
+														toast.error("Code cannot exceed 8 characters.", {
+															autoClose: 3000,
+														});
+													} else if (
+														rawValue.length > 1 &&
+														rawValue.startsWith("0")
+													) {
+														toast.error("Leading zeros are not allowed.", {
+															autoClose: 3000,
+														});
+													} else {
+														const formattedValue = parsedValue.toString();
+														handleInputChange({
+															target: {
+																name: "inputform7",
+																value: formattedValue,
+															},
+														});
+														setAlertData(null);
+													}
+
+													setTimeout(() => {
+														setAlertData(null);
+													}, 2000);
+												}}
+												onKeyDown={(e) => handleEnterKeyPress(inputform8ref, e)}
+											/>
+										</div>
+
+										<div className="col-sm-3 label-field">Sale:</div>
+										<div className="col-sm-3 d-flex align-items-center">
+											<Form.Control
+												type="text"
+												id="inputform8"
+												placeholder="Sale Rate"
+												name="inputform8"
+												className={`form-control-field ${
+													errors.inputform8 ? "border-red" : ""
+												}`}
+												value={formData.inputform8}
+												ref={inputform8ref}
+												style={{
+													textAlign: "right",
+												}}
+												onFocus={(e) => e.target.select()}
+												onChange={(e) => {
+													const rawValue = e.target.value.replace(/,/g, "");
+													const parsedValue = rawValue
+														? parseInt(rawValue, 10)
+														: "";
+
+													if (!/^\d*$/.test(rawValue)) {
+														toast.error("Please enter numbers only.", {
+															autoClose: 3000,
+														});
+													} else if (parsedValue < 0) {
+														toast.error("Amount cannot be negative.", {
+															autoClose: 3000,
+														});
+													} else if (rawValue.length > 8) {
+														toast.error("Code cannot exceed 8 characters.", {
+															autoClose: 3000,
+														});
+													} else if (
+														rawValue.length > 1 &&
+														rawValue.startsWith("0")
+													) {
+														toast.error("Leading zeros are not allowed.", {
+															autoClose: 3000,
+														});
+													} else {
+														const formattedValue = parsedValue.toString();
+														handleInputChange({
+															target: {
+																name: "inputform8",
+																value: formattedValue,
+															},
+														});
+														setAlertData(null);
+													}
+
+													setTimeout(() => {
+														setAlertData(null);
+													}, 2000);
+												}}
+												onKeyDown={(e) => handleEnterKeyPress(inputform9ref, e)}
+											/>
+										</div>
+									</div>
+
+									<div className="row">
+										<div className="col-sm-3 label-field">Remarks:</div>
+										<div className="col-sm-9 d-flex align-items-center">
+											<Form.Control
+												type="textarea"
+												id="inputform9"
+												placeholder="Remarks"
+												name="inputform9"
+												className={`form-control-field ${
+													errors.inputform9 ? "border-red" : ""
+												}`}
+												value={formData.inputform9}
+												ref={inputform9ref}
+												onFocus={(e) => e.target.select()}
+												onChange={(e) =>
+													handleInputChange({
+														target: {
+															name: "inputform9",
+															value: e.target.value,
+														},
+													})
+												}
+												onKeyDown={(e) => handleEnterKeyPress(Submit, e)}
+											/>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<ButtonGroupp
+							Submit={Submit}
+							handleFocus={handleFocus}
+							handleBlur={handleBlur}
+							handleSave={handleSave}
+							handleReturn={handleReturn}
+							handleClear={handleClear}
+							handleFormSubmit={handleFormSubmit}
+						/>
+						<TwoColumnModel
+							isOpen={isModalOpen}
+							handleClose={handleCloseModal}
+							title="Select Item"
+							technicians={getworkshopitemmaintenance}
+							searchRef={SearchBox}
+							handleRowClick={handleRowClick}
+							firstColKey="titmcod"
+							secondColKey="titmdsc"
+							firstColWidth="100px"
+							secondColWidth="450px"
+							firstColAlign="center"
+							secondColAlign="left"
+						/>
+					</div>
+				</div>
+			</div>
+		</>
+	);
 }
 
 export default Item_Maintenance;
