@@ -11,7 +11,7 @@ import { isLoggedIn, getUserData, getOrganisationData } from "../../Auth";
 import CustomerModal from "./CustomerMaintenanceModal";
 import { useMutation } from "@tanstack/react-query";
 import { useTheme } from "../../../ThemeContext";
-// import { fetchGetItemMaintenance } from "../../../Redux/action";
+import { fetchGetWorkShopItemMaintenance } from "../../Redux/action";
 import { useSelector, useDispatch } from "react-redux";
 import CustomDropdown from "../../MainComponent/Dropdown/Dropdown";
 function formatToThreeDigits(number) {
@@ -71,18 +71,18 @@ function CustomerMaintenance() {
 		inputform31: "",
 		inputform32: "",
 	});
-	let getitemmaintenance = [];
 	// const {
-	// 	data: getitemmaintenance = [],
+	// 	data: getitemmaintenance,
 	// 	loading: getitemloading,
 	// 	error: getitemerror,
 	// } = useSelector((state) => state.getitemmaintenance);
-	// useEffect(() => {
-	// 	console.log("Code:", getitemmaintenance);
-	// 	// if (getitemmaintenance?.length === 0) {
-	// 	// 	dispatch(fetchGetItemMaintenance(organisation.code));
-	// 	// }
-	// }, [dispatch]);
+	const getitemmaintenance = [];
+	useEffect(() => {
+		console.log("Code:", getitemmaintenance);
+		if (getitemmaintenance?.length === 0) {
+			dispatch(fetchGetWorkShopItemMaintenance(organisation.code));
+		}
+	}, [dispatch]);
 	// useEffect(() => {
 	//   console.log("===============", newtypemaintenance);
 	//   if (newtypemaintenance) {
@@ -166,23 +166,23 @@ function CustomerMaintenance() {
 	const [selectedCompany, setSelectedCompany] = useState(null);
 	const handleCompanyChange = (selectedOption) => {
 		setSelectedCompany(selectedOption);
-		// console.log("Selected technician:", selectedOption);
+		console.log("Selected technician:", selectedOption);
 	};
 	const [selectedCategory, setSelectedCategory] = useState(null);
 	const handleCategoryChange = (selectedOption) => {
 		setSelectedCategory(selectedOption);
-		// console.log("Selected technician:", selectedOption);
+		console.log("Selected technician:", selectedOption);
 	};
 
 	const [selectedCapacity, setSelectedCapacity] = useState(null);
 	const handleCapacityChange = (selectedOption) => {
 		setSelectedCapacity(selectedOption);
-		// console.log("Selected technician:", selectedOption);
+		console.log("Selected technician:", selectedOption);
 	};
 	const [selectedType, setSelectedType] = useState(null);
 	const handleTypeChange = (selectedOption) => {
 		setSelectedType(selectedOption);
-		// console.log("Selected technician:", selectedOption);
+		console.log("Selected technician:", selectedOption);
 	};
 
 	const [dropdownKey, setDropdownKey] = useState(0);
@@ -206,7 +206,7 @@ function CustomerMaintenance() {
 	};
 	const handleFormSubmit = async (e) => {
 		e.preventDefault();
-		// dispatch(fetchGetItemMaintenance(organisation.code));
+		dispatch(fetchGetWorkShopItemMaintenance(organisation.code));
 		// dispatch(fetchNewTypeMaintenance(organisation.code));
 		// Basic validation
 		const checks = [
@@ -236,7 +236,7 @@ function CustomerMaintenance() {
 			AccountCodeform: formData.AccountCodeform,
 			Descriptionform: formData.Descriptionform,
 		};
-		// console.log("Form Data:", data);
+		console.log("Form Data:", data);
 		// Prepare form data for submission
 		const formDataa = new FormData();
 		formDataa.append("FItmCod", formData.AccountCodeform);
@@ -276,7 +276,7 @@ function CustomerMaintenance() {
 			if (response.data.error === 200) {
 				setTimeout(() => {
 					Code.current.focus();
-					// dispatch(fetchGetItemMaintenance(organisation.code));
+					dispatch(fetchGetWorkShopItemMaintenance(organisation.code));
 					// dispatch(fetchNewTypeMaintenance(organisation.code));
 				}, 500);
 
@@ -346,13 +346,13 @@ function CustomerMaintenance() {
 		// data
 		setHighlightedRowIndex(0);
 		settextdata("Customer Maintenance");
-		// dispatch(fetchGetItemMaintenance(organisation.code));
+		dispatch(fetchGetWorkShopItemMaintenance(organisation.code));
 
 		setModalOpen(false);
 	};
 
 	const handleDoubleClick = (e) => {
-		// dispatch(fetchGetItemMaintenance(organisation.code));
+		dispatch(fetchGetWorkShopItemMaintenance(organisation.code));
 		focusNextInput(Code);
 		console.log("====== handle double click=======");
 		setModalOpen(true);
@@ -859,8 +859,11 @@ function CustomerMaintenance() {
 														onDoubleClick={(e) => {
 															handleDoubleClick(e);
 															setTimeout(() => {
-																dispatch();
-																// fetchGetItemMaintenance(organisation.code)
+																dispatch(
+																	fetchGetWorkShopItemMaintenance(
+																		organisation.code
+																	)
+																);
 																focusNextInput(SearchBox);
 															}, 100);
 														}}
@@ -1057,14 +1060,14 @@ function CustomerMaintenance() {
 											</div>
 
 											<div className="row">
-												<div className="col-sm-3 label-adduser">Phone:</div>
+												<div className="col-sm-3 label-customer">Phone:</div>
 												<div className="col-sm-4">
 													<Form.Control
 														type="text"
 														id="inputform7"
 														placeholder="Phone"
 														name="inputform7"
-														className={`form-control-adduser ${
+														className={`form-control-customer ${
 															errors.inputform7 ? "border-red" : ""
 														}`}
 														style={{ textAlign: "left" }}
@@ -1108,14 +1111,14 @@ function CustomerMaintenance() {
 														}
 													/>
 												</div>
-												<div className="col-sm-2 label-adduser">Mobile:</div>
+												<div className="col-sm-2 label-customer">Mobile:</div>
 												<div className="col-sm-3">
 													<Form.Control
 														type="text"
 														id="inputform8"
 														placeholder="Mobile No"
 														name="inputform8"
-														className={`form-control-adduser ${
+														className={`form-control-customer ${
 															errors.inputform8 ? "border-red" : ""
 														}`}
 														style={{ textAlign: "left" }}
@@ -1162,14 +1165,14 @@ function CustomerMaintenance() {
 											</div>
 
 											<div className="row">
-												<div className="col-sm-3 label-adduser">CNIC:</div>
+												<div className="col-sm-3 label-customer">CNIC:</div>
 												<div className="col-sm-4">
 													<Form.Control
 														type="text"
 														id="inputform9"
 														placeholder="(e.g., 35201-9773413-3)"
 														name="inputform9"
-														className={`form-control-adduser ${
+														className={`form-control-customer ${
 															errors.inputform9 ? "border-red" : ""
 														}`}
 														style={{ textAlign: "left" }}
@@ -1488,7 +1491,7 @@ function CustomerMaintenance() {
 														id="inputform14"
 														placeholder="Phone No"
 														name="inputform14"
-														className={`form-control-adduser ${
+														className={`form-control-customer ${
 															errors.inputform14 ? "border-red" : ""
 														}`}
 														style={{ textAlign: "left" }}
@@ -1870,14 +1873,14 @@ function CustomerMaintenance() {
 												</div>
 											</div>
 											<div className="row">
-												<div className="col-sm-3 label-adduser">CNIC:</div>
+												<div className="col-sm-3 label-customer">CNIC:</div>
 												<div className="col-sm-4">
 													<Form.Control
 														type="text"
 														id="inputform24"
 														placeholder="(e.g., 35201-9773413-3)"
 														name="inputform24"
-														className={`form-control-adduser ${
+														className={`form-control-customer ${
 															errors.inputform24 ? "border-red" : ""
 														}`}
 														style={{ textAlign: "left" }}
@@ -1919,14 +1922,14 @@ function CustomerMaintenance() {
 														}
 													/>
 												</div>
-												<div className="col-sm-2 label-adduser">Mobile:</div>
+												<div className="col-sm-2 label-customer">Mobile:</div>
 												<div className="col-sm-3">
 													<Form.Control
 														type="text"
 														id="inputform25"
 														placeholder="Mobile No"
 														name="inputform25"
-														className={`form-control-adduser ${
+														className={`form-control-customer ${
 															errors.inputform25 ? "border-red" : ""
 														}`}
 														style={{ textAlign: "left" }}
@@ -2097,14 +2100,14 @@ function CustomerMaintenance() {
 												</div>
 											</div>
 											<div className="row">
-												<div className="col-sm-3 label-adduser">CNIC:</div>
+												<div className="col-sm-3 label-customer">CNIC:</div>
 												<div className="col-sm-4">
 													<Form.Control
 														type="text"
 														id="inputform30"
 														placeholder="(e.g., 35201-9773413-3)"
 														name="inputform30"
-														className={`form-control-adduser ${
+														className={`form-control-customer ${
 															errors.inputform30 ? "border-red" : ""
 														}`}
 														style={{ textAlign: "left" }}
@@ -2146,14 +2149,14 @@ function CustomerMaintenance() {
 														}
 													/>
 												</div>
-												<div className="col-sm-2 label-adduser">Mobile:</div>
+												<div className="col-sm-2 label-customer">Mobile:</div>
 												<div className="col-sm-3">
 													<Form.Control
 														type="text"
 														id="inputform31"
 														placeholder="Mobile No"
 														name="inputform31"
-														className={`form-control-adduser ${
+														className={`form-control-customer ${
 															errors.inputform31 ? "border-red" : ""
 														}`}
 														style={{ textAlign: "left" }}
