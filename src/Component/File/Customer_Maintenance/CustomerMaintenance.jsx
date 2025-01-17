@@ -2174,7 +2174,8 @@ function CustomerMaintenance() {
 																) {
 																	setAlertData({
 																		type: "error",
-																		message: "Mobile number must start with 03",
+																		message:
+																			"Mobile number must start with +923",
 																	});
 																	setTimeout(() => {
 																		setAlertData(null);
