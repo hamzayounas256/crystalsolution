@@ -799,7 +799,7 @@ export default function DailySaleReport() {
 	};
 
 	const firstColWidth = {
-		width: "7%",
+		width: "8%",
 	};
 	const secondColWidth = {
 		width: "5%",
@@ -808,13 +808,13 @@ export default function DailySaleReport() {
 		width: "4%",
 	};
 	const forthColWidth = {
-		width: "31%",
+		width: "30%",
 	};
 	const fifthColWidth = {
-		width: "27%",
+		width: "26%",
 	};
 	const sixthColWidth = {
-		width: "8%",
+		width: "9%",
 	};
 	const seventhColWidth = {
 		width: "6%",
@@ -845,9 +845,10 @@ export default function DailySaleReport() {
 
 	const contentStyle = {
 		backgroundColor: getcolor,
-		width: isSidebarVisible ? "calc(65vw - 0%)" : "65vw",
+		height: "100vh",
+		width: isSidebarVisible ? "calc(100vw - 5%)" : "100vw",
 		position: "relative",
-		top: "35%",
+		top: "50%",
 		left: isSidebarVisible ? "50%" : "50%",
 		transform: "translate(-50%, -50%)",
 		transition: isSidebarVisible
@@ -860,7 +861,7 @@ export default function DailySaleReport() {
 		overflowY: "hidden",
 		wordBreak: "break-word",
 		textAlign: "center",
-		maxWidth: "1200px",
+		maxWidth: "1100px",
 		fontSize: "15px",
 		fontStyle: "normal",
 		fontWeight: "400",
@@ -1707,7 +1708,8 @@ export default function DailySaleReport() {
 														}
 														style={{
 															backgroundColor: getcolor,
-															color: fontcolor,
+															color:
+																item["Amount"]?.[0] === "-" ? "red" : fontcolor,
 														}}
 													>
 														<td className="text-start" style={firstColWidth}>
