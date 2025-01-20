@@ -17,6 +17,7 @@ import { saveAs } from "file-saver";
 import "react-calendar/dist/Calendar.css";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchGetUser } from "../../Redux/action";
+
 import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -253,6 +254,9 @@ export default function DailySaleReport() {
 		const apiMainUrl = apiLinks + "/DailySaleReport.php";
 		setIsLoading(true);
 		const formMainData = new URLSearchParams({
+			// code: organisation.code,
+			// FLocCod: getLocationNumber,
+			// FYerDsc: getyeardescription,
 			code: "EMART",
 			FLocCod: "001",
 			FYerDsc: "2024-2024",
@@ -381,9 +385,20 @@ export default function DailySaleReport() {
 		dropdownIndicator: (base) => ({
 			...base,
 			padding: 0,
+			marginTop: "-5px",
 			fontSize: "18px",
 			display: "flex",
 			textAlign: "center !important",
+		}),
+		singleValue: (base) => ({
+			...base,
+			marginTop: "-5px",
+			textAlign: "left",
+			color: fontcolor,
+		}),
+		clearIndicator: (base) => ({
+			...base,
+			marginTop: "-5px",
 		}),
 	});
 
@@ -653,7 +668,9 @@ export default function DailySaleReport() {
 			type: "application/pdf",
 		});
 	};
-
+	useEffect(() => {
+		document.documentElement.style.setProperty("--background-color", getcolor);
+	}, [getcolor]);
 	const handleDownloadCSV = async () => {
 		const workbook = new ExcelJS.Workbook();
 		const worksheet = workbook.addWorksheet("Sheet1");
@@ -799,10 +816,10 @@ export default function DailySaleReport() {
 	};
 
 	const firstColWidth = {
-		width: "8%",
+		width: "7.75%",
 	};
 	const secondColWidth = {
-		width: "5%",
+		width: "5.25%",
 	};
 	const thirdColWidth = {
 		width: "4%",
@@ -811,10 +828,10 @@ export default function DailySaleReport() {
 		width: "30%",
 	};
 	const fifthColWidth = {
-		width: "26%",
+		width: "25%",
 	};
 	const sixthColWidth = {
-		width: "9%",
+		width: "10%",
 	};
 	const seventhColWidth = {
 		width: "6%",
@@ -845,10 +862,9 @@ export default function DailySaleReport() {
 
 	const contentStyle = {
 		backgroundColor: getcolor,
-		height: "100vh",
-		width: isSidebarVisible ? "calc(100vw - 5%)" : "100vw",
+		width: isSidebarVisible ? "calc(75vw - 0%)" : "75vw",
 		position: "relative",
-		top: "50%",
+		top: "35%",
 		left: isSidebarVisible ? "50%" : "50%",
 		transform: "translate(-50%, -50%)",
 		transition: isSidebarVisible
@@ -861,7 +877,7 @@ export default function DailySaleReport() {
 		overflowY: "hidden",
 		wordBreak: "break-word",
 		textAlign: "center",
-		maxWidth: "1100px",
+		maxWidth: "1200px",
 		fontSize: "15px",
 		fontStyle: "normal",
 		fontWeight: "400",
@@ -1709,7 +1725,9 @@ export default function DailySaleReport() {
 														style={{
 															backgroundColor: getcolor,
 															color:
-																item["Amount"]?.[0] === "-" ? "red" : fontcolor,
+																item["Sale Amount"]?.[0] === "-"
+																	? "red"
+																	: fontcolor,
 														}}
 													>
 														<td className="text-start" style={firstColWidth}>
@@ -1721,11 +1739,23 @@ export default function DailySaleReport() {
 														<td className="text-center" style={thirdColWidth}>
 															{item.Type}
 														</td>
-														<td className="text-start" style={forthColWidth}>
-															{item.Description}
+														<td
+															className="text-start"
+															style={forthColWidth}
+															title={item.Description}
+														>
+															{item.Description.length > 30
+																? `${item.Description.substring(0, 30)}...`
+																: item.Description}
 														</td>
-														<td className="text-start" style={fifthColWidth}>
-															{item.Customer}
+														<td
+															className="text-start"
+															style={fifthColWidth}
+															title={item.Customer}
+														>
+															{item.Customer.length > 25
+																? `${item.Customer.substring(0, 30)}...`
+																: item.Customer}
 														</td>
 														<td className="text-end" style={sixthColWidth}>
 															{item.Mobile}

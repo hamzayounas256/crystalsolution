@@ -17,6 +17,7 @@ import { saveAs } from "file-saver";
 import "react-calendar/dist/Calendar.css";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchGetUser } from "../../Redux/action";
+
 import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -235,6 +236,9 @@ export default function DailyPurchaseReport() {
 		const apiMainUrl = apiLinks + "/DailyPurchaseReport.php";
 		setIsLoading(true);
 		const formMainData = new URLSearchParams({
+			//   code: organisation.code,
+			//   FLocCod: getLocationNumber,
+			//   FYerDsc: getyeardescription,
 			code: "EMART",
 			FLocCod: "001",
 			FYerDsc: "2024-2024",
@@ -363,9 +367,20 @@ export default function DailyPurchaseReport() {
 		dropdownIndicator: (base) => ({
 			...base,
 			padding: 0,
+			marginTop: "-5px",
 			fontSize: "18px",
 			display: "flex",
 			textAlign: "center !important",
+		}),
+		singleValue: (base) => ({
+			...base,
+			marginTop: "-5px",
+			textAlign: "left",
+			color: fontcolor,
+		}),
+		clearIndicator: (base) => ({
+			...base,
+			marginTop: "-5px",
 		}),
 	});
 
@@ -782,19 +797,19 @@ export default function DailyPurchaseReport() {
 		width: "4%",
 	};
 	const forthColWidth = {
-		width: "32%",
+		width: "30%",
 	};
 	const fifthColWidth = {
-		width: "32%",
+		width: "29%",
 	};
 	const sixthColWidth = {
-		width: "6%",
+		width: "8%",
 	};
 	const seventhColWidth = {
-		width: "4%",
+		width: "5%",
 	};
 	const eighthColWidth = {
-		width: "8%",
+		width: "10%",
 	};
 
 	useHotkeys("s", fetchDailyPurchaseReport);
@@ -816,10 +831,9 @@ export default function DailyPurchaseReport() {
 
 	const contentStyle = {
 		backgroundColor: getcolor,
-		height: "100vh",
-		width: isSidebarVisible ? "calc(100vw - 5%)" : "100vw",
+		width: isSidebarVisible ? "calc(75vw - 0%)" : "75vw",
 		position: "relative",
-		top: "50%",
+		top: "40%",
 		left: isSidebarVisible ? "50%" : "50%",
 		transform: "translate(-50%, -50%)",
 		transition: isSidebarVisible
@@ -832,14 +846,16 @@ export default function DailyPurchaseReport() {
 		overflowY: "hidden",
 		wordBreak: "break-word",
 		textAlign: "center",
-		maxWidth: "1100px",
+		maxWidth: "1000px",
 		fontSize: "15px",
 		fontStyle: "normal",
 		fontWeight: "400",
 		lineHeight: "23px",
 		fontFamily: '"Poppins", sans-serif',
 	};
-
+	useEffect(() => {
+		document.documentElement.style.setProperty("--background-color", getcolor);
+	}, [getcolor]);
 	const [isFilterApplied, setIsFilterApplied] = useState(false);
 	useEffect(() => {
 		if (isFilterApplied || tableData.length > 0) {
@@ -1552,7 +1568,7 @@ export default function DailyPurchaseReport() {
 									fontSize: "12px",
 									width: "100%",
 									position: "relative",
-									paddingRight: "2%",
+									// paddingRight: "2%",
 								}}
 							>
 								<thead
@@ -1607,7 +1623,7 @@ export default function DailyPurchaseReport() {
 								backgroundColor: textColor,
 								borderBottom: `1px solid ${fontcolor}`,
 								overflowY: "auto",
-								maxHeight: "45vh",
+								maxHeight: "53vh",
 								width: "100%",
 								wordBreak: "break-word",
 							}}
@@ -1676,7 +1692,9 @@ export default function DailyPurchaseReport() {
 														style={{
 															backgroundColor: getcolor,
 															color:
-																item["Amount"]?.[0] === "-" ? "red" : fontcolor,
+																item["Pur Amount"]?.[0] === "-"
+																	? "red"
+																	: fontcolor,
 														}}
 													>
 														<td className="text-start" style={firstColWidth}>
@@ -1688,11 +1706,23 @@ export default function DailyPurchaseReport() {
 														<td className="text-center" style={thirdColWidth}>
 															{item.Type}
 														</td>
-														<td className="text-start" style={forthColWidth}>
-															{item.Description}
+														<td
+															className="text-start"
+															style={forthColWidth}
+															title={item.Description || ""}
+														>
+															{item.Description.length > 30
+																? `${item.Description.substring(0, 30)}...`
+																: item.Description}
 														</td>
-														<td className="text-start" style={fifthColWidth}>
-															{item.Supplier}
+														<td
+															className="text-start"
+															style={fifthColWidth}
+															title={item.Supplier || ""}
+														>
+															{item.Supplier && item.Supplier.length > 30
+																? `${item.Supplier.substring(0, 30)}...`
+																: item.Supplier || " "}
 														</td>
 														<td className="text-end" style={sixthColWidth}>
 															{item.Rate}
@@ -1747,7 +1777,7 @@ export default function DailyPurchaseReport() {
 							borderTop: `1px solid ${fontcolor}`,
 							height: "24px",
 							display: "flex",
-							paddingRight: "1.4%",
+							paddingRight: "1.3%",
 						}}
 					>
 						<div
