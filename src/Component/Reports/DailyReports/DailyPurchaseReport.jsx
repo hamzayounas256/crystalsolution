@@ -1518,7 +1518,7 @@ export default function DailyPurchaseReport() {
 								<div>
 									<label for="searchInput">
 										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
-											Search:&ensp;
+											Search:&nbsp;&nbsp;
 										</span>
 									</label>
 								</div>
