@@ -73,6 +73,8 @@ export default function PayableAging() {
 		getLocationNumber,
 		getyeardescription,
 		getfromdate,
+		getdatafontsize,
+		getfontstyle,
 		gettodate,
 	} = useTheme();
 
@@ -187,12 +189,14 @@ export default function PayableAging() {
 		const apiMainUrl = apiLinks + "/PayableAging.php";
 		setIsLoading(true);
 		const formMainData = new URLSearchParams({
-			code: "EMART",
+			code: organisation.code,
+			// FLocCod: getLocationNumber,
 			FLocCod: "001",
+			// FYerDsc: getyeardescription,
 			FYerDsc: "2024-2024",
 			// FIntDat: fromInputDate,
 			FRepDat: toInputDate,
-			FSchTxt: "",
+			FSchTxt: searchQuery,
 		}).toString();
 
 		axios
@@ -253,11 +257,6 @@ export default function PayableAging() {
 		setfromInputDate(formatDate(firstDateOfCurrentMonth));
 	}, []);
 
-	const handleTransactionTypeChange = (event) => {
-		const selectedTransactionType = event.target.value;
-		settransectionType(selectedTransactionType);
-	};
-
 	const exportPDFHandler = () => {
 		const doc = new jsPDF({ orientation: "landscape" });
 		const rows = tableData.map((item) => [
@@ -284,25 +283,25 @@ export default function PayableAging() {
 		]);
 		const headers = [
 			"Code",
-			"Customer",
-			"Amt 1",
-			"Amt 2",
-			"Amt 3",
-			"Amt 4",
-			"Amt 5",
-			"Amt 6",
-			"Total",
+			"Description",
+			"0 - 30",
+			"31 - 60",
+			"61 - 90",
+			"91 - 120",
+			"121 - 150",
+			"150+",
+			"Balance",
 		];
-		const columnWidths = [20, 80, 20, 20, 20, 20, 20, 20, 20];
+		const columnWidths = [25, 80, 25, 25, 25, 25, 25, 25, 25];
 		const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
 		const pageHeight = doc.internal.pageSize.height;
 		const paddingTop = 15;
 		doc.setFont("verdana");
-		doc.setFontSize(10);
+		doc.setFontSize(parseInt(getdatafontsize));
 
 		const addTableHeaders = (startX, startY) => {
 			doc.setFont("bold");
-			doc.setFontSize(10);
+			doc.setFontSize(parseInt(getdatafontsize));
 			headers.forEach((header, index) => {
 				const cellWidth = columnWidths[index];
 				const cellHeight = 6;
@@ -316,15 +315,15 @@ export default function PayableAging() {
 				doc.text(header, cellX, cellY, { align: "center" });
 				startX += columnWidths[index];
 			});
-			doc.setFont("verdana");
-			doc.setFontSize(10);
+			doc.setFont(getfontstyle);
+			doc.setFontSize(parseInt(getdatafontsize));
 		};
 
 		const addTableRows = (startX, startY, startIndex, endIndex) => {
-			const rowHeight = 5;
-			const fontSize = 8;
+			const rowHeight = 6;
+			const fontSize = parseInt(getdatafontsize);
 			const boldFont = "verdana";
-			const normalFont = "verdana";
+			const normalFont = getfontstyle;
 			const tableWidth = getTotalTableWidth();
 			doc.setFontSize(fontSize);
 
@@ -334,11 +333,6 @@ export default function PayableAging() {
 				const isRedRow = row[0] && parseInt(row[0]) > 100;
 				let textColor = [0, 0, 0];
 				let fontName = normalFont;
-
-				// if (isRedRow) {
-				// 	textColor = [255, 0, 0];
-				// 	fontName = boldFont;
-				// }
 
 				doc.setDrawColor(0);
 				doc.rect(
@@ -417,7 +411,7 @@ export default function PayableAging() {
 			return paddingTop;
 		};
 
-		const rowsPerPage = 29;
+		const rowsPerPage = 23;
 
 		const handlePagination = () => {
 			const addTitle = (
@@ -426,7 +420,7 @@ export default function PayableAging() {
 				time,
 				pageNumber,
 				startY,
-				titleFontSize = 16,
+				titleFontSize = 18,
 				dateTimeFontSize = 8,
 				pageNumberFontSize = 8
 			) => {
@@ -457,26 +451,37 @@ export default function PayableAging() {
 			let pageNumber = 1;
 
 			while (currentPageIndex * rowsPerPage < rows.length) {
-				addTitle(comapnyname, "", "", pageNumber, startY, 20, 10);
+				// Add company name and title
+				addTitle(comapnyname, "", "", pageNumber, startY, 18);
 				startY += 7;
 				addTitle(
-					`Payable Aging Rep Date: ${toInputDate}`,
+					`Payable Aging Report`,
 					"",
 					"",
 					pageNumber,
 					startY,
-					14
+					parseInt(getdatafontsize)
 				);
 				startY += 13;
 
-				const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
-				const labelsY = startY + 2;
-				doc.setFontSize(14);
-				doc.setFont("verdana", "bold");
-				doc.setFont("verdana", "normal");
-				startY += 0;
+				// New additional line before the table
+				const currentDate = toInputDate ? `Rep Date: ${toInputDate}` : ""; // Left side
+				const searchTerm = searchQuery ? `Search: ${searchQuery}` : ""; // Right side
+				const labelXLeft = doc.internal.pageSize.width - totalWidth;
+				const labelXRight = doc.internal.pageSize.width - totalWidth + 240;
 
-				addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 39);
+				// Date on the left
+				doc.setFontSize(parseInt(getdatafontsize));
+				doc.text(currentDate, labelXLeft, startY);
+
+				// Search term on the right
+				doc.text(searchTerm, labelXRight, startY, { align: "right" });
+
+				startY += 5; // Adjust the Y-position for the next section
+				addTableHeaders(
+					(doc.internal.pageSize.width - totalWidth) / 2,
+					startY + 6
+				);
 				const startIndex = currentPageIndex * rowsPerPage;
 				const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
 				startY = addTableRows(
@@ -513,7 +518,7 @@ export default function PayableAging() {
 		const time = getCurrentTime();
 
 		handlePagination();
-		doc.save("PayableAging.pdf");
+		doc.save(`PayableAggingRep${toInputDate}.pdf`);
 
 		const pdfBlob = doc.output("blob");
 		const pdfFile = new File([pdfBlob], "table_data.pdf", {
@@ -526,7 +531,7 @@ export default function PayableAging() {
 		const worksheet = workbook.addWorksheet("Sheet1");
 		const numColumns = 9;
 		const titleStyle = {
-			font: { bold: true, size: 12 },
+			font: { bold: true, size: 18 },
 			alignment: { horizontal: "center" },
 		};
 		const columnAlignments = [
@@ -541,14 +546,20 @@ export default function PayableAging() {
 			"right",
 		];
 		worksheet.addRow([]);
-		[comapnyname, `Payable Aging Rep Date ${toInputDate}`].forEach(
-			(title, index) => {
-				worksheet.addRow([title]).eachCell((cell) => (cell.style = titleStyle));
-				worksheet.mergeCells(
-					`A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
-				);
-			}
-		);
+		[comapnyname, `Payable Aging Report`].forEach((title, index) => {
+			worksheet.addRow([title]).eachCell((cell) => (cell.style = titleStyle));
+			worksheet.mergeCells(
+				`A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
+			);
+		});
+		worksheet.addRow([]);
+		worksheet.addRow([
+			"",
+			`Rep Date: ${toInputDate}`,
+			"",
+			"",
+			searchQuery ? `Search: ${searchQuery}` : "",
+		]);
 		worksheet.addRow([]);
 		const headerStyle = {
 			font: { bold: true },
@@ -567,14 +578,14 @@ export default function PayableAging() {
 		};
 		const headers = [
 			"Code",
-			"Customer",
-			"Amt 1",
-			"Amt 2",
-			"Amt 3",
-			"Amt 4",
-			"Amt 5",
-			"Amt 6",
-			"Total",
+			"Description",
+			"0 - 30",
+			"31 - 60",
+			"61 - 90",
+			"91 - 120",
+			"121 - 150",
+			"151+",
+			"Balance",
 		];
 		const headerRow = worksheet.addRow(headers);
 		headerRow.eachCell((cell) => {
@@ -607,13 +618,13 @@ export default function PayableAging() {
 		totalRow.eachCell((cell) => {
 			cell.font = { bold: true };
 		});
-		[10, 45, 10, 10, 10, 10, 10, 10, 10].forEach((width, index) => {
+		[12, 45, 12, 12, 12, 12, 12, 12, 12].forEach((width, index) => {
 			worksheet.getColumn(index + 1).width = width;
 		});
 		worksheet.eachRow((row, rowNumber) => {
 			if (rowNumber > 5) {
 				row.eachCell((cell, colNumber) => {
-					if (rowNumber === 5) {
+					if (rowNumber === 7) {
 						cell.alignment = { horizontal: "center" };
 					} else {
 						cell.alignment = { horizontal: columnAlignments[colNumber - 1] };
@@ -631,7 +642,7 @@ export default function PayableAging() {
 		const blob = new Blob([buffer], {
 			type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 		});
-		saveAs(blob, "PayableAging.xlsx");
+		saveAs(blob, `PayableAggingRep${toInputDate}.xlsx`);
 	};
 
 	const dispatch = useDispatch();
@@ -668,28 +679,28 @@ export default function PayableAging() {
 		width: "9%",
 	};
 	const secondColWidth = {
-		width: "35%",
+		width: "27%",
 	};
 	const thirdColWidth = {
-		width: "8%",
+		width: "9%",
 	};
 	const forthColWidth = {
-		width: "8%",
+		width: "9%",
 	};
 	const fifthColWidth = {
-		width: "8%",
+		width: "9%",
 	};
 	const sixthColWidth = {
-		width: "8%",
+		width: "9%",
 	};
 	const seventhColWidth = {
-		width: "8%",
+		width: "9%",
 	};
 	const eighthColWidth = {
-		width: "8%",
+		width: "9%",
 	};
 	const ninthColWidth = {
-		width: "8%",
+		width: "10%",
 	};
 
 	useHotkeys("s", fetchPayableAging);
@@ -726,12 +737,12 @@ export default function PayableAging() {
 		overflowY: "hidden",
 		wordBreak: "break-word",
 		textAlign: "center",
-		maxWidth: "900px",
-		fontSize: "15px",
+		maxWidth: "1100px",
+		fontSize: getdatafontsize,
 		fontStyle: "normal",
 		fontWeight: "400",
 		lineHeight: "23px",
-		fontFamily: '"Poppins", sans-serif',
+		fontFamily: getfontstyle,
 	};
 
 	const [isFilterApplied, setIsFilterApplied] = useState(false);
@@ -859,7 +870,9 @@ export default function PayableAging() {
 			focusNextElement(searchRef, selectButtonRef);
 		}
 	};
-
+	useEffect(() => {
+		document.documentElement.style.setProperty("--background-color", getcolor);
+	}, [getcolor]);
 	return (
 		<>
 			<ToastContainer />
@@ -900,7 +913,9 @@ export default function PayableAging() {
 									}}
 								>
 									<label htmlFor="toDatePicker">
-										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+										<span
+											style={{ fontSize: getdatafontsize, fontWeight: "bold" }}
+										>
 											Rep Date:&nbsp;&nbsp;
 										</span>
 									</label>
@@ -931,7 +946,7 @@ export default function PayableAging() {
 											paddingLeft: "5px",
 											outline: "none",
 											border: "none",
-											fontSize: "12px",
+											fontSize: getdatafontsize,
 											backgroundColor: getcolor,
 											color: fontcolor,
 											opacity: selectedRadio === "custom" ? 1 : 0.5,
@@ -969,7 +984,7 @@ export default function PayableAging() {
 																? "pointer"
 																: "default",
 														marginLeft: "18px",
-														fontSize: "12px",
+														fontSize: getdatafontsize,
 														color: fontcolor,
 														opacity: selectedRadio === "custom" ? 1 : 0.5,
 													}}
@@ -989,7 +1004,9 @@ export default function PayableAging() {
 							>
 								<div>
 									<label for="searchInput">
-										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+										<span
+											style={{ fontSize: getdatafontsize, fontWeight: "bold" }}
+										>
 											Search:&nbsp;&nbsp;
 										</span>
 									</label>
@@ -1005,7 +1022,7 @@ export default function PayableAging() {
 										style={{
 											width: "135px",
 											height: "24px",
-											fontSize: "12px",
+											fontSize: getdatafontsize,
 											color: fontcolor,
 											backgroundColor: getcolor,
 											border: `1px solid ${fontcolor}`,
@@ -1037,7 +1054,7 @@ export default function PayableAging() {
 								className="myTable"
 								id="table"
 								style={{
-									fontSize: "12px",
+									fontSize: getdatafontsize,
 									width: "100%",
 									position: "relative",
 								}}
@@ -1062,28 +1079,28 @@ export default function PayableAging() {
 											Code
 										</td>
 										<td className="border-dark" style={secondColWidth}>
-											Customer
+											Description
 										</td>
 										<td className="border-dark" style={thirdColWidth}>
-											Amt 1
+											0 - 30
 										</td>
 										<td className="border-dark" style={forthColWidth}>
-											Amt 2
+											31 - 60
 										</td>
 										<td className="border-dark" style={fifthColWidth}>
-											Amt 3
+											61 - 90
 										</td>
 										<td className="border-dark" style={sixthColWidth}>
-											Amt 4
+											91 - 120
 										</td>
 										<td className="border-dark" style={seventhColWidth}>
-											Amt 5
+											121 - 150
 										</td>
 										<td className="border-dark" style={eighthColWidth}>
-											Amt 6
+											151+
 										</td>
 										<td className="border-dark" style={ninthColWidth}>
-											Total
+											Balance
 										</td>
 									</tr>
 								</thead>
@@ -1105,7 +1122,7 @@ export default function PayableAging() {
 								className="myTable"
 								id="tableBody"
 								style={{
-									fontSize: "12px",
+									fontSize: getdatafontsize,
 									width: "100%",
 									position: "relative",
 								}}
