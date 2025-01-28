@@ -281,6 +281,7 @@ export default function PayableAging() {
 			String(totalAmt6),
 			String(total),
 		]);
+
 		const headers = [
 			"Code",
 			"Description",
@@ -296,11 +297,11 @@ export default function PayableAging() {
 		const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
 		const pageHeight = doc.internal.pageSize.height;
 		const paddingTop = 15;
-		doc.setFont("verdana");
+		doc.setFont(getfontstyle, "normal");
 		doc.setFontSize(parseInt(getdatafontsize));
 
 		const addTableHeaders = (startX, startY) => {
-			doc.setFont("bold");
+			doc.setFont(getfontstyle, "bold");
 			doc.setFontSize(parseInt(getdatafontsize));
 			headers.forEach((header, index) => {
 				const cellWidth = columnWidths[index];
@@ -315,20 +316,21 @@ export default function PayableAging() {
 				doc.text(header, cellX, cellY, { align: "center" });
 				startX += columnWidths[index];
 			});
-			doc.setFont(getfontstyle);
+			doc.setFont(getfontstyle, "normal");
 			doc.setFontSize(parseInt(getdatafontsize));
 		};
 
 		const addTableRows = (startX, startY, startIndex, endIndex) => {
 			const rowHeight = 6;
 			const fontSize = parseInt(getdatafontsize);
-			const boldFont = "verdana";
+			const boldFont = getfontstyle;
 			const normalFont = getfontstyle;
 			const tableWidth = getTotalTableWidth();
 			doc.setFontSize(fontSize);
 
 			for (let i = startIndex; i < endIndex; i++) {
 				const row = rows[i];
+				const isTotalRow = i === rows.length - 1;
 				const isOddRow = i % 2 !== 0;
 				const isRedRow = row[0] && parseInt(row[0]) > 100;
 				let textColor = [0, 0, 0];
@@ -347,8 +349,16 @@ export default function PayableAging() {
 					const cellX = startX + 2;
 					doc.setTextColor(textColor[0], textColor[1], textColor[2]);
 					doc.setFont(fontName, "normal");
-					const cellValue = String(cell);
 
+					if (isTotalRow) {
+						doc.setFont(boldFont, "bold");
+						textColor = [0, 0, 0]; // Keep the text color black
+					} else {
+						doc.setFont(normalFont, "normal");
+					}
+
+					doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+					const cellValue = String(cell);
 					if (
 						cellIndex === 2 ||
 						cellIndex === 3 ||
@@ -392,7 +402,7 @@ export default function PayableAging() {
 			const lineY = pageHeight - 15;
 			doc.setLineWidth(0.3);
 			doc.line(lineX, lineY, lineX + lineWidth, lineY);
-			const headingFontSize = 12;
+			const headingFontSize = parseInt(getdatafontsize);
 			const headingX = lineX + 2;
 			const headingY = lineY + 5;
 			doc.setFontSize(headingFontSize);
@@ -411,7 +421,7 @@ export default function PayableAging() {
 			return paddingTop;
 		};
 
-		const rowsPerPage = 23;
+		const rowsPerPage = 24;
 
 		const handlePagination = () => {
 			const addTitle = (
@@ -452,32 +462,39 @@ export default function PayableAging() {
 
 			while (currentPageIndex * rowsPerPage < rows.length) {
 				// Add company name and title
+				doc.setFont(getfontstyle, "bold");
 				addTitle(comapnyname, "", "", pageNumber, startY, 18);
+				doc.setFont(getfontstyle, "normal");
 				startY += 7;
 				addTitle(
-					`Payable Aging Report`,
+					`Payable Agging Report Rep Date: ${toInputDate}`,
 					"",
 					"",
 					pageNumber,
 					startY,
 					parseInt(getdatafontsize)
 				);
-				startY += 13;
+				startY += 10;
 
 				// New additional line before the table
-				const currentDate = toInputDate ? `Rep Date: ${toInputDate}` : ""; // Left side
-				const searchTerm = searchQuery ? `Search: ${searchQuery}` : ""; // Right side
-				const labelXLeft = doc.internal.pageSize.width - totalWidth;
-				const labelXRight = doc.internal.pageSize.width - totalWidth + 240;
+				// const currentDate = toInputDate ? `` : ""; // Left side
+				const searchWord = searchQuery ? "Search: " : "";
+				const searchTerm = searchQuery ? `${searchQuery}` : "";
+				// const labelXLeft = doc.internal.pageSize.width - totalWidth;
+				const labelXRightWord = doc.internal.pageSize.width - totalWidth + 230;
+				const labelXRightTerm = doc.internal.pageSize.width - totalWidth + 245;
 
 				// Date on the left
 				doc.setFontSize(parseInt(getdatafontsize));
-				doc.text(currentDate, labelXLeft, startY);
+				// doc.text(currentDate, labelXLeft, startY);
 
 				// Search term on the right
-				doc.text(searchTerm, labelXRight, startY, { align: "right" });
+				doc.setFont(getfontstyle, "bold");
+				doc.text(searchWord, labelXRightWord, startY);
+				doc.setFont(getfontstyle, "normal");
+				doc.text(searchTerm, labelXRightTerm, startY);
 
-				startY += 5; // Adjust the Y-position for the next section
+				// startY += 2; // Adjust the Y-position for the next section
 				addTableHeaders(
 					(doc.internal.pageSize.width - totalWidth) / 2,
 					startY + 6
@@ -546,21 +563,45 @@ export default function PayableAging() {
 			"right",
 		];
 		worksheet.addRow([]);
-		[comapnyname, `Payable Aging Report`].forEach((title, index) => {
-			worksheet.addRow([title]).eachCell((cell) => (cell.style = titleStyle));
-			worksheet.mergeCells(
-				`A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
-			);
-		});
+		[comapnyname, `Payable Agging Report Rep Date: ${toInputDate}`].forEach(
+			(title, index) => {
+				worksheet.addRow([title]).eachCell((cell) => {
+					cell.style = {
+						font: {
+							bold: index === 0 ? true : false,
+							size: index === 0 ? 18 : parseInt(getdatafontsize),
+						},
+						alignment: { horizontal: "center" },
+					};
+				});
+				worksheet.mergeCells(
+					`A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
+				);
+			}
+		);
 		worksheet.addRow([]);
-		worksheet.addRow([
-			"",
-			`Rep Date: ${toInputDate}`,
-			"",
-			"",
-			searchQuery ? `Search: ${searchQuery}` : "",
-		]);
-		worksheet.addRow([]);
+		worksheet
+			.addRow([
+				"",
+				"",
+				"",
+				"",
+				"",
+				"",
+				"",
+				searchQuery ? `Search:` : "",
+				searchQuery ? `${searchQuery}` : "",
+			])
+			.eachCell((cell, colNumber) => {
+				if (colNumber === 8 && searchQuery) {
+					// Target the cell containing "Search:"
+					cell.font = {
+						bold: true,
+						size: parseInt(getdatafontsize), // Apply dynamic font size if required
+					};
+				}
+			});
+		// worksheet.addRow([]);
 		const headerStyle = {
 			font: { bold: true },
 			alignment: { horizontal: "center" },
@@ -589,7 +630,14 @@ export default function PayableAging() {
 		];
 		const headerRow = worksheet.addRow(headers);
 		headerRow.eachCell((cell) => {
-			cell.style = { ...headerStyle, alignment: { horizontal: "center" } };
+			cell.style = {
+				...headerStyle,
+				alignment: { horizontal: "center" },
+				font: {
+					bold: true,
+					size: parseInt(getdatafontsize),
+				},
+			};
 		});
 		tableData.forEach((item) => {
 			worksheet.addRow([
@@ -624,7 +672,7 @@ export default function PayableAging() {
 		worksheet.eachRow((row, rowNumber) => {
 			if (rowNumber > 5) {
 				row.eachCell((cell, colNumber) => {
-					if (rowNumber === 7) {
+					if (rowNumber === 6) {
 						cell.alignment = { horizontal: "center" };
 					} else {
 						cell.alignment = { horizontal: columnAlignments[colNumber - 1] };
@@ -638,6 +686,7 @@ export default function PayableAging() {
 				});
 			}
 		});
+		worksheet.getRow(2).height = 20;
 		const buffer = await workbook.xlsx.writeBuffer();
 		const blob = new Blob([buffer], {
 			type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -886,7 +935,7 @@ export default function PayableAging() {
 						borderRadius: "9px",
 					}}
 				>
-					<NavComponent textdata="Payable Aging" />
+					<NavComponent textdata="Payable Agging Report" />
 
 					{/* ------------1st row */}
 					<div
