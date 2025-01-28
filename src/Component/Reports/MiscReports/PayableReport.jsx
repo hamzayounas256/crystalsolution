@@ -65,6 +65,8 @@ export default function PayableReport() {
 		getyeardescription,
 		getfromdate,
 		gettodate,
+		getdatafontsize,
+		getfontstyle,
 	} = useTheme();
 
 	const comapnyname = organisation.description;
@@ -260,6 +262,9 @@ export default function PayableReport() {
 			}
 		}
 	};
+	useEffect(() => {
+		document.documentElement.style.setProperty("--background-color", getcolor);
+	}, [getcolor]);
 	const handleKeyPress = (e, nextInputRef) => {
 		if (e.key === "Enter") {
 			e.preventDefault();
@@ -369,9 +374,9 @@ export default function PayableReport() {
 			FFnlDat: toInputDate,
 			FTrnTyp: transectionType,
 			FAccCod: saleType,
-			code: "EMART",
-			FLocCod: "001",
-			FYerDsc: "2024-2024",
+			code: organisation.code,
+			FLocCod: getLocationNumber,
+			FYerDsc: getyeardescription,
 		};
 		console.log(data);
 		document.getElementById(
@@ -384,13 +389,15 @@ export default function PayableReport() {
 		const apiUrl = apiLinks + "/PayableReport.php";
 		setIsLoading(true);
 		const formData = new URLSearchParams({
-			code: "EMART",
+			code: organisation.code,
+			// FLocCod: getLocationNumber,
 			FLocCod: "001",
+			// FYerDsc: getyeardescription,
 			FYerDsc: "2024-2024",
 			FIntDat: fromInputDate,
 			FFnlDat: toInputDate,
 			FRepTyp: transectionType,
-			FSchTxt: "",
+			FSchTxt: searchQuery,
 		}).toString();
 
 		axios
@@ -473,7 +480,7 @@ export default function PayableReport() {
 			<components.Option {...props}>
 				<div
 					style={{
-						fontSize: "12px",
+						fontSize: parseInt(getdatafontsize),
 						paddingBottom: "5px",
 						lineHeight: "3px",
 						color: "black",
@@ -491,7 +498,7 @@ export default function PayableReport() {
 			height: "24px",
 			minHeight: "unset",
 			width: 418,
-			fontSize: "12px",
+			fontSize: parseInt(getdatafontsize),
 			backgroundColor: getcolor,
 			color: fontcolor,
 			borderRadius: 0,
@@ -508,7 +515,7 @@ export default function PayableReport() {
 		dropdownIndicator: (base) => ({
 			...base,
 			padding: 0,
-			fontSize: "18px",
+			fontSize: parseInt(getdatafontsize),
 			display: "flex",
 			textAlign: "center !important",
 		}),
@@ -537,6 +544,7 @@ export default function PayableReport() {
 			String(totalCredit),
 			String(closingBalance),
 		]);
+
 		const headers = [
 			"Code",
 			"Description",
@@ -545,16 +553,16 @@ export default function PayableReport() {
 			"Credit",
 			"Balance",
 		];
-		const columnWidths = [18, 80, 20, 20, 20, 25];
+		const columnWidths = [23, 80, 25, 25, 25, 25];
 		const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
 		const pageHeight = doc.internal.pageSize.height;
 		const paddingTop = 15;
-		doc.setFont("verdana");
-		doc.setFontSize(10);
+		doc.setFont(getfontstyle, "normal");
+		doc.setFontSize(parseInt(getdatafontsize));
 
 		const addTableHeaders = (startX, startY) => {
-			doc.setFont("bold");
-			doc.setFontSize(10);
+			doc.setFont(getfontstyle, "bold");
+			doc.setFontSize(parseInt(getdatafontsize));
 			headers.forEach((header, index) => {
 				const cellWidth = columnWidths[index];
 				const cellHeight = 6;
@@ -568,29 +576,25 @@ export default function PayableReport() {
 				doc.text(header, cellX, cellY, { align: "center" });
 				startX += columnWidths[index];
 			});
-			doc.setFont("verdana");
-			doc.setFontSize(10);
+			doc.setFont(getfontstyle, "normal");
+			doc.setFontSize(parseInt(getdatafontsize));
 		};
 
 		const addTableRows = (startX, startY, startIndex, endIndex) => {
-			const rowHeight = 5;
-			const fontSize = 8;
-			const boldFont = "verdana";
-			const normalFont = "verdana";
+			const rowHeight = 6;
+			const fontSize = parseInt(getdatafontsize);
+			const boldFont = getfontstyle;
+			const normalFont = getfontstyle;
 			const tableWidth = getTotalTableWidth();
 			doc.setFontSize(fontSize);
 
 			for (let i = startIndex; i < endIndex; i++) {
 				const row = rows[i];
+				const isTotalRow = i === rows.length - 1;
 				const isOddRow = i % 2 !== 0;
 				const isRedRow = row[0] && parseInt(row[0]) > 100;
 				let textColor = [0, 0, 0];
 				let fontName = normalFont;
-
-				if (isRedRow) {
-					textColor = [255, 0, 0];
-					fontName = boldFont;
-				}
 
 				doc.setDrawColor(0);
 				doc.rect(
@@ -605,8 +609,16 @@ export default function PayableReport() {
 					const cellX = startX + 2;
 					doc.setTextColor(textColor[0], textColor[1], textColor[2]);
 					doc.setFont(fontName, "normal");
-					const cellValue = String(cell);
 
+					if (isTotalRow) {
+						doc.setFont(boldFont, "bold");
+						textColor = [0, 0, 0]; // Keep the text color black
+					} else {
+						doc.setFont(normalFont, "normal");
+					}
+
+					doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+					const cellValue = String(cell);
 					if (
 						cellIndex === 2 ||
 						cellIndex === 3 ||
@@ -647,7 +659,7 @@ export default function PayableReport() {
 			const lineY = pageHeight - 15;
 			doc.setLineWidth(0.3);
 			doc.line(lineX, lineY, lineX + lineWidth, lineY);
-			const headingFontSize = 12;
+			const headingFontSize = parseInt(getdatafontsize);
 			const headingX = lineX + 2;
 			const headingY = lineY + 5;
 			doc.setFontSize(headingFontSize);
@@ -666,7 +678,7 @@ export default function PayableReport() {
 			return paddingTop;
 		};
 
-		const rowsPerPage = 46;
+		const rowsPerPage = 39;
 
 		const handlePagination = () => {
 			const addTitle = (
@@ -675,7 +687,7 @@ export default function PayableReport() {
 				time,
 				pageNumber,
 				startY,
-				titleFontSize = 16,
+				titleFontSize = 18,
 				dateTimeFontSize = 8,
 				pageNumberFontSize = 8
 			) => {
@@ -706,7 +718,10 @@ export default function PayableReport() {
 			let pageNumber = 1;
 
 			while (currentPageIndex * rowsPerPage < rows.length) {
-				addTitle(comapnyname, "", "", pageNumber, startY, 20, 10);
+				// Add company name and title
+				doc.setFont(getfontstyle, "bold");
+				addTitle(comapnyname, "", "", pageNumber, startY, 18);
+				doc.setFont(getfontstyle, "normal");
 				startY += 7;
 				addTitle(
 					`Payable Report From: ${fromInputDate} To: ${toInputDate}`,
@@ -714,18 +729,41 @@ export default function PayableReport() {
 					"",
 					pageNumber,
 					startY,
-					14
+					parseInt(getdatafontsize)
 				);
-				startY += 13;
+				startY += 10;
 
-				const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
-				const labelsY = startY + 2;
-				doc.setFontSize(14);
-				doc.setFont("verdana", "bold");
-				doc.setFont("verdana", "normal");
-				startY += 0;
+				// New additional line before the table
+				const typeWord = transectionType ? "Type: " : ""; // Left side
+				const typeTerm = transectionType ? transectionType : ""; // Left side
 
-				addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 39);
+				const searchWord = searchQuery ? "Search: " : "";
+				const searchTerm = searchQuery ? searchQuery : "";
+
+				const labelXLeftWord = doc.internal.pageSize.width - totalWidth;
+				const labelXLeftTerm = doc.internal.pageSize.width - totalWidth + 15;
+
+				const labelXRightWord = doc.internal.pageSize.width - totalWidth + 160;
+				const labelXRightTerm = doc.internal.pageSize.width - totalWidth + 175;
+
+				// Date on the left
+				doc.setFontSize(parseInt(getdatafontsize));
+				// doc.text(currentDate, labelXLeft, startY);
+
+				// Search term on the right
+				doc.setFont(getfontstyle, "bold");
+				doc.text(searchWord, labelXRightWord, startY);
+				doc.text(typeWord, labelXLeftWord, startY);
+
+				doc.setFont(getfontstyle, "normal");
+				doc.text(searchTerm, labelXRightTerm, startY);
+				doc.text(typeTerm, labelXLeftTerm, startY);
+
+				// startY += 2; // Adjust the Y-position for the next section
+				addTableHeaders(
+					(doc.internal.pageSize.width - totalWidth) / 2,
+					startY + 6
+				);
 				const startIndex = currentPageIndex * rowsPerPage;
 				const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
 				startY = addTableRows(
@@ -762,7 +800,7 @@ export default function PayableReport() {
 		const time = getCurrentTime();
 
 		handlePagination();
-		doc.save("PayableReport.pdf");
+		doc.save(`PayableReportFrom${fromInputDate}To${toInputDate}.pdf`);
 
 		const pdfBlob = doc.output("blob");
 		const pdfFile = new File([pdfBlob], "table_data.pdf", {
@@ -774,10 +812,7 @@ export default function PayableReport() {
 		const workbook = new ExcelJS.Workbook();
 		const worksheet = workbook.addWorksheet("Sheet1");
 		const numColumns = 6;
-		const titleStyle = {
-			font: { bold: true, size: 12 },
-			alignment: { horizontal: "center" },
-		};
+
 		const columnAlignments = [
 			"center",
 			"left",
@@ -789,14 +824,48 @@ export default function PayableReport() {
 		worksheet.addRow([]);
 		[
 			comapnyname,
-			`Payable Report From ${fromInputDate} To ${toInputDate}`,
+			`Payable Report From: ${fromInputDate} to ${toInputDate}`,
 		].forEach((title, index) => {
-			worksheet.addRow([title]).eachCell((cell) => (cell.style = titleStyle));
+			worksheet.addRow([title]).eachCell((cell) => {
+				cell.style = {
+					font: {
+						bold: index === 0 ? true : false,
+						size: index === 0 ? 18 : parseInt(getdatafontsize),
+					},
+					alignment: { horizontal: "center" },
+				};
+			});
 			worksheet.mergeCells(
 				`A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
 			);
 		});
 		worksheet.addRow([]);
+		worksheet
+			.addRow([
+				transectionType ? "Type: " : "",
+				transectionType ? transectionType : "",
+				"",
+				"",
+				searchQuery ? "Search: " : "",
+				searchQuery ? searchQuery : "",
+			])
+			.eachCell((cell, colNumber) => {
+				if (colNumber === 1 && transectionType) {
+					// Target the cell containing "Search:"
+					cell.font = {
+						bold: true,
+						size: parseInt(getdatafontsize), // Apply dynamic font size if required
+					};
+				}
+				if (colNumber === 5 && searchQuery) {
+					// Target the cell containing "Search:"
+					cell.font = {
+						bold: true,
+						size: parseInt(getdatafontsize), // Apply dynamic font size if required
+					};
+				}
+			});
+		// worksheet.addRow([]);
 		const headerStyle = {
 			font: { bold: true },
 			alignment: { horizontal: "center" },
@@ -822,7 +891,14 @@ export default function PayableReport() {
 		];
 		const headerRow = worksheet.addRow(headers);
 		headerRow.eachCell((cell) => {
-			cell.style = { ...headerStyle, alignment: { horizontal: "center" } };
+			cell.style = {
+				...headerStyle,
+				alignment: { horizontal: "center" },
+				font: {
+					bold: true,
+					size: parseInt(getdatafontsize),
+				},
+			};
 		});
 		tableData.forEach((item) => {
 			worksheet.addRow([
@@ -845,13 +921,13 @@ export default function PayableReport() {
 		totalRow.eachCell((cell) => {
 			cell.font = { bold: true };
 		});
-		[10, 45, 12, 12, 12, 15].forEach((width, index) => {
+		[12, 35, 13, 13, 13, 13].forEach((width, index) => {
 			worksheet.getColumn(index + 1).width = width;
 		});
 		worksheet.eachRow((row, rowNumber) => {
 			if (rowNumber > 5) {
 				row.eachCell((cell, colNumber) => {
-					if (rowNumber === 5) {
+					if (rowNumber === 6) {
 						cell.alignment = { horizontal: "center" };
 					} else {
 						cell.alignment = { horizontal: columnAlignments[colNumber - 1] };
@@ -865,11 +941,12 @@ export default function PayableReport() {
 				});
 			}
 		});
+		worksheet.getRow(2).height = 20;
 		const buffer = await workbook.xlsx.writeBuffer();
 		const blob = new Blob([buffer], {
 			type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 		});
-		saveAs(blob, "PayableReport.xlsx");
+		saveAs(blob, `PayableReportFrom${fromInputDate}To${toInputDate}.xlsx`);
 	};
 
 	const dispatch = useDispatch();
@@ -885,40 +962,23 @@ export default function PayableReport() {
 	const [isLoading, setIsLoading] = useState(false);
 	const { data, loading, error } = useSelector((state) => state.getuser);
 
-	const handleSearch = (e) => {
-		setSelectedSearch(e.target.value);
-	};
-
-	let totalEntries = 0;
-
-	const getFilteredTableData = () => {
-		let filteredData = tableData;
-		if (selectedSearch.trim() !== "") {
-			const query = selectedSearch.trim().toLowerCase();
-			filteredData = filteredData.filter(
-				(data) => data.tusrnam && data.tusrnam.toLowerCase().includes(query)
-			);
-		}
-		return filteredData;
-	};
-
 	const firstColWidth = {
-		width: "9%",
+		width: "12%",
 	};
 	const secondColWidth = {
-		width: "43%",
+		width: "36%",
 	};
 	const thirdColWidth = {
-		width: "12%",
+		width: "13%",
 	};
 	const forthColWidth = {
-		width: "12%",
+		width: "13%",
 	};
 	const fifthColWidth = {
-		width: "12%",
+		width: "13%",
 	};
 	const sixthColWidth = {
-		width: "12%",
+		width: "13%",
 	};
 
 	useHotkeys("s", fetchPayableReport);
@@ -940,9 +1000,9 @@ export default function PayableReport() {
 
 	const contentStyle = {
 		backgroundColor: getcolor,
-		width: isSidebarVisible ? "calc(65vw - 0%)" : "65vw",
+		width: isSidebarVisible ? "calc(55vw - 0%)" : "55vw",
 		position: "relative",
-		top: "35%",
+		top: "40%",
 		left: isSidebarVisible ? "50%" : "50%",
 		transform: "translate(-50%, -50%)",
 		transition: isSidebarVisible
@@ -956,11 +1016,11 @@ export default function PayableReport() {
 		wordBreak: "break-word",
 		textAlign: "center",
 		maxWidth: "1000px",
-		fontSize: "15px",
+		fontSize: parseInt(getdatafontsize),
 		fontStyle: "normal",
 		fontWeight: "400",
 		lineHeight: "23px",
-		fontFamily: '"Poppins", sans-serif',
+		fontFamily: getfontstyle,
 	};
 
 	const [isFilterApplied, setIsFilterApplied] = useState(false);
@@ -1013,6 +1073,7 @@ export default function PayableReport() {
 			});
 		}
 	};
+
 	useEffect(() => {
 		window.addEventListener("keydown", handleKeyDown);
 		return () => {
@@ -1090,30 +1151,7 @@ export default function PayableReport() {
 							}}
 						>
 							<div className="d-flex align-items-center justify-content-center">
-								<div className="mx-5">
-									{/* <label htmlFor="">
-										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
-											Check :
-										</span>{" "}
-									</label>
-									<input
-										onChange={() => setCheck(!check)}
-										type="checkbox"
-										name=""
-										id=""
-										checked={check}
-										style={{
-											alignItems: "center",
-											marginLeft: "10px",
-										}}
-										onFocus={(e) =>
-											(e.currentTarget.style.border = "2px solid red")
-										}
-										onBlur={(e) =>
-											(e.currentTarget.style.border = `1px solid ${fontcolor}`)
-										}
-									/> */}
-								</div>
+								<div className="mx-5"></div>
 								<div
 									className="d-flex align-items-center"
 									style={{ marginRight: "15px" }}
@@ -1208,7 +1246,12 @@ export default function PayableReport() {
 									}}
 								>
 									<label htmlFor="transactionType">
-										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+										<span
+											style={{
+												fontSize: parseInt(getdatafontsize),
+												fontWeight: "bold",
+											}}
+										>
 											Type:
 										</span>
 									</label>
@@ -1227,18 +1270,18 @@ export default function PayableReport() {
 									value={transectionType}
 									onChange={handleTransactionTypeChange}
 									style={{
-										width: "200px",
+										width: "150px",
 										height: "24px",
 										marginLeft: "15px",
 										backgroundColor: getcolor,
 										border: `1px solid ${fontcolor}`,
-										fontSize: "12px",
+										fontSize: parseInt(getdatafontsize),
 										color: fontcolor,
 									}}
 								>
 									<option value="">All</option>
-									<option value="Receivable">Receivable</option>
-									<option value="Payable">Payable</option>
+									<option value="R">Receivable</option>
+									<option value="P">Payable</option>
 								</select>
 							</div>
 						</div>
@@ -1266,7 +1309,12 @@ export default function PayableReport() {
 									}}
 								>
 									<label htmlFor="fromDatePicker">
-										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+										<span
+											style={{
+												fontSize: parseInt(getdatafontsize),
+												fontWeight: "bold",
+											}}
+										>
 											From:
 										</span>
 									</label>
@@ -1297,7 +1345,7 @@ export default function PayableReport() {
 											paddingLeft: "5px",
 											outline: "none",
 											border: "none",
-											fontSize: "12px",
+											fontSize: parseInt(getdatafontsize),
 											backgroundColor: getcolor,
 											color: fontcolor,
 											opacity: selectedRadio === "custom" ? 1 : 0.5,
@@ -1336,7 +1384,7 @@ export default function PayableReport() {
 																? "pointer"
 																: "default",
 														marginLeft: "18px",
-														fontSize: "12px",
+														fontSize: parseInt(getdatafontsize),
 														color: fontcolor,
 														opacity: selectedRadio === "custom" ? 1 : 0.5,
 													}}
@@ -1360,7 +1408,12 @@ export default function PayableReport() {
 									}}
 								>
 									<label htmlFor="toDatePicker">
-										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+										<span
+											style={{
+												fontSize: parseInt(getdatafontsize),
+												fontWeight: "bold",
+											}}
+										>
 											To:
 										</span>
 									</label>
@@ -1392,7 +1445,7 @@ export default function PayableReport() {
 											paddingLeft: "5px",
 											outline: "none",
 											border: "none",
-											fontSize: "12px",
+											fontSize: parseInt(getdatafontsize),
 											backgroundColor: getcolor,
 											color: fontcolor,
 											opacity: selectedRadio === "custom" ? 1 : 0.5,
@@ -1430,7 +1483,7 @@ export default function PayableReport() {
 																? "pointer"
 																: "default",
 														marginLeft: "18px",
-														fontSize: "12px",
+														fontSize: parseInt(getdatafontsize),
 														color: fontcolor,
 														opacity: selectedRadio === "custom" ? 1 : 0.5,
 													}}
@@ -1444,7 +1497,12 @@ export default function PayableReport() {
 							</div>
 							<div id="lastDiv" style={{ marginRight: "1px" }}>
 								<label for="searchInput" style={{ marginRight: "15px" }}>
-									<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+									<span
+										style={{
+											fontSize: parseInt(getdatafontsize),
+											fontWeight: "bold",
+										}}
+									>
 										Search :
 									</span>{" "}
 								</label>
@@ -1457,9 +1515,9 @@ export default function PayableReport() {
 									value={searchQuery}
 									style={{
 										marginRight: "20px",
-										width: "200px",
+										width: "150px",
 										height: "24px",
-										fontSize: "12px",
+										fontSize: parseInt(getdatafontsize),
 										color: fontcolor,
 										backgroundColor: getcolor,
 										border: `1px solid ${fontcolor}`,
@@ -1472,7 +1530,7 @@ export default function PayableReport() {
 									onBlur={(e) =>
 										(e.currentTarget.style.border = `1px solid ${fontcolor}`)
 									}
-									onChange={(e) => setSearchQuery(e.target.value)}
+									onChange={(e) => setSearchQuery(e.target.value.toUpperCase())}
 								/>
 							</div>
 						</div>
@@ -1481,17 +1539,16 @@ export default function PayableReport() {
 						<div
 							style={{
 								overflowY: "auto",
-								width: "98.8%",
+								width: "98.3%",
 							}}
 						>
 							<table
 								className="myTable"
 								id="table"
 								style={{
-									fontSize: "12px",
+									fontSize: parseInt(getdatafontsize),
 									width: "100%",
 									position: "relative",
-									paddingRight: "2%",
 								}}
 							>
 								<thead
@@ -1538,7 +1595,7 @@ export default function PayableReport() {
 								backgroundColor: textColor,
 								borderBottom: `1px solid ${fontcolor}`,
 								overflowY: "auto",
-								maxHeight: "45vh",
+								maxHeight: "55vh",
 								width: "100%",
 								wordBreak: "break-word",
 							}}
@@ -1547,7 +1604,7 @@ export default function PayableReport() {
 								className="myTable"
 								id="tableBody"
 								style={{
-									fontSize: "12px",
+									fontSize: parseInt(getdatafontsize),
 									width: "100%",
 									position: "relative",
 								}}
@@ -1665,7 +1722,7 @@ export default function PayableReport() {
 							borderTop: `1px solid ${fontcolor}`,
 							height: "24px",
 							display: "flex",
-							paddingRight: "1.2%",
+							paddingRight: "1.7%",
 						}}
 					>
 						<div
