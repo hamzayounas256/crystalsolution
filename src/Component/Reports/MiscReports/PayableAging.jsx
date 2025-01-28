@@ -21,7 +21,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-export default function PayableAging() {
+export default function PayableAggingReport() {
 	const navigate = useNavigate();
 	const user = getUserData();
 	const organisation = getOrganisationData();
@@ -73,9 +73,9 @@ export default function PayableAging() {
 		getLocationNumber,
 		getyeardescription,
 		getfromdate,
+		gettodate,
 		getdatafontsize,
 		getfontstyle,
-		gettodate,
 	} = useTheme();
 
 	useEffect(() => {
@@ -707,23 +707,6 @@ export default function PayableAging() {
 	const [isLoading, setIsLoading] = useState(false);
 	const { data, loading, error } = useSelector((state) => state.getuser);
 
-	const handleSearch = (e) => {
-		setSelectedSearch(e.target.value);
-	};
-
-	let totalEntries = 0;
-
-	const getFilteredTableData = () => {
-		let filteredData = tableData;
-		if (selectedSearch.trim() !== "") {
-			const query = selectedSearch.trim().toLowerCase();
-			filteredData = filteredData.filter(
-				(data) => data.tusrnam && data.tusrnam.toLowerCase().includes(query)
-			);
-		}
-		return filteredData;
-	};
-
 	const firstColWidth = {
 		width: "9%",
 	};
@@ -1084,7 +1067,9 @@ export default function PayableAging() {
 										onBlur={(e) =>
 											(e.currentTarget.style.border = `1px solid ${fontcolor}`)
 										}
-										onChange={(e) => setSearchQuery(e.target.value)}
+										onChange={(e) =>
+											setSearchQuery(e.target.value.toUpperCase())
+										}
 									/>
 								</div>
 							</div>

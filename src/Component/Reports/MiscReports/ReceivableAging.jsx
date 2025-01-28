@@ -21,7 +21,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-export default function ReceivableAging() {
+export default function ReceivableAggingReport() {
 	const navigate = useNavigate();
 	const user = getUserData();
 	const organisation = getOrganisationData();
@@ -74,6 +74,8 @@ export default function ReceivableAging() {
 		getyeardescription,
 		getfromdate,
 		gettodate,
+		getdatafontsize,
+		getfontstyle,
 	} = useTheme();
 
 	useEffect(() => {
@@ -187,12 +189,14 @@ export default function ReceivableAging() {
 		const apiMainUrl = apiLinks + "/ReceivableAging.php";
 		setIsLoading(true);
 		const formMainData = new URLSearchParams({
-			code: "EMART",
+			code: organisation.code,
+			// FLocCod: getLocationNumber,
 			FLocCod: "001",
+			// FYerDsc: getyeardescription,
 			FYerDsc: "2024-2024",
 			// FIntDat: fromInputDate,
 			FRepDat: toInputDate,
-			FSchTxt: "",
+			FSchTxt: searchQuery,
 		}).toString();
 
 		axios
@@ -253,11 +257,6 @@ export default function ReceivableAging() {
 		setfromInputDate(formatDate(firstDateOfCurrentMonth));
 	}, []);
 
-	const handleTransactionTypeChange = (event) => {
-		const selectedTransactionType = event.target.value;
-		settransectionType(selectedTransactionType);
-	};
-
 	const exportPDFHandler = () => {
 		const doc = new jsPDF({ orientation: "landscape" });
 		const rows = tableData.map((item) => [
@@ -282,27 +281,28 @@ export default function ReceivableAging() {
 			String(totalAmt6),
 			String(total),
 		]);
+
 		const headers = [
 			"Code",
-			"Customer",
-			"Amt 1",
-			"Amt 2",
-			"Amt 3",
-			"Amt 4",
-			"Amt 5",
-			"Amt 6",
-			"Total",
+			"Description",
+			"0 - 30",
+			"31 - 60",
+			"61 - 90",
+			"91 - 120",
+			"121 - 150",
+			"150+",
+			"Balance",
 		];
-		const columnWidths = [20, 80, 20, 20, 20, 20, 20, 20, 20];
+		const columnWidths = [25, 80, 25, 25, 25, 25, 25, 25, 25];
 		const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
 		const pageHeight = doc.internal.pageSize.height;
 		const paddingTop = 15;
-		doc.setFont("verdana");
-		doc.setFontSize(10);
+		doc.setFont(getfontstyle, "normal");
+		doc.setFontSize(parseInt(getdatafontsize));
 
 		const addTableHeaders = (startX, startY) => {
-			doc.setFont("bold");
-			doc.setFontSize(10);
+			doc.setFont(getfontstyle, "bold");
+			doc.setFontSize(parseInt(getdatafontsize));
 			headers.forEach((header, index) => {
 				const cellWidth = columnWidths[index];
 				const cellHeight = 6;
@@ -316,29 +316,25 @@ export default function ReceivableAging() {
 				doc.text(header, cellX, cellY, { align: "center" });
 				startX += columnWidths[index];
 			});
-			doc.setFont("verdana");
-			doc.setFontSize(10);
+			doc.setFont(getfontstyle, "normal");
+			doc.setFontSize(parseInt(getdatafontsize));
 		};
 
 		const addTableRows = (startX, startY, startIndex, endIndex) => {
-			const rowHeight = 5;
-			const fontSize = 8;
-			const boldFont = "verdana";
-			const normalFont = "verdana";
+			const rowHeight = 6;
+			const fontSize = parseInt(getdatafontsize);
+			const boldFont = getfontstyle;
+			const normalFont = getfontstyle;
 			const tableWidth = getTotalTableWidth();
 			doc.setFontSize(fontSize);
 
 			for (let i = startIndex; i < endIndex; i++) {
 				const row = rows[i];
+				const isTotalRow = i === rows.length - 1;
 				const isOddRow = i % 2 !== 0;
 				const isRedRow = row[0] && parseInt(row[0]) > 100;
 				let textColor = [0, 0, 0];
 				let fontName = normalFont;
-
-				// if (isRedRow) {
-				// 	textColor = [255, 0, 0];
-				// 	fontName = boldFont;
-				// }
 
 				doc.setDrawColor(0);
 				doc.rect(
@@ -353,8 +349,16 @@ export default function ReceivableAging() {
 					const cellX = startX + 2;
 					doc.setTextColor(textColor[0], textColor[1], textColor[2]);
 					doc.setFont(fontName, "normal");
-					const cellValue = String(cell);
 
+					if (isTotalRow) {
+						doc.setFont(boldFont, "bold");
+						textColor = [0, 0, 0]; // Keep the text color black
+					} else {
+						doc.setFont(normalFont, "normal");
+					}
+
+					doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+					const cellValue = String(cell);
 					if (
 						cellIndex === 2 ||
 						cellIndex === 3 ||
@@ -398,7 +402,7 @@ export default function ReceivableAging() {
 			const lineY = pageHeight - 15;
 			doc.setLineWidth(0.3);
 			doc.line(lineX, lineY, lineX + lineWidth, lineY);
-			const headingFontSize = 12;
+			const headingFontSize = parseInt(getdatafontsize);
 			const headingX = lineX + 2;
 			const headingY = lineY + 5;
 			doc.setFontSize(headingFontSize);
@@ -417,7 +421,7 @@ export default function ReceivableAging() {
 			return paddingTop;
 		};
 
-		const rowsPerPage = 29;
+		const rowsPerPage = 24;
 
 		const handlePagination = () => {
 			const addTitle = (
@@ -426,7 +430,7 @@ export default function ReceivableAging() {
 				time,
 				pageNumber,
 				startY,
-				titleFontSize = 16,
+				titleFontSize = 18,
 				dateTimeFontSize = 8,
 				pageNumberFontSize = 8
 			) => {
@@ -457,26 +461,41 @@ export default function ReceivableAging() {
 			let pageNumber = 1;
 
 			while (currentPageIndex * rowsPerPage < rows.length) {
-				addTitle(comapnyname, "", "", pageNumber, startY, 20, 10);
+				// Add company name and title
+				doc.setFont(getfontstyle, "bold");
+				addTitle(comapnyname, "", "", pageNumber, startY, 18);
+				doc.setFont(getfontstyle, "normal");
 				startY += 7;
 				addTitle(
-					`Receivable Aging Rep Date: ${toInputDate}`,
+					`Receivable Agging Report Rep Date: ${toInputDate}`,
 					"",
 					"",
 					pageNumber,
 					startY,
-					14
+					parseInt(getdatafontsize)
 				);
-				startY += 13;
+				startY += 10;
 
-				const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
-				const labelsY = startY + 2;
-				doc.setFontSize(14);
-				doc.setFont("verdana", "bold");
-				doc.setFont("verdana", "normal");
-				startY += 0;
+				// New additional line before the table
+				const searchWord = searchQuery ? "Search: " : "";
+				const searchTerm = searchQuery ? `${searchQuery}` : "";
 
-				addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 39);
+				const labelXRightWord = doc.internal.pageSize.width - totalWidth + 230;
+				const labelXRightTerm = doc.internal.pageSize.width - totalWidth + 245;
+
+				doc.setFontSize(parseInt(getdatafontsize));
+
+				// Search term on the right
+				doc.setFont(getfontstyle, "bold");
+				doc.text(searchWord, labelXRightWord, startY);
+				doc.setFont(getfontstyle, "normal");
+				doc.text(searchTerm, labelXRightTerm, startY);
+
+				// startY += 2; // Adjust the Y-position for the next section
+				addTableHeaders(
+					(doc.internal.pageSize.width - totalWidth) / 2,
+					startY + 6
+				);
 				const startIndex = currentPageIndex * rowsPerPage;
 				const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
 				startY = addTableRows(
@@ -513,7 +532,7 @@ export default function ReceivableAging() {
 		const time = getCurrentTime();
 
 		handlePagination();
-		doc.save("ReceivableAging.pdf");
+		doc.save(`ReceivableAggingRep${toInputDate}.pdf`);
 
 		const pdfBlob = doc.output("blob");
 		const pdfFile = new File([pdfBlob], "table_data.pdf", {
@@ -526,7 +545,7 @@ export default function ReceivableAging() {
 		const worksheet = workbook.addWorksheet("Sheet1");
 		const numColumns = 9;
 		const titleStyle = {
-			font: { bold: true, size: 12 },
+			font: { bold: true, size: 18 },
 			alignment: { horizontal: "center" },
 		};
 		const columnAlignments = [
@@ -541,15 +560,45 @@ export default function ReceivableAging() {
 			"right",
 		];
 		worksheet.addRow([]);
-		[comapnyname, `Receivable Aging Rep Date ${toInputDate}`].forEach(
+		[comapnyname, `Receivable Agging Report Rep Date: ${toInputDate}`].forEach(
 			(title, index) => {
-				worksheet.addRow([title]).eachCell((cell) => (cell.style = titleStyle));
+				worksheet.addRow([title]).eachCell((cell) => {
+					cell.style = {
+						font: {
+							bold: index === 0 ? true : false,
+							size: index === 0 ? 18 : parseInt(getdatafontsize),
+						},
+						alignment: { horizontal: "center" },
+					};
+				});
 				worksheet.mergeCells(
 					`A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
 				);
 			}
 		);
 		worksheet.addRow([]);
+		worksheet
+			.addRow([
+				"",
+				"",
+				"",
+				"",
+				"",
+				"",
+				"",
+				searchQuery ? `Search:` : "",
+				searchQuery ? `${searchQuery}` : "",
+			])
+			.eachCell((cell, colNumber) => {
+				if (colNumber === 8 && searchQuery) {
+					// Target the cell containing "Search:"
+					cell.font = {
+						bold: true,
+						size: parseInt(getdatafontsize), // Apply dynamic font size if required
+					};
+				}
+			});
+		// worksheet.addRow([]);
 		const headerStyle = {
 			font: { bold: true },
 			alignment: { horizontal: "center" },
@@ -567,18 +616,25 @@ export default function ReceivableAging() {
 		};
 		const headers = [
 			"Code",
-			"Customer",
-			"Amt 1",
-			"Amt 2",
-			"Amt 3",
-			"Amt 4",
-			"Amt 5",
-			"Amt 6",
-			"Total",
+			"Description",
+			"0 - 30",
+			"31 - 60",
+			"61 - 90",
+			"91 - 120",
+			"121 - 150",
+			"151+",
+			"Balance",
 		];
 		const headerRow = worksheet.addRow(headers);
 		headerRow.eachCell((cell) => {
-			cell.style = { ...headerStyle, alignment: { horizontal: "center" } };
+			cell.style = {
+				...headerStyle,
+				alignment: { horizontal: "center" },
+				font: {
+					bold: true,
+					size: parseInt(getdatafontsize),
+				},
+			};
 		});
 		tableData.forEach((item) => {
 			worksheet.addRow([
@@ -607,13 +663,13 @@ export default function ReceivableAging() {
 		totalRow.eachCell((cell) => {
 			cell.font = { bold: true };
 		});
-		[10, 45, 10, 10, 10, 10, 10, 10, 10].forEach((width, index) => {
+		[12, 45, 12, 12, 12, 12, 12, 12, 12].forEach((width, index) => {
 			worksheet.getColumn(index + 1).width = width;
 		});
 		worksheet.eachRow((row, rowNumber) => {
 			if (rowNumber > 5) {
 				row.eachCell((cell, colNumber) => {
-					if (rowNumber === 5) {
+					if (rowNumber === 6) {
 						cell.alignment = { horizontal: "center" };
 					} else {
 						cell.alignment = { horizontal: columnAlignments[colNumber - 1] };
@@ -627,11 +683,12 @@ export default function ReceivableAging() {
 				});
 			}
 		});
+		worksheet.getRow(2).height = 20;
 		const buffer = await workbook.xlsx.writeBuffer();
 		const blob = new Blob([buffer], {
 			type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 		});
-		saveAs(blob, "ReceivableAging.xlsx");
+		saveAs(blob, `ReceivableAggingRep${toInputDate}.xlsx`);
 	};
 
 	const dispatch = useDispatch();
@@ -651,45 +708,32 @@ export default function ReceivableAging() {
 		setSelectedSearch(e.target.value);
 	};
 
-	let totalEntries = 0;
-
-	const getFilteredTableData = () => {
-		let filteredData = tableData;
-		if (selectedSearch.trim() !== "") {
-			const query = selectedSearch.trim().toLowerCase();
-			filteredData = filteredData.filter(
-				(data) => data.tusrnam && data.tusrnam.toLowerCase().includes(query)
-			);
-		}
-		return filteredData;
-	};
-
 	const firstColWidth = {
 		width: "9%",
 	};
 	const secondColWidth = {
-		width: "35%",
+		width: "27%",
 	};
 	const thirdColWidth = {
-		width: "8%",
+		width: "9%",
 	};
 	const forthColWidth = {
-		width: "8%",
+		width: "9%",
 	};
 	const fifthColWidth = {
-		width: "8%",
+		width: "9%",
 	};
 	const sixthColWidth = {
-		width: "8%",
+		width: "9%",
 	};
 	const seventhColWidth = {
-		width: "8%",
+		width: "9%",
 	};
 	const eighthColWidth = {
-		width: "8%",
+		width: "9%",
 	};
 	const ninthColWidth = {
-		width: "8%",
+		width: "10%",
 	};
 
 	useHotkeys("s", fetchReceivableAging);
@@ -726,12 +770,12 @@ export default function ReceivableAging() {
 		overflowY: "hidden",
 		wordBreak: "break-word",
 		textAlign: "center",
-		maxWidth: "900px",
-		fontSize: "15px",
+		maxWidth: "1100px",
+		fontSize: getdatafontsize,
 		fontStyle: "normal",
 		fontWeight: "400",
 		lineHeight: "23px",
-		fontFamily: '"Poppins", sans-serif',
+		fontFamily: getfontstyle,
 	};
 
 	const [isFilterApplied, setIsFilterApplied] = useState(false);
@@ -859,6 +903,9 @@ export default function ReceivableAging() {
 			focusNextElement(searchRef, selectButtonRef);
 		}
 	};
+	useEffect(() => {
+		document.documentElement.style.setProperty("--background-color", getcolor);
+	}, [getcolor]);
 
 	return (
 		<>
@@ -873,7 +920,7 @@ export default function ReceivableAging() {
 						borderRadius: "9px",
 					}}
 				>
-					<NavComponent textdata="Receivable Aging" />
+					<NavComponent textdata="Receivable Agging Report" />
 
 					{/* ------------1st row */}
 					<div
@@ -900,7 +947,12 @@ export default function ReceivableAging() {
 									}}
 								>
 									<label htmlFor="toDatePicker">
-										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+										<span
+											style={{
+												fontSize: parseInt(getdatafontsize),
+												fontWeight: "bold",
+											}}
+										>
 											Rep Date:&nbsp;&nbsp;
 										</span>
 									</label>
@@ -931,7 +983,7 @@ export default function ReceivableAging() {
 											paddingLeft: "5px",
 											outline: "none",
 											border: "none",
-											fontSize: "12px",
+											fontSize: parseInt(getdatafontsize),
 											backgroundColor: getcolor,
 											color: fontcolor,
 											opacity: selectedRadio === "custom" ? 1 : 0.5,
@@ -969,7 +1021,7 @@ export default function ReceivableAging() {
 																? "pointer"
 																: "default",
 														marginLeft: "18px",
-														fontSize: "12px",
+														fontSize: parseInt(getdatafontsize),
 														color: fontcolor,
 														opacity: selectedRadio === "custom" ? 1 : 0.5,
 													}}
@@ -989,7 +1041,12 @@ export default function ReceivableAging() {
 							>
 								<div>
 									<label for="searchInput">
-										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+										<span
+											style={{
+												fontSize: parseInt(getdatafontsize),
+												fontWeight: "bold",
+											}}
+										>
 											Search:&nbsp;&nbsp;
 										</span>
 									</label>
@@ -1005,7 +1062,7 @@ export default function ReceivableAging() {
 										style={{
 											width: "135px",
 											height: "24px",
-											fontSize: "12px",
+											fontSize: parseInt(getdatafontsize),
 											color: fontcolor,
 											backgroundColor: getcolor,
 											border: `1px solid ${fontcolor}`,
@@ -1018,7 +1075,9 @@ export default function ReceivableAging() {
 										onBlur={(e) =>
 											(e.currentTarget.style.border = `1px solid ${fontcolor}`)
 										}
-										onChange={(e) => setSearchQuery(e.target.value)}
+										onChange={(e) =>
+											setSearchQuery(e.target.value.toUpperCase())
+										}
 									/>
 								</div>
 							</div>
@@ -1037,7 +1096,7 @@ export default function ReceivableAging() {
 								className="myTable"
 								id="table"
 								style={{
-									fontSize: "12px",
+									fontSize: parseInt(getdatafontsize),
 									width: "100%",
 									position: "relative",
 								}}
@@ -1062,28 +1121,28 @@ export default function ReceivableAging() {
 											Code
 										</td>
 										<td className="border-dark" style={secondColWidth}>
-											Customer
+											Description
 										</td>
 										<td className="border-dark" style={thirdColWidth}>
-											Amt 1
+											0 - 30
 										</td>
 										<td className="border-dark" style={forthColWidth}>
-											Amt 2
+											31 - 60
 										</td>
 										<td className="border-dark" style={fifthColWidth}>
-											Amt 3
+											61 - 90
 										</td>
 										<td className="border-dark" style={sixthColWidth}>
-											Amt 4
+											91 - 120
 										</td>
 										<td className="border-dark" style={seventhColWidth}>
-											Amt 5
+											121 - 150
 										</td>
 										<td className="border-dark" style={eighthColWidth}>
-											Amt 6
+											151+
 										</td>
 										<td className="border-dark" style={ninthColWidth}>
-											Total
+											Balance
 										</td>
 									</tr>
 								</thead>
@@ -1105,7 +1164,7 @@ export default function ReceivableAging() {
 								className="myTable"
 								id="tableBody"
 								style={{
-									fontSize: "12px",
+									fontSize: parseInt(getdatafontsize),
 									width: "100%",
 									position: "relative",
 								}}
