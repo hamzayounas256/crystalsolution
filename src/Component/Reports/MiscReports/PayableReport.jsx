@@ -1162,7 +1162,7 @@ export default function PayableReport() {
 											justifyContent: "evenly",
 										}}
 									>
-										<div className="d-flex align-items-baseline mx-2">
+										<div className="d-flex align-items-center mx-2">
 											<input
 												type="radio"
 												name="dateRange"
@@ -1179,7 +1179,7 @@ export default function PayableReport() {
 											&nbsp;
 											<label htmlFor="custom">Custom</label>
 										</div>
-										<div className="d-flex align-items-baseline mx-2">
+										<div className="d-flex align-items-center mx-2">
 											<input
 												type="radio"
 												name="dateRange"
@@ -1196,7 +1196,7 @@ export default function PayableReport() {
 											&nbsp;
 											<label htmlFor="30">30 Days</label>
 										</div>
-										<div className="d-flex align-items-baseline mx-2">
+										<div className="d-flex align-items-center mx-2">
 											<input
 												type="radio"
 												name="dateRange"
@@ -1213,7 +1213,7 @@ export default function PayableReport() {
 											&nbsp;
 											<label htmlFor="60">60 Days</label>
 										</div>
-										<div className="d-flex align-items-baseline mx-2">
+										<div className="d-flex align-items-center mx-2">
 											<input
 												type="radio"
 												name="dateRange"
