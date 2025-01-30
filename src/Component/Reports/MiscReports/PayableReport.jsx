@@ -3,7 +3,12 @@ import { Container, Spinner, Nav } from "react-bootstrap";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../../../ThemeContext";
-import { getUserData, getOrganisationData } from "../../Auth";
+import {
+	getUserData,
+	getOrganisationData,
+	getLocationnumber,
+	getYearDescription,
+} from "../../Auth";
 import NavComponent from "../../MainComponent/Navform/navbarform";
 import SingleButton from "../../MainComponent/Button/SingleButton/SingleButton";
 import Select from "react-select";
@@ -25,6 +30,8 @@ export default function PayableReport() {
 	const navigate = useNavigate();
 	const user = getUserData();
 	const organisation = getOrganisationData();
+	const yeardescription = getYearDescription();
+	const locationnumber = getLocationnumber();
 
 	const saleSelectRef = useRef(null);
 	const input1Ref = useRef(null);
@@ -375,8 +382,8 @@ export default function PayableReport() {
 			FTrnTyp: transectionType,
 			FAccCod: saleType,
 			code: organisation.code,
-			FLocCod: getLocationNumber,
-			FYerDsc: getyeardescription,
+			FLocCod: locationnumber || getLocationNumber,
+			FYerDsc: yeardescription || getyeardescription,
 		};
 		console.log(data);
 		document.getElementById(
@@ -390,9 +397,9 @@ export default function PayableReport() {
 		setIsLoading(true);
 		const formData = new URLSearchParams({
 			code: organisation.code,
-			// FLocCod: getLocationNumber,
+			// FLocCod: locationnumber || getLocationNumber,
 			FLocCod: "001",
-			// FYerDsc: getyeardescription,
+			// FYerDsc: yeardescription || getyeardescription,
 			FYerDsc: "2024-2024",
 			FIntDat: fromInputDate,
 			FFnlDat: toInputDate,
@@ -453,73 +460,6 @@ export default function PayableReport() {
 		setSelectedfromDate(firstDateOfCurrentMonth);
 		setfromInputDate(formatDate(firstDateOfCurrentMonth));
 	}, []);
-
-	useEffect(() => {
-		const apiUrl = apiLinks + "/GetActiveAccounts.php";
-		const formData = new URLSearchParams({
-			FLocCod: getLocationNumber,
-			code: organisation.code,
-		}).toString();
-		axios
-			.post(apiUrl, formData)
-			.then((response) => {
-				setSupplierList(response.data);
-			})
-			.catch((error) => {
-				console.error("Error fetching data:", error);
-			});
-	}, []);
-
-	const options = supplierList.map((item) => ({
-		value: item.tacccod,
-		label: `${item.tacccod}-${item.taccdsc.trim()}`,
-	}));
-
-	const DropdownOption = (props) => {
-		return (
-			<components.Option {...props}>
-				<div
-					style={{
-						fontSize: parseInt(getdatafontsize),
-						paddingBottom: "5px",
-						lineHeight: "3px",
-						color: "black",
-						textAlign: "start",
-					}}
-				>
-					{props.data.label}
-				</div>
-			</components.Option>
-		);
-	};
-	const customStyles1 = (hasError) => ({
-		control: (base, state) => ({
-			...base,
-			height: "24px",
-			minHeight: "unset",
-			width: 418,
-			fontSize: parseInt(getdatafontsize),
-			backgroundColor: getcolor,
-			color: fontcolor,
-			borderRadius: 0,
-			border: hasError ? "2px solid red" : `1px solid ${fontcolor}`,
-			transition: "border-color 0.15s ease-in-out",
-			"&:hover": {
-				borderColor: state.isFocused ? base.borderColor : "black",
-			},
-			padding: "0 8px",
-			display: "flex",
-			alignItems: "center",
-			justifyContent: "space-between",
-		}),
-		dropdownIndicator: (base) => ({
-			...base,
-			padding: 0,
-			fontSize: parseInt(getdatafontsize),
-			display: "flex",
-			textAlign: "center !important",
-		}),
-	});
 
 	const handleTransactionTypeChange = (event) => {
 		const selectedTransactionType = event.target.value;
@@ -734,8 +674,12 @@ export default function PayableReport() {
 				startY += 10;
 
 				// New additional line before the table
-				const typeWord = transectionType ? "Type: " : ""; // Left side
-				const typeTerm = transectionType ? transectionType : ""; // Left side
+				const typeWord = "Type: "; // Left side
+				const typeTerm = transectionType
+					? transectionType === "R"
+						? "Receivable"
+						: "Payable"
+					: "ALL"; // Left side
 
 				const searchWord = searchQuery ? "Search: " : "";
 				const searchTerm = searchQuery ? searchQuery : "";
@@ -842,15 +786,19 @@ export default function PayableReport() {
 		worksheet.addRow([]);
 		worksheet
 			.addRow([
-				transectionType ? "Type: " : "",
-				transectionType ? transectionType : "",
+				"Type: ",
+				transectionType
+					? transectionType === "R"
+						? "Receivable"
+						: "Payable"
+					: "ALL",
 				"",
 				"",
 				searchQuery ? "Search: " : "",
 				searchQuery ? searchQuery : "",
 			])
 			.eachCell((cell, colNumber) => {
-				if (colNumber === 1 && transectionType) {
+				if (colNumber === 1) {
 					// Target the cell containing "Search:"
 					cell.font = {
 						bold: true,
@@ -1785,7 +1733,6 @@ export default function PayableReport() {
 						<SingleButton
 							to="/MainPage"
 							text="Return"
-							style={{ backgroundColor: "#186DB7", width: "120px" }}
 							onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
 							onBlur={(e) =>
 								(e.currentTarget.style.border = `1px solid ${fontcolor}`)
@@ -1794,7 +1741,6 @@ export default function PayableReport() {
 						<SingleButton
 							text="PDF"
 							onClick={exportPDFHandler}
-							style={{ backgroundColor: "#186DB7", width: "120px" }}
 							onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
 							onBlur={(e) =>
 								(e.currentTarget.style.border = `1px solid ${fontcolor}`)
@@ -1803,7 +1749,6 @@ export default function PayableReport() {
 						<SingleButton
 							text="Excel"
 							onClick={handleDownloadCSV}
-							style={{ backgroundColor: "#186DB7", width: "120px" }}
 							onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
 							onBlur={(e) =>
 								(e.currentTarget.style.border = `1px solid ${fontcolor}`)
@@ -1814,7 +1759,6 @@ export default function PayableReport() {
 							text="Select"
 							ref={input3Ref}
 							onClick={fetchPayableReport}
-							style={{ backgroundColor: "#186DB7", width: "120px" }}
 							onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
 							onBlur={(e) =>
 								(e.currentTarget.style.border = `1px solid ${fontcolor}`)
