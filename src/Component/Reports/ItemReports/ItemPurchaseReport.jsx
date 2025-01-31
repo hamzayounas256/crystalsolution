@@ -826,17 +826,19 @@ export default function ItemPurchaseReport() {
 			for (let i = startIndex; i < endIndex; i++) {
 				const row = rows[i];
 				const isTotalRow = i === rows.length - 1;
-				const isOddRow = i % 2 !== 0;
-				const isRedRow = row[0] && parseInt(row[0]) > 100;
+				const isNegativeQnty = row[5] && row[5].startsWith("-"); // Check if Qnty is negative
 				let textColor = [0, 0, 0];
 				let fontName = normalFont;
+				let bgColor = isNegativeQnty ? [255, 0, 0] : [255, 255, 255]; // Set red for negative Qnty row
 
 				doc.setDrawColor(0);
+				doc.setFillColor(bgColor[0], bgColor[1], bgColor[2]);
 				doc.rect(
 					startX,
 					startY + (i - startIndex + 2) * rowHeight,
 					tableWidth,
-					rowHeight
+					rowHeight,
+					"F"
 				);
 
 				row.forEach((cell, cellIndex) => {
@@ -1232,7 +1234,7 @@ export default function ItemPurchaseReport() {
 			};
 		});
 		tableData.forEach((item) => {
-			worksheet.addRow([
+			const row = worksheet.addRow([
 				item.Date,
 				item["Trn#"],
 				item.Type,
@@ -1241,6 +1243,20 @@ export default function ItemPurchaseReport() {
 				item.Qnty,
 				item.Rate,
 			]);
+
+			// **Check if Qnty is negative**
+			const isNegativeQnty = item.Qnty && String(item.Qnty).startsWith("-");
+
+			if (isNegativeQnty) {
+				row.eachCell((cell) => {
+					cell.fill = {
+						type: "pattern",
+						pattern: "solid",
+						fgColor: { argb: "FFFF0000" },
+					}; // Red color
+					cell.font = { color: { argb: "FFFFFFFF" } }; // White text for contrast
+				});
+			}
 		});
 		const totalRow = worksheet.addRow([
 			"",
