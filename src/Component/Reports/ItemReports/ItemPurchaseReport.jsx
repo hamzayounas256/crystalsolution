@@ -1133,7 +1133,7 @@ export default function ItemPurchaseReport() {
 						size: parseInt(getdatafontsize), // Apply dynamic font size if required
 					};
 				}
-				if (colNumber === 6 && searchQuery) {
+				if (colNumber === 6) {
 					// Target the cell containing "Search:"
 					cell.font = {
 						bold: true,
@@ -1163,7 +1163,7 @@ export default function ItemPurchaseReport() {
 						size: parseInt(getdatafontsize), // Apply dynamic font size if required
 					};
 				}
-				if (colNumber === 6 && searchQuery) {
+				if (colNumber === 6) {
 					// Target the cell containing "Search:"
 					cell.font = {
 						bold: true,
@@ -1189,7 +1189,7 @@ export default function ItemPurchaseReport() {
 						size: parseInt(getdatafontsize), // Apply dynamic font size if required
 					};
 				}
-				if (colNumber === 6 && searchQuery) {
+				if (colNumber === 6) {
 					// Target the cell containing "Search:"
 					cell.font = {
 						bold: true,
@@ -2320,6 +2320,7 @@ export default function ItemPurchaseReport() {
 							</div>
 						</div>
 					</div>
+
 					<div>
 						{/* Table Head */}
 						<div
