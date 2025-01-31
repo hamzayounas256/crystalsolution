@@ -21,6 +21,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./ItemReports.css";
+import { LabelImportantTwoTone } from "@mui/icons-material";
 
 export default function ItemPurchaseReport() {
 	const navigate = useNavigate();
@@ -50,6 +51,11 @@ export default function ItemPurchaseReport() {
 	const [companyType, setCompanyType] = useState("");
 	const [categoryType, setCategoryType] = useState("");
 	const [capacityType, setCapacityType] = useState("");
+
+	const [storeTypeDataValue, setStoreTypeDataValue] = useState("");
+	const [companyTypeDataValue, setCompanyTypeDataValue] = useState("");
+	const [categoryTypeDataValue, setCategoryTypeDataValue] = useState("");
+	const [capacityTypeDataValue, setCapacityTypeDataValue] = useState("");
 
 	const [storeList, setStoreList] = useState([]);
 	const [companyList, setCompanyList] = useState([]);
@@ -963,37 +969,41 @@ export default function ItemPurchaseReport() {
 				startY += 10;
 
 				// New additional line before the table
-				const typeWord = "Type: "; // Left side
+				const typeWord = "Type: ";
 				const typeTerm = transectionType
 					? transectionType === "BIL"
-						? "Purchase"
-						: "Purchase Return"
-					: "ALL"; // Left side
+						? "PURCHASE"
+						: "PURCHASE RETURN"
+					: "ALL";
 
 				const searchWord = searchQuery ? "Search: " : "";
 				const searchTerm = searchQuery ? searchQuery : "";
 
 				const companyWord = "Company: ";
-				const companyTerm = companyType ? companyType : "ALL";
+				const companyTerm = companyTypeDataValue
+					? companyTypeDataValue.label
+					: "ALL";
 
 				const categoryWord = "Category: ";
-				const categoryTerm = categoryType ? categoryType : "ALL";
+				const categoryTerm = categoryTypeDataValue
+					? categoryTypeDataValue.label
+					: "ALL";
 
 				const capacityWord = "Capacity: ";
-				const capacityTerm = capacityType ? capacityType : "ALL";
+				const capacityTerm = capacityTypeDataValue
+					? capacityTypeDataValue.label
+					: "ALL";
 
 				const storeWord = "Store: ";
-				const storeTerm = storeType ? storeType : "ALL";
+				const storeTerm = storeTypeDataValue ? storeTypeDataValue.label : "ALL";
 
 				const labelXLeftWord = doc.internal.pageSize.width - totalWidth;
-				const labelXLeftTerm = doc.internal.pageSize.width - totalWidth + 20;
+				const labelXLeftTerm = doc.internal.pageSize.width - totalWidth + 25;
 
 				const labelXRightWord = doc.internal.pageSize.width - totalWidth + 140;
 				const labelXRightTerm = doc.internal.pageSize.width - totalWidth + 160;
 
-				// Date on the left
 				doc.setFontSize(parseInt(getdatafontsize));
-				// doc.text(currentDate, labelXLeft, startY);
 
 				doc.setFont(getfontstyle, "bold");
 				doc.text(companyWord, labelXLeftWord, startY);
@@ -1106,12 +1116,12 @@ export default function ItemPurchaseReport() {
 		worksheet
 			.addRow([
 				"Company: ",
-				companyType ? companyType : "ALL",
+				companyTypeDataValue ? companyTypeDataValue.label : "ALL",
 				"",
 				"",
 				"",
 				"Store: ",
-				storeType ? storeType : "ALL",
+				storeTypeDataValue ? storeTypeDataValue.label : "ALL",
 			])
 			.eachCell((cell, colNumber) => {
 				if (colNumber === 1) {
@@ -1121,7 +1131,7 @@ export default function ItemPurchaseReport() {
 						size: parseInt(getdatafontsize), // Apply dynamic font size if required
 					};
 				}
-				if (colNumber === 5 && searchQuery) {
+				if (colNumber === 6 && searchQuery) {
 					// Target the cell containing "Search:"
 					cell.font = {
 						bold: true,
@@ -1132,15 +1142,15 @@ export default function ItemPurchaseReport() {
 		worksheet
 			.addRow([
 				"Category: ",
-				categoryType ? categoryType : "ALL",
+				categoryTypeDataValue ? categoryTypeDataValue.label : "ALL",
 				"",
 				"",
 				"",
 				"Type: ",
 				transectionType
 					? transectionType === "BIL"
-						? "Purchase"
-						: "Purchase Return"
+						? "PURCHASE"
+						: "PURCHASE RETURN"
 					: "ALL",
 			])
 			.eachCell((cell, colNumber) => {
@@ -1151,7 +1161,7 @@ export default function ItemPurchaseReport() {
 						size: parseInt(getdatafontsize), // Apply dynamic font size if required
 					};
 				}
-				if (colNumber === 5 && searchQuery) {
+				if (colNumber === 6 && searchQuery) {
 					// Target the cell containing "Search:"
 					cell.font = {
 						bold: true,
@@ -1162,7 +1172,8 @@ export default function ItemPurchaseReport() {
 		worksheet
 			.addRow([
 				"Capacity: ",
-				capacityType ? capacityType : "ALL",
+				capacityTypeDataValue ? capacityTypeDataValue.label : "ALL",
+				"",
 				"",
 				"",
 				searchQuery ? "Search: " : "",
@@ -1176,7 +1187,7 @@ export default function ItemPurchaseReport() {
 						size: parseInt(getdatafontsize), // Apply dynamic font size if required
 					};
 				}
-				if (colNumber === 5 && searchQuery) {
+				if (colNumber === 6 && searchQuery) {
 					// Target the cell containing "Search:"
 					cell.font = {
 						bold: true,
@@ -1966,9 +1977,15 @@ export default function ItemPurchaseReport() {
 										id="selectedsale"
 										onChange={(selectedOption) => {
 											if (selectedOption && selectedOption.value) {
+												const labelPart = selectedOption.label.split("-")[0];
 												setCompanyType(selectedOption.value);
+												setCompanyTypeDataValue({
+													value: selectedOption.value,
+													label: labelPart,
+												});
 											} else {
-												setCompanyType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+												setCompanyType("");
+												setCompanyTypeDataValue("");
 											}
 										}}
 										components={{ Option: DropdownOption }}
@@ -2016,9 +2033,16 @@ export default function ItemPurchaseReport() {
 										id="selectedsale"
 										onChange={(selectedOption) => {
 											if (selectedOption && selectedOption.value) {
+												console.log(selectedOption);
+												const labelPart = selectedOption.label.split("-")[0];
 												setStoreType(selectedOption.value);
+												setStoreTypeDataValue({
+													value: selectedOption.value,
+													label: labelPart,
+												});
 											} else {
-												setStoreType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+												setStoreType("");
+												setStoreTypeDataValue("");
 											}
 										}}
 										components={{ Option: DropdownOption }}
@@ -2083,9 +2107,15 @@ export default function ItemPurchaseReport() {
 										id="selectedsale"
 										onChange={(selectedOption) => {
 											if (selectedOption && selectedOption.value) {
+												const labelPart = selectedOption.label.split("-")[0];
 												setCategoryType(selectedOption.value);
+												setCategoryTypeDataValue({
+													value: selectedOption.value,
+													label: labelPart,
+												});
 											} else {
-												setCategoryType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+												setCategoryType("");
+												setCategoryTypeDataValue("");
 											}
 										}}
 										components={{ Option: DropdownOption }}
@@ -2202,9 +2232,15 @@ export default function ItemPurchaseReport() {
 										id="selectedsale"
 										onChange={(selectedOption) => {
 											if (selectedOption && selectedOption.value) {
+												const labelPart = selectedOption.label.split("-")[0];
 												setCapacityType(selectedOption.value);
+												setCapacityTypeDataValue({
+													value: selectedOption.value,
+													label: labelPart,
+												});
 											} else {
-												setCapacityType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+												setCapacityType("");
+												setCapacityTypeDataValue("");
 											}
 										}}
 										components={{ Option: DropdownOption }}
