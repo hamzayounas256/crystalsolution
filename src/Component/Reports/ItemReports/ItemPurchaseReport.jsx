@@ -147,126 +147,6 @@ export default function ItemPurchaseReport() {
 		setfromInputDate(e.target.value);
 	};
 
-	const handlefromKeyPress = (e, inputId) => {
-		if (e.key === "Enter") {
-			e.preventDefault();
-			const fromDateElement = document.getElementById("fromdatevalidation");
-			const formattedInput = fromInputDate.replace(
-				/^(\d{2})(\d{2})(\d{4})$/,
-				"$1-$2-$3"
-			);
-			const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
-
-			if (formattedInput.length === 10 && datePattern.test(formattedInput)) {
-				const [day, month, year] = formattedInput.split("-").map(Number);
-
-				if (month > 12 || month === 0) {
-					toast.error("Please enter a valid month (MM) between 01 and 12");
-					return;
-				}
-
-				const daysInMonth = new Date(year, month, 0).getDate();
-				if (day > daysInMonth || day === 0) {
-					toast.error(`Please enter a valid day (DD) for month ${month}`);
-					return;
-				}
-
-				const currentDate = new Date();
-				const enteredDate = new Date(year, month - 1, day);
-
-				if (GlobalfromDate && enteredDate < GlobalfromDate) {
-					toast.error(
-						`Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-					);
-					return;
-				}
-				if (GlobalfromDate && enteredDate > GlobaltoDate) {
-					toast.error(
-						`Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-					);
-					return;
-				}
-
-				fromDateElement.style.border = `1px solid ${fontcolor}`;
-				setfromInputDate(formattedInput);
-
-				const nextInput = document.getElementById(inputId);
-				if (nextInput) {
-					nextInput.focus();
-					nextInput.select();
-				} else {
-					document.getElementById("submitButton").click();
-				}
-			} else {
-				toast.error("Date must be in the format dd-mm-yyyy");
-			}
-		}
-	};
-
-	const handleToKeyPress = (e) => {
-		if (e.key === "Enter") {
-			e.preventDefault();
-			const toDateElement = document.getElementById("todatevalidation");
-			const formattedInput = toInputDate.replace(
-				/^(\d{2})(\d{2})(\d{4})$/,
-				"$1-$2-$3"
-			);
-			const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
-
-			if (formattedInput.length === 10 && datePattern.test(formattedInput)) {
-				const [day, month, year] = formattedInput.split("-").map(Number);
-
-				if (month > 12 || month === 0) {
-					toast.error("Please enter a valid month (MM) between 01 and 12");
-					return;
-				}
-
-				const daysInMonth = new Date(year, month, 0).getDate();
-				if (day > daysInMonth || day === 0) {
-					toast.error(`Please enter a valid day (DD) for month ${month}`);
-					return;
-				}
-
-				const currentDate = new Date();
-				const enteredDate = new Date(year, month - 1, day);
-
-				if (GlobaltoDate && enteredDate > GlobaltoDate) {
-					toast.error(
-						`Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-					);
-					return;
-				}
-
-				if (GlobaltoDate && enteredDate < GlobalfromDate) {
-					toast.error(
-						`Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-					);
-					return;
-				}
-
-				if (fromInputDate) {
-					const fromDate = new Date(
-						fromInputDate.split("-").reverse().join("-")
-					);
-					if (enteredDate <= fromDate) {
-						toast.error("To date must be after from date");
-						return;
-					}
-				}
-
-				toDateElement.style.border = `1px solid ${fontcolor}`;
-				settoInputDate(formattedInput);
-
-				if (input1Ref.current) {
-					e.preventDefault();
-					input1Ref.current.focus();
-				}
-			} else {
-				toast.error("Date must be in the format dd-mm-yyyy");
-			}
-		}
-	};
-
 	const handleToDateChange = (date) => {
 		setSelectedToDate(date);
 		settoInputDate(date ? formatDate(date) : "");
@@ -274,29 +154,6 @@ export default function ItemPurchaseReport() {
 	};
 	const handleToInputChange = (e) => {
 		settoInputDate(e.target.value);
-	};
-	const handleSaleKeypress = (event, inputId) => {
-		if (event.key === "Enter") {
-			const selectedOption = saleSelectRef.current.state.selectValue;
-			if (selectedOption && selectedOption.value) {
-				setSaleType(selectedOption.value);
-			}
-			const nextInput = document.getElementById(inputId);
-			if (nextInput) {
-				nextInput.focus();
-				nextInput.select();
-			} else {
-				document.getElementById("submitButton").click();
-			}
-		}
-	};
-	const handleKeyPress = (e, nextInputRef) => {
-		if (e.key === "Enter") {
-			e.preventDefault();
-			if (nextInputRef.current) {
-				nextInputRef.current.focus();
-			}
-		}
 	};
 
 	function fetchItemPurchaseReport() {
@@ -394,16 +251,6 @@ export default function ItemPurchaseReport() {
 				break;
 		}
 
-		const data = {
-			FIntDat: fromInputDate,
-			FFnlDat: toInputDate,
-			FTrnTyp: transectionType,
-			FAccCod: saleType,
-			code: organisation.code,
-			FLocCod: getLocationNumber,
-			FYerDsc: getyeardescription,
-		};
-		// console.log(data);
 		document.getElementById(
 			"fromdatevalidation"
 		).style.border = `1px solid ${fontcolor}`;
@@ -759,21 +606,23 @@ export default function ItemPurchaseReport() {
 	};
 
 	const exportPDFHandler = () => {
-		const doc = new jsPDF({ orientation: "portrait" });
+		const doc = new jsPDF({ orientation: "landscape" });
 		const rows = tableData.map((item) => [
 			item.Date,
 			item["Trn#"],
 			item.Type,
 			item.Description,
 			item.Store,
-			item.Qnty,
 			item.Rate,
+			item.Qnty,
+			item["Pur Amount"],
 		]);
 		rows.push([
 			"",
 			"",
 			"",
 			"Total",
+			"",
 			"",
 			String(totalQnty),
 			String(totalAmount),
@@ -784,11 +633,12 @@ export default function ItemPurchaseReport() {
 			"Trn#",
 			"Type",
 			"Description",
-			"Str",
-			"Qty",
+			"Store",
 			"Rate",
+			"Qnty",
+			"Amount",
 		];
-		const columnWidths = [23, 16, 12, 105, 10, 10, 20];
+		const columnWidths = [25, 20, 13, 110, 15, 25, 15, 25];
 		const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
 		const pageHeight = doc.internal.pageSize.height;
 		const paddingTop = 15;
@@ -826,10 +676,15 @@ export default function ItemPurchaseReport() {
 			for (let i = startIndex; i < endIndex; i++) {
 				const row = rows[i];
 				const isTotalRow = i === rows.length - 1;
-				const isNegativeQnty = row[5] && row[5].startsWith("-"); // Check if Qnty is negative
-				let textColor = [0, 0, 0];
+				const isNegativeQnty = row[6] && row[6].startsWith("-");
+				let textColor = [0, 0, 0]; // Default text color
 				let fontName = normalFont;
-				let bgColor = isNegativeQnty ? [255, 0, 0] : [255, 255, 255]; // Set red for negative Qnty row
+				const bgColor = [255, 255, 255]; // Always white background
+
+				// Set text color to red for negative quantities (except total row)
+				if (isNegativeQnty && !isTotalRow) {
+					textColor = [255, 0, 0];
+				}
 
 				doc.setDrawColor(0);
 				doc.setFillColor(bgColor[0], bgColor[1], bgColor[2]);
@@ -849,7 +704,7 @@ export default function ItemPurchaseReport() {
 
 					if (isTotalRow) {
 						doc.setFont(boldFont, "bold");
-						textColor = [0, 0, 0]; // Keep the text color black
+						doc.setTextColor(textColor[0], textColor[1], textColor[2]);
 					} else {
 						doc.setFont(normalFont, "normal");
 					}
@@ -860,7 +715,8 @@ export default function ItemPurchaseReport() {
 						cellIndex === 1 ||
 						cellIndex === 4 ||
 						cellIndex === 5 ||
-						cellIndex === 6
+						cellIndex === 6 ||
+						cellIndex === 7
 					) {
 						const rightAlignX = startX + columnWidths[cellIndex] - 2;
 						doc.text(cellValue, rightAlignX, cellY, {
@@ -915,7 +771,7 @@ export default function ItemPurchaseReport() {
 			return paddingTop;
 		};
 
-		const rowsPerPage = 37;
+		const rowsPerPage = 23;
 
 		const handlePagination = () => {
 			const addTitle = (
@@ -1002,8 +858,8 @@ export default function ItemPurchaseReport() {
 				const labelXLeftWord = doc.internal.pageSize.width - totalWidth;
 				const labelXLeftTerm = doc.internal.pageSize.width - totalWidth + 25;
 
-				const labelXRightWord = doc.internal.pageSize.width - totalWidth + 140;
-				const labelXRightTerm = doc.internal.pageSize.width - totalWidth + 160;
+				const labelXRightWord = doc.internal.pageSize.width - totalWidth + 160;
+				const labelXRightTerm = doc.internal.pageSize.width - totalWidth + 175;
 
 				doc.setFontSize(parseInt(getdatafontsize));
 
@@ -1095,6 +951,7 @@ export default function ItemPurchaseReport() {
 			"right",
 			"right",
 			"right",
+			"right",
 		];
 		worksheet.addRow([]);
 		[
@@ -1122,6 +979,7 @@ export default function ItemPurchaseReport() {
 				"",
 				"",
 				"",
+				"",
 				"Store: ",
 				storeTypeDataValue ? storeTypeDataValue.label : "ALL",
 			])
@@ -1145,6 +1003,7 @@ export default function ItemPurchaseReport() {
 			.addRow([
 				"Category: ",
 				categoryTypeDataValue ? categoryTypeDataValue.label : "ALL",
+				"",
 				"",
 				"",
 				"",
@@ -1175,6 +1034,7 @@ export default function ItemPurchaseReport() {
 			.addRow([
 				"Capacity: ",
 				capacityTypeDataValue ? capacityTypeDataValue.label : "ALL",
+				"",
 				"",
 				"",
 				"",
@@ -1219,8 +1079,9 @@ export default function ItemPurchaseReport() {
 			"Type",
 			"Description",
 			"Store",
-			"Qnty",
 			"Rate",
+			"Qnty",
+			"Amount",
 		];
 		const headerRow = worksheet.addRow(headers);
 		headerRow.eachCell((cell) => {
@@ -1240,8 +1101,9 @@ export default function ItemPurchaseReport() {
 				item.Type,
 				item.Description,
 				item.Store,
-				item.Qnty,
 				item.Rate,
+				item.Qnty,
+				item["Pur Amount"],
 			]);
 
 			// **Check if Qnty is negative**
@@ -1252,9 +1114,9 @@ export default function ItemPurchaseReport() {
 					cell.fill = {
 						type: "pattern",
 						pattern: "solid",
-						fgColor: { argb: "FFFF0000" },
-					}; // Red color
-					cell.font = { color: { argb: "FFFFFFFF" } }; // White text for contrast
+						fgColor: { argb: "FFFFFFFF" },
+					}; // WHITE color
+					cell.font = { color: { argb: "FFFF0000" } }; // red text for contrast
 				});
 			}
 		});
@@ -1264,13 +1126,14 @@ export default function ItemPurchaseReport() {
 			"",
 			"Total",
 			"",
+			"",
 			totalQnty,
 			totalAmount,
 		]);
 		totalRow.eachCell((cell) => {
 			cell.font = { bold: true };
 		});
-		[12, 7, 6, 45, 7, 7, 12].forEach((width, index) => {
+		[12, 7, 6, 45, 7, 12, 7, 12].forEach((width, index) => {
 			worksheet.getColumn(index + 1).width = width;
 		});
 		worksheet.eachRow((row, rowNumber) => {
@@ -1312,7 +1175,7 @@ export default function ItemPurchaseReport() {
 	const { data, loading, error } = useSelector((state) => state.getuser);
 
 	const firstColWidth = {
-		width: "12%",
+		width: "11%",
 	};
 	const secondColWidth = {
 		width: "8%",
@@ -1321,15 +1184,18 @@ export default function ItemPurchaseReport() {
 		width: "6%",
 	};
 	const forthColWidth = {
-		width: "48%",
+		width: "42%",
 	};
 	const fifthColWidth = {
-		width: "7%",
+		width: "6%",
 	};
 	const sixthColWidth = {
-		width: "7%",
+		width: "9%",
 	};
 	const seventhColWidth = {
+		width: "6%",
+	};
+	const eighthColWidth = {
 		width: "12%",
 	};
 
@@ -1856,7 +1722,7 @@ export default function ItemPurchaseReport() {
 										justifyContent: "evenly",
 									}}
 								>
-									<div className="d-flex align-items-baseline mx-2">
+									<div className="d-flex align-items-center mx-2">
 										<input
 											type="radio"
 											name="dateRange"
@@ -1878,7 +1744,7 @@ export default function ItemPurchaseReport() {
 											Custom
 										</label>
 									</div>
-									<div className="d-flex align-items-baseline mx-2">
+									<div className="d-flex align-items-center mx-2">
 										<input
 											type="radio"
 											name="dateRange"
@@ -1900,7 +1766,7 @@ export default function ItemPurchaseReport() {
 											30 Days
 										</label>
 									</div>
-									<div className="d-flex align-items-baseline mx-2">
+									<div className="d-flex align-items-center mx-2">
 										<input
 											type="radio"
 											name="dateRange"
@@ -1922,7 +1788,7 @@ export default function ItemPurchaseReport() {
 											60 Days
 										</label>
 									</div>
-									<div className="d-flex align-items-baseline mx-2">
+									<div className="d-flex align-items-center mx-2">
 										<input
 											type="radio"
 											name="dateRange"
@@ -2371,10 +2237,13 @@ export default function ItemPurchaseReport() {
 											Store
 										</td>
 										<td className="border-dark" style={sixthColWidth}>
-											Qnty
+											Rate
 										</td>
 										<td className="border-dark" style={seventhColWidth}>
-											Rate
+											Qnty
+										</td>
+										<td className="border-dark" style={eighthColWidth}>
+											Amount
 										</td>
 									</tr>
 								</thead>
@@ -2409,7 +2278,7 @@ export default function ItemPurchaseReport() {
 													backgroundColor: getcolor,
 												}}
 											>
-												<td colSpan="7" className="text-center">
+												<td colSpan="8" className="text-center">
 													<Spinner animation="border" variant="primary" />
 												</td>
 											</tr>
@@ -2422,7 +2291,7 @@ export default function ItemPurchaseReport() {
 															color: fontcolor,
 														}}
 													>
-														{Array.from({ length: 7 }).map((_, colIndex) => (
+														{Array.from({ length: 8 }).map((_, colIndex) => (
 															<td key={`blank-${rowIndex}-${colIndex}`}>
 																&nbsp;
 															</td>
@@ -2438,6 +2307,7 @@ export default function ItemPurchaseReport() {
 												<td style={fifthColWidth}></td>
 												<td style={sixthColWidth}></td>
 												<td style={seventhColWidth}></td>
+												<td style={eighthColWidth}></td>
 											</tr>
 										</>
 									) : (
@@ -2474,10 +2344,13 @@ export default function ItemPurchaseReport() {
 															{item["Store"]}
 														</td>
 														<td className="text-end" style={sixthColWidth}>
-															{item["Qnty"]}
+															{item["Rate"]}
 														</td>
 														<td className="text-end" style={seventhColWidth}>
-															{item["Rate"]}
+															{item["Qnty"]}
+														</td>
+														<td className="text-end" style={eighthColWidth}>
+															{item["Pur Amount"]}
 														</td>
 													</tr>
 												);
@@ -2492,7 +2365,7 @@ export default function ItemPurchaseReport() {
 														color: fontcolor,
 													}}
 												>
-													{Array.from({ length: 6 }).map((_, colIndex) => (
+													{Array.from({ length: 8 }).map((_, colIndex) => (
 														<td key={`blank-${rowIndex}-${colIndex}`}>
 															&nbsp;
 														</td>
@@ -2507,6 +2380,7 @@ export default function ItemPurchaseReport() {
 												<td style={fifthColWidth}></td>
 												<td style={sixthColWidth}></td>
 												<td style={seventhColWidth}></td>
+												<td style={eighthColWidth}></td>
 											</tr>
 										</>
 									)}
@@ -2565,12 +2439,19 @@ export default function ItemPurchaseReport() {
 								background: getcolor,
 								borderRight: `1px solid ${fontcolor}`,
 							}}
+						></div>
+						<div
+							style={{
+								...seventhColWidth,
+								background: getcolor,
+								borderRight: `1px solid ${fontcolor}`,
+							}}
 						>
 							<span className="mobileledger_total">{totalQnty}</span>
 						</div>
 						<div
 							style={{
-								...seventhColWidth,
+								...eighthColWidth,
 								background: getcolor,
 								borderRight: `1px solid ${fontcolor}`,
 							}}

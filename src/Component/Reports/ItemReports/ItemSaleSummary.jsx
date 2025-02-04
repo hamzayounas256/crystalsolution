@@ -51,6 +51,11 @@ export default function ItemSaleSummary() {
 	const [categoryType, setCategoryType] = useState("");
 	const [capacityType, setCapacityType] = useState("");
 
+	const [storeTypeDataValue, setStoreTypeDataValue] = useState("");
+	const [companyTypeDataValue, setCompanyTypeDataValue] = useState("");
+	const [categoryTypeDataValue, setCategoryTypeDataValue] = useState("");
+	const [capacityTypeDataValue, setCapacityTypeDataValue] = useState("");
+
 	const [storeList, setStoreList] = useState([]);
 	const [companyList, setCompanyList] = useState([]);
 	const [categoryList, setCategoryList] = useState([]);
@@ -85,6 +90,8 @@ export default function ItemSaleSummary() {
 		getyeardescription,
 		getfromdate,
 		gettodate,
+		getdatafontsize,
+		getfontstyle,
 	} = useTheme();
 
 	useEffect(() => {
@@ -541,25 +548,25 @@ export default function ItemSaleSummary() {
 	// Store List array
 	const optionStore = storeList.map((item) => ({
 		value: item.tstrcod,
-		label: `${item.tstrcod}-${item.tstrdsc.trim()}`,
+		label: item.tstrdsc.trim(),
 	}));
 
 	// Capacity List array
 	const optionCapacity = capacityList.map((item) => ({
 		value: item.tcapcod,
-		label: `${item.tcapcod}-${item.tcapdsc.trim()}`,
+		label: item.tcapdsc.trim(),
 	}));
 
 	// Company List array
 	const optionCompany = companyList.map((item) => ({
 		value: item.tcmpcod,
-		label: `${item.tcmpcod}-${item.tcmpdsc.trim()}`,
+		label: item.tcmpdsc.trim(),
 	}));
 
 	// Category List array
 	const optionCategory = categoryList.map((item) => ({
 		value: item.tctgcod,
-		label: `${item.tctgcod}-${item.tctgdsc.trim()}`,
+		label: item.tctgdsc.trim(),
 	}));
 
 	const DropdownOption = (props) => {
@@ -567,7 +574,7 @@ export default function ItemSaleSummary() {
 			<components.Option {...props}>
 				<div
 					style={{
-						fontSize: "12px",
+						fontSize: parseInt(getdatafontsize),
 						paddingBottom: "5px",
 						lineHeight: "3px",
 						color: "black",
@@ -587,7 +594,7 @@ export default function ItemSaleSummary() {
 			height: "24px",
 			minHeight: "unset",
 			width: "275px",
-			fontSize: "12px",
+			fontSize: parseInt(getdatafontsize),
 			backgroundColor: getcolor,
 			color: fontcolor,
 			borderRadius: 0,
@@ -604,7 +611,7 @@ export default function ItemSaleSummary() {
 		dropdownIndicator: (base) => ({
 			...base,
 			padding: 0,
-			fontSize: "18px",
+			fontSize: parseInt(getdatafontsize),
 			display: "flex",
 			textAlign: "center !important",
 		}),
@@ -617,7 +624,7 @@ export default function ItemSaleSummary() {
 			height: "24px",
 			minHeight: "unset",
 			width: 275,
-			fontSize: "12px",
+			fontSize: parseInt(getdatafontsize),
 			backgroundColor: getcolor,
 			color: fontcolor,
 			borderRadius: 0,
@@ -634,7 +641,7 @@ export default function ItemSaleSummary() {
 		dropdownIndicator: (base) => ({
 			...base,
 			padding: 0,
-			fontSize: "18px",
+			fontSize: parseInt(getdatafontsize),
 			display: "flex",
 			textAlign: "center !important",
 		}),
@@ -647,7 +654,7 @@ export default function ItemSaleSummary() {
 			height: "24px",
 			minHeight: "unset",
 			width: 275,
-			fontSize: "12px",
+			fontSize: parseInt(getdatafontsize),
 			backgroundColor: getcolor,
 			color: fontcolor,
 			borderRadius: 0,
@@ -664,7 +671,7 @@ export default function ItemSaleSummary() {
 		dropdownIndicator: (base) => ({
 			...base,
 			padding: 0,
-			fontSize: "18px",
+			fontSize: parseInt(getdatafontsize),
 			display: "flex",
 			textAlign: "center !important",
 		}),
@@ -677,7 +684,7 @@ export default function ItemSaleSummary() {
 			height: "24px",
 			minHeight: "unset",
 			width: 275,
-			fontSize: "12px",
+			fontSize: parseInt(getdatafontsize),
 			backgroundColor: getcolor,
 			color: fontcolor,
 			borderRadius: 0,
@@ -694,7 +701,7 @@ export default function ItemSaleSummary() {
 		dropdownIndicator: (base) => ({
 			...base,
 			padding: 0,
-			fontSize: "18px",
+			fontSize: parseInt(getdatafontsize),
 			display: "flex",
 			textAlign: "center !important",
 		}),
@@ -715,17 +722,17 @@ export default function ItemSaleSummary() {
 			item["Sale Amount"],
 		]);
 		rows.push(["", "Total", "", String(totalQnty), String(totalAmount)]);
-		const headers = ["Code", "Description", "Rate", "Qnty", "Amount"];
-		const columnWidths = [35, 80, 20, 10, 20];
+		const headers = ["Code", "Description", "Rate", "Qty", "Amount"];
+		const columnWidths = [40, 105, 20, 10, 25];
 		const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
 		const pageHeight = doc.internal.pageSize.height;
 		const paddingTop = 15;
-		doc.setFont("verdana");
-		doc.setFontSize(10);
+		doc.setFont(getfontstyle, "normal");
+		doc.setFontSize(parseInt(getdatafontsize));
 
 		const addTableHeaders = (startX, startY) => {
-			doc.setFont("bold");
-			doc.setFontSize(10);
+			doc.setFont(getfontstyle, "bold");
+			doc.setFontSize(parseInt(getdatafontsize));
 			headers.forEach((header, index) => {
 				const cellWidth = columnWidths[index];
 				const cellHeight = 6;
@@ -739,36 +746,39 @@ export default function ItemSaleSummary() {
 				doc.text(header, cellX, cellY, { align: "center" });
 				startX += columnWidths[index];
 			});
-			doc.setFont("verdana");
-			doc.setFontSize(10);
+			doc.setFont(getfontstyle, "normal");
+			doc.setFontSize(parseInt(getdatafontsize));
 		};
 
 		const addTableRows = (startX, startY, startIndex, endIndex) => {
-			const rowHeight = 5;
-			const fontSize = 8;
-			const boldFont = "verdana";
-			const normalFont = "verdana";
+			const rowHeight = 6;
+			const fontSize = parseInt(getdatafontsize);
+			const boldFont = getfontstyle;
+			const normalFont = getfontstyle;
 			const tableWidth = getTotalTableWidth();
 			doc.setFontSize(fontSize);
 
 			for (let i = startIndex; i < endIndex; i++) {
 				const row = rows[i];
-				const isOddRow = i % 2 !== 0;
-				const isRedRow = row[0] && parseInt(row[0]) > 100;
-				let textColor = [0, 0, 0];
+				const isTotalRow = i === rows.length - 1;
+				const isNegativeQnty = row[3] && row[3].startsWith("-");
+				let textColor = [0, 0, 0]; // Default text color
 				let fontName = normalFont;
+				const bgColor = [255, 255, 255]; // Always white background
 
-				// if (isRedRow) {
-				// 	textColor = [255, 0, 0];
-				// 	fontName = boldFont;
-				// }
+				// Set text color to red for negative quantities (except total row)
+				if (isNegativeQnty && !isTotalRow) {
+					textColor = [255, 0, 0];
+				}
 
 				doc.setDrawColor(0);
+				doc.setFillColor(bgColor[0], bgColor[1], bgColor[2]);
 				doc.rect(
 					startX,
 					startY + (i - startIndex + 2) * rowHeight,
 					tableWidth,
-					rowHeight
+					rowHeight,
+					"F"
 				);
 
 				row.forEach((cell, cellIndex) => {
@@ -776,8 +786,16 @@ export default function ItemSaleSummary() {
 					const cellX = startX + 2;
 					doc.setTextColor(textColor[0], textColor[1], textColor[2]);
 					doc.setFont(fontName, "normal");
-					const cellValue = String(cell);
 
+					if (isTotalRow) {
+						doc.setFont(boldFont, "bold");
+						doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+					} else {
+						doc.setFont(normalFont, "normal");
+					}
+
+					doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+					const cellValue = String(cell);
 					if (cellIndex === 2 || cellIndex === 3 || cellIndex === 4) {
 						const rightAlignX = startX + columnWidths[cellIndex] - 2;
 						doc.text(cellValue, rightAlignX, cellY, {
@@ -813,7 +831,7 @@ export default function ItemSaleSummary() {
 			const lineY = pageHeight - 15;
 			doc.setLineWidth(0.3);
 			doc.line(lineX, lineY, lineX + lineWidth, lineY);
-			const headingFontSize = 12;
+			const headingFontSize = parseInt(getdatafontsize);
 			const headingX = lineX + 2;
 			const headingY = lineY + 5;
 			doc.setFontSize(headingFontSize);
@@ -832,7 +850,7 @@ export default function ItemSaleSummary() {
 			return paddingTop;
 		};
 
-		const rowsPerPage = 46;
+		const rowsPerPage = 37;
 
 		const handlePagination = () => {
 			const addTitle = (
@@ -841,7 +859,7 @@ export default function ItemSaleSummary() {
 				time,
 				pageNumber,
 				startY,
-				titleFontSize = 16,
+				titleFontSize = 18,
 				dateTimeFontSize = 8,
 				pageNumberFontSize = 8
 			) => {
@@ -872,26 +890,89 @@ export default function ItemSaleSummary() {
 			let pageNumber = 1;
 
 			while (currentPageIndex * rowsPerPage < rows.length) {
-				addTitle(comapnyname, "", "", pageNumber, startY, 20, 10);
+				// Add company name and title
+				doc.setFont(getfontstyle, "bold");
+				addTitle(comapnyname, "", "", pageNumber, startY, 18);
+				doc.setFont(getfontstyle, "normal");
 				startY += 7;
 				addTitle(
-					`Item Sale Summary From: ${fromInputDate} To: ${toInputDate}`,
+					`Item Sale Summary Report From: ${fromInputDate} To: ${toInputDate}`,
 					"",
 					"",
 					pageNumber,
 					startY,
-					14
+					parseInt(getdatafontsize)
 				);
-				startY += 13;
+				startY += 10;
 
-				const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
-				const labelsY = startY + 2;
-				doc.setFontSize(14);
-				doc.setFont("verdana", "bold");
-				doc.setFont("verdana", "normal");
-				startY += 0;
+				// New additional line before the table
+				const typeWord = "Type: ";
+				const typeTerm = transectionType
+					? transectionType === "INV"
+						? "SALE"
+						: "SALE RETURN"
+					: "ALL";
 
-				addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 39);
+				const searchWord = searchQuery ? "Search: " : "";
+				const searchTerm = searchQuery ? searchQuery : "";
+
+				const companyWord = "Company: ";
+				const companyTerm = companyTypeDataValue
+					? companyTypeDataValue.label
+					: "ALL";
+
+				const categoryWord = "Category: ";
+				const categoryTerm = categoryTypeDataValue
+					? categoryTypeDataValue.label
+					: "ALL";
+
+				const capacityWord = "Capacity: ";
+				const capacityTerm = capacityTypeDataValue
+					? capacityTypeDataValue.label
+					: "ALL";
+
+				const storeWord = "Store: ";
+				const storeTerm = storeTypeDataValue ? storeTypeDataValue.label : "ALL";
+
+				const labelXLeftWord = doc.internal.pageSize.width - totalWidth;
+				const labelXLeftTerm = doc.internal.pageSize.width - totalWidth + 20;
+
+				const labelXRightWord = doc.internal.pageSize.width - totalWidth + 140;
+				const labelXRightTerm = doc.internal.pageSize.width - totalWidth + 155;
+
+				doc.setFontSize(parseInt(getdatafontsize));
+
+				doc.setFont(getfontstyle, "bold");
+				doc.text(companyWord, labelXLeftWord, startY);
+				doc.text(storeWord, labelXRightWord, startY);
+
+				doc.setFont(getfontstyle, "normal");
+				doc.text(companyTerm, labelXLeftTerm, startY);
+				doc.text(storeTerm, labelXRightTerm, startY);
+
+				startY += 5; // Adjust the Y-position for the next section
+				doc.setFont(getfontstyle, "bold");
+				doc.text(categoryWord, labelXLeftWord, startY);
+				doc.text(typeWord, labelXRightWord, startY);
+
+				doc.setFont(getfontstyle, "normal");
+				doc.text(categoryTerm, labelXLeftTerm, startY);
+				doc.text(typeTerm, labelXRightTerm, startY);
+
+				startY += 5; // Adjust the Y-position for the next section
+				doc.setFont(getfontstyle, "bold");
+				doc.text(capacityWord, labelXLeftWord, startY);
+				doc.text(searchWord, labelXRightWord, startY);
+
+				doc.setFont(getfontstyle, "normal");
+				doc.text(capacityTerm, labelXLeftTerm, startY);
+				doc.text(searchTerm, labelXRightTerm, startY);
+
+				// startY += 2; // Adjust the Y-position for the next section
+				addTableHeaders(
+					(doc.internal.pageSize.width - totalWidth) / 2,
+					startY + 6
+				);
 				const startIndex = currentPageIndex * rowsPerPage;
 				const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
 				startY = addTableRows(
@@ -928,7 +1009,7 @@ export default function ItemSaleSummary() {
 		const time = getCurrentTime();
 
 		handlePagination();
-		doc.save("ItemSaleSummary.pdf");
+		doc.save(`ItemSaleSummaryReportFrom${fromInputDate}To${toInputDate}.pdf`);
 
 		const pdfBlob = doc.output("blob");
 		const pdfFile = new File([pdfBlob], "table_data.pdf", {
@@ -940,22 +1021,104 @@ export default function ItemSaleSummary() {
 		const workbook = new ExcelJS.Workbook();
 		const worksheet = workbook.addWorksheet("Sheet1");
 		const numColumns = 5;
-		const titleStyle = {
-			font: { bold: true, size: 12 },
-			alignment: { horizontal: "center" },
-		};
-		const columnAlignments = ["left", "left", "right", "center", "right"];
+
+		const columnAlignments = ["left", "left", "right", "right", "right"];
 		worksheet.addRow([]);
 		[
 			comapnyname,
-			`Item Sale Summary From ${fromInputDate} To ${toInputDate}`,
+			`Item Sale Summary Report From: ${fromInputDate} to ${toInputDate}`,
 		].forEach((title, index) => {
-			worksheet.addRow([title]).eachCell((cell) => (cell.style = titleStyle));
+			worksheet.addRow([title]).eachCell((cell) => {
+				cell.style = {
+					font: {
+						bold: index === 0 ? true : false,
+						size: index === 0 ? 18 : parseInt(getdatafontsize),
+					},
+					alignment: { horizontal: "center" },
+				};
+			});
 			worksheet.mergeCells(
 				`A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
 			);
 		});
 		worksheet.addRow([]);
+		worksheet
+			.addRow([
+				"Company: ",
+				companyTypeDataValue ? companyTypeDataValue.label : "ALL",
+				"",
+				"Store: ",
+				storeTypeDataValue ? storeTypeDataValue.label : "ALL",
+			])
+			.eachCell((cell, colNumber) => {
+				if (colNumber === 1) {
+					// Target the cell containing "Search:"
+					cell.font = {
+						bold: true,
+						size: parseInt(getdatafontsize), // Apply dynamic font size if required
+					};
+				}
+				if (colNumber === 4) {
+					// Target the cell containing "Search:"
+					cell.font = {
+						bold: true,
+						size: parseInt(getdatafontsize), // Apply dynamic font size if required
+					};
+				}
+			});
+		worksheet
+			.addRow([
+				"Category: ",
+				categoryTypeDataValue ? categoryTypeDataValue.label : "ALL",
+				"",
+				"Type: ",
+				transectionType
+					? transectionType === "INV"
+						? "SALE"
+						: "SALE RETURN"
+					: "ALL",
+			])
+			.eachCell((cell, colNumber) => {
+				if (colNumber === 1) {
+					// Target the cell containing "Search:"
+					cell.font = {
+						bold: true,
+						size: parseInt(getdatafontsize), // Apply dynamic font size if required
+					};
+				}
+				if (colNumber === 4) {
+					// Target the cell containing "Search:"
+					cell.font = {
+						bold: true,
+						size: parseInt(getdatafontsize), // Apply dynamic font size if required
+					};
+				}
+			});
+		worksheet
+			.addRow([
+				"Capacity: ",
+				capacityTypeDataValue ? capacityTypeDataValue.label : "ALL",
+				"",
+				searchQuery ? "Search: " : "",
+				searchQuery ? searchQuery : "",
+			])
+			.eachCell((cell, colNumber) => {
+				if (colNumber === 1) {
+					// Target the cell containing "Search:"
+					cell.font = {
+						bold: true,
+						size: parseInt(getdatafontsize), // Apply dynamic font size if required
+					};
+				}
+				if (colNumber === 4) {
+					// Target the cell containing "Search:"
+					cell.font = {
+						bold: true,
+						size: parseInt(getdatafontsize), // Apply dynamic font size if required
+					};
+				}
+			});
+		// worksheet.addRow([]);
 		const headerStyle = {
 			font: { bold: true },
 			alignment: { horizontal: "center" },
@@ -974,16 +1137,37 @@ export default function ItemSaleSummary() {
 		const headers = ["Code", "Description", "Rate", "Qnty", "Amount"];
 		const headerRow = worksheet.addRow(headers);
 		headerRow.eachCell((cell) => {
-			cell.style = { ...headerStyle, alignment: { horizontal: "center" } };
+			cell.style = {
+				...headerStyle,
+				alignment: { horizontal: "center" },
+				font: {
+					bold: true,
+					size: parseInt(getdatafontsize),
+				},
+			};
 		});
 		tableData.forEach((item) => {
-			worksheet.addRow([
+			const row = worksheet.addRow([
 				item.code,
 				item.Description,
 				item.Rate,
 				item.Qnty,
 				item["Sale Amount"],
 			]);
+
+			// **Check if Qnty is negative**
+			const isNegativeQnty = item.Qnty && String(item.Qnty).startsWith("-");
+
+			if (isNegativeQnty) {
+				row.eachCell((cell) => {
+					cell.fill = {
+						type: "pattern",
+						pattern: "solid",
+						fgColor: { argb: "FFFFFFFF" },
+					}; // Red color
+					cell.font = { color: { argb: "FFFF0000" } }; // White text for contrast
+				});
+			}
 		});
 		const totalRow = worksheet.addRow([
 			"",
@@ -999,9 +1183,9 @@ export default function ItemSaleSummary() {
 			worksheet.getColumn(index + 1).width = width;
 		});
 		worksheet.eachRow((row, rowNumber) => {
-			if (rowNumber > 5) {
+			if (rowNumber > 7) {
 				row.eachCell((cell, colNumber) => {
-					if (rowNumber === 5) {
+					if (rowNumber === 8) {
 						cell.alignment = { horizontal: "center" };
 					} else {
 						cell.alignment = { horizontal: columnAlignments[colNumber - 1] };
@@ -1015,11 +1199,15 @@ export default function ItemSaleSummary() {
 				});
 			}
 		});
+		worksheet.getRow(2).height = 20;
 		const buffer = await workbook.xlsx.writeBuffer();
 		const blob = new Blob([buffer], {
 			type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 		});
-		saveAs(blob, "ItemSaleSummary.xlsx");
+		saveAs(
+			blob,
+			`ItemSaleSummaryReportFrom${fromInputDate}To${toInputDate}.xlsx`
+		);
 	};
 
 	const dispatch = useDispatch();
@@ -1034,23 +1222,6 @@ export default function ItemSaleSummary() {
 	const [selectedSearch, setSelectedSearch] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
 	const { data, loading, error } = useSelector((state) => state.getuser);
-
-	const handleSearch = (e) => {
-		setSelectedSearch(e.target.value);
-	};
-
-	let totalEntries = 0;
-
-	const getFilteredTableData = () => {
-		let filteredData = tableData;
-		if (selectedSearch.trim() !== "") {
-			const query = selectedSearch.trim().toLowerCase();
-			filteredData = filteredData.filter(
-				(data) => data.tusrnam && data.tusrnam.toLowerCase().includes(query)
-			);
-		}
-		return filteredData;
-	};
 
 	const firstColWidth = {
 		width: "20%",
@@ -1087,7 +1258,7 @@ export default function ItemSaleSummary() {
 
 	const contentStyle = {
 		backgroundColor: getcolor,
-		width: isSidebarVisible ? "calc(65vw - 0%)" : "65vw",
+		width: isSidebarVisible ? "calc(60vw - 0%)" : "60vw",
 		position: "relative",
 		top: "40%",
 		left: isSidebarVisible ? "50%" : "50%",
@@ -1103,11 +1274,11 @@ export default function ItemSaleSummary() {
 		wordBreak: "break-word",
 		textAlign: "center",
 		maxWidth: "800px",
-		fontSize: "15px",
+		fontSize: parseInt(getdatafontsize),
 		fontStyle: "normal",
 		fontWeight: "400",
 		lineHeight: "23px",
-		fontFamily: '"Poppins", sans-serif',
+		fontFamily: getfontstyle,
 	};
 
 	const [isFilterApplied, setIsFilterApplied] = useState(false);
@@ -1396,7 +1567,12 @@ export default function ItemSaleSummary() {
 									}}
 								>
 									<label htmlFor="fromDatePicker">
-										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+										<span
+											style={{
+												fontSize: parseInt(getdatafontsize),
+												fontWeight: "bold",
+											}}
+										>
 											From:&nbsp;&nbsp;
 										</span>
 									</label>
@@ -1426,7 +1602,7 @@ export default function ItemSaleSummary() {
 											paddingLeft: "5px",
 											outline: "none",
 											border: "none",
-											fontSize: "12px",
+											fontSize: parseInt(getdatafontsize),
 											backgroundColor: getcolor,
 											color: fontcolor,
 											opacity: selectedRadio === "custom" ? 1 : 0.5,
@@ -1465,7 +1641,7 @@ export default function ItemSaleSummary() {
 																? "pointer"
 																: "default",
 														marginLeft: "18px",
-														fontSize: "12px",
+														fontSize: parseInt(getdatafontsize),
 														color: fontcolor,
 														opacity: selectedRadio === "custom" ? 1 : 0.5,
 													}}
@@ -1488,7 +1664,12 @@ export default function ItemSaleSummary() {
 									}}
 								>
 									<label htmlFor="toDatePicker">
-										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+										<span
+											style={{
+												fontSize: parseInt(getdatafontsize),
+												fontWeight: "bold",
+											}}
+										>
 											To:&nbsp;&nbsp;
 										</span>
 									</label>
@@ -1519,7 +1700,7 @@ export default function ItemSaleSummary() {
 											paddingLeft: "5px",
 											outline: "none",
 											border: "none",
-											fontSize: "12px",
+											fontSize: parseInt(getdatafontsize),
 											backgroundColor: getcolor,
 											color: fontcolor,
 											opacity: selectedRadio === "custom" ? 1 : 0.5,
@@ -1557,7 +1738,7 @@ export default function ItemSaleSummary() {
 																? "pointer"
 																: "default",
 														marginLeft: "18px",
-														fontSize: "12px",
+														fontSize: parseInt(getdatafontsize),
 														color: fontcolor,
 														opacity: selectedRadio === "custom" ? 1 : 0.5,
 													}}
@@ -1581,7 +1762,7 @@ export default function ItemSaleSummary() {
 										justifyContent: "evenly",
 									}}
 								>
-									<div className="d-flex align-items-baseline mx-2">
+									<div className="d-flex align-items-center mx-2">
 										<input
 											type="radio"
 											name="dateRange"
@@ -1596,11 +1777,14 @@ export default function ItemSaleSummary() {
 											}
 										/>
 										&nbsp;
-										<label htmlFor="custom" style={{ fontSize: "14px" }}>
+										<label
+											htmlFor="custom"
+											style={{ fontSize: parseInt(getdatafontsize) }}
+										>
 											Custom
 										</label>
 									</div>
-									<div className="d-flex align-items-baseline mx-2">
+									<div className="d-flex align-items-center mx-2">
 										<input
 											type="radio"
 											name="dateRange"
@@ -1615,11 +1799,14 @@ export default function ItemSaleSummary() {
 											}
 										/>
 										&nbsp;
-										<label htmlFor="30" style={{ fontSize: "14px" }}>
+										<label
+											htmlFor="30"
+											style={{ fontSize: parseInt(getdatafontsize) }}
+										>
 											30 Days
 										</label>
 									</div>
-									<div className="d-flex align-items-baseline mx-2">
+									<div className="d-flex align-items-center mx-2">
 										<input
 											type="radio"
 											name="dateRange"
@@ -1634,11 +1821,14 @@ export default function ItemSaleSummary() {
 											}
 										/>
 										&nbsp;
-										<label htmlFor="60" style={{ fontSize: "14px" }}>
+										<label
+											htmlFor="60"
+											style={{ fontSize: parseInt(getdatafontsize) }}
+										>
 											60 Days
 										</label>
 									</div>
-									<div className="d-flex align-items-baseline mx-2">
+									<div className="d-flex align-items-center mx-2">
 										<input
 											type="radio"
 											name="dateRange"
@@ -1653,7 +1843,10 @@ export default function ItemSaleSummary() {
 											}
 										/>
 										&nbsp;
-										<label htmlFor="90" style={{ fontSize: "14px" }}>
+										<label
+											htmlFor="90"
+											style={{ fontSize: parseInt(getdatafontsize) }}
+										>
 											90 Days
 										</label>
 									</div>
@@ -1686,7 +1879,12 @@ export default function ItemSaleSummary() {
 									}}
 								>
 									<label htmlFor="fromDatePicker">
-										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+										<span
+											style={{
+												fontSize: parseInt(getdatafontsize),
+												fontWeight: "bold",
+											}}
+										>
 											Company:&nbsp;&nbsp;
 										</span>{" "}
 										<br />
@@ -1701,14 +1899,20 @@ export default function ItemSaleSummary() {
 										id="selectedsale"
 										onChange={(selectedOption) => {
 											if (selectedOption && selectedOption.value) {
+												const labelPart = selectedOption.label.split("-")[0];
 												setCompanyType(selectedOption.value);
+												setCompanyTypeDataValue({
+													value: selectedOption.value,
+													label: labelPart,
+												});
 											} else {
-												setCompanyType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+												setCompanyType("");
+												setCompanyTypeDataValue("");
 											}
 										}}
 										components={{ Option: DropdownOption }}
 										// styles={customStylesStore}
-										styles={customStylesCompany()}
+										styles={customStylesCompany(!companyType)}
 										isClearable
 										placeholder="Search or select..."
 										menuIsOpen={menuCompanyIsOpen}
@@ -1731,7 +1935,12 @@ export default function ItemSaleSummary() {
 									}}
 								>
 									<label htmlFor="fromDatePicker">
-										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+										<span
+											style={{
+												fontSize: parseInt(getdatafontsize),
+												fontWeight: "bold",
+											}}
+										>
 											Store:&nbsp;&nbsp;
 										</span>{" "}
 										<br />
@@ -1746,9 +1955,16 @@ export default function ItemSaleSummary() {
 										id="selectedsale"
 										onChange={(selectedOption) => {
 											if (selectedOption && selectedOption.value) {
+												console.log(selectedOption);
+												const labelPart = selectedOption.label.split("-")[0];
 												setStoreType(selectedOption.value);
+												setStoreTypeDataValue({
+													value: selectedOption.value,
+													label: labelPart,
+												});
 											} else {
-												setStoreType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+												setStoreType("");
+												setStoreTypeDataValue("");
 											}
 										}}
 										components={{ Option: DropdownOption }}
@@ -1793,7 +2009,12 @@ export default function ItemSaleSummary() {
 									}}
 								>
 									<label htmlFor="fromDatePicker">
-										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+										<span
+											style={{
+												fontSize: parseInt(getdatafontsize),
+												fontWeight: "bold",
+											}}
+										>
 											Category:&nbsp;&nbsp;
 										</span>{" "}
 										<br />
@@ -1808,9 +2029,15 @@ export default function ItemSaleSummary() {
 										id="selectedsale"
 										onChange={(selectedOption) => {
 											if (selectedOption && selectedOption.value) {
+												const labelPart = selectedOption.label.split("-")[0];
 												setCategoryType(selectedOption.value);
+												setCategoryTypeDataValue({
+													value: selectedOption.value,
+													label: labelPart,
+												});
 											} else {
-												setCategoryType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+												setCategoryType("");
+												setCategoryTypeDataValue("");
 											}
 										}}
 										components={{ Option: DropdownOption }}
@@ -1838,7 +2065,12 @@ export default function ItemSaleSummary() {
 									}}
 								>
 									<label htmlFor="transactionType">
-										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+										<span
+											style={{
+												fontSize: parseInt(getdatafontsize),
+												fontWeight: "bold",
+											}}
+										>
 											Type:&nbsp;&nbsp;
 										</span>
 									</label>
@@ -1862,7 +2094,7 @@ export default function ItemSaleSummary() {
 										// marginLeft: "15px",
 										backgroundColor: getcolor,
 										border: `1px solid ${fontcolor}`,
-										fontSize: "12px",
+										fontSize: parseInt(getdatafontsize),
 										color: fontcolor,
 									}}
 								>
@@ -1902,7 +2134,12 @@ export default function ItemSaleSummary() {
 									}}
 								>
 									<label htmlFor="fromDatePicker">
-										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+										<span
+											style={{
+												fontSize: parseInt(getdatafontsize),
+												fontWeight: "bold",
+											}}
+										>
 											Capacity:&nbsp;&nbsp;
 										</span>{" "}
 										<br />
@@ -1917,9 +2154,15 @@ export default function ItemSaleSummary() {
 										id="selectedsale"
 										onChange={(selectedOption) => {
 											if (selectedOption && selectedOption.value) {
+												const labelPart = selectedOption.label.split("-")[0];
 												setCapacityType(selectedOption.value);
+												setCapacityTypeDataValue({
+													value: selectedOption.value,
+													label: labelPart,
+												});
 											} else {
-												setCapacityType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+												setCapacityType("");
+												setCapacityTypeDataValue("");
 											}
 										}}
 										components={{ Option: DropdownOption }}
@@ -1941,7 +2184,12 @@ export default function ItemSaleSummary() {
 							>
 								<div>
 									<label for="searchInput">
-										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+										<span
+											style={{
+												fontSize: parseInt(getdatafontsize),
+												fontWeight: "bold",
+											}}
+										>
 											Search:&nbsp;&nbsp;
 										</span>
 									</label>
@@ -1957,7 +2205,7 @@ export default function ItemSaleSummary() {
 										style={{
 											width: "275px",
 											height: "24px",
-											fontSize: "12px",
+											fontSize: parseInt(getdatafontsize),
 											color: fontcolor,
 											backgroundColor: getcolor,
 											border: `1px solid ${fontcolor}`,
@@ -1970,7 +2218,9 @@ export default function ItemSaleSummary() {
 										onBlur={(e) =>
 											(e.currentTarget.style.border = `1px solid ${fontcolor}`)
 										}
-										onChange={(e) => setSearchQuery(e.target.value)}
+										onChange={(e) =>
+											setSearchQuery(e.target.value.toUpperCase())
+										}
 									/>
 								</div>
 							</div>
@@ -1988,7 +2238,7 @@ export default function ItemSaleSummary() {
 								className="myTable"
 								id="table"
 								style={{
-									fontSize: "12px",
+									fontSize: parseInt(getdatafontsize),
 									width: "100%",
 									position: "relative",
 									paddingRight: "2%",
@@ -2045,7 +2295,7 @@ export default function ItemSaleSummary() {
 								className="myTable"
 								id="tableBody"
 								style={{
-									fontSize: "12px",
+									fontSize: parseInt(getdatafontsize),
 									width: "100%",
 									position: "relative",
 								}}
@@ -2101,7 +2351,7 @@ export default function ItemSaleSummary() {
 														}
 														style={{
 															backgroundColor: getcolor,
-															color: fontcolor,
+															color: item.Qnty?.[0] === "-" ? "red" : fontcolor,
 														}}
 													>
 														<td className="text-start" style={firstColWidth}>
@@ -2113,7 +2363,7 @@ export default function ItemSaleSummary() {
 														<td className="text-end" style={thirdColWidth}>
 															{item.Rate}
 														</td>
-														<td className="text-center" style={forthColWidth}>
+														<td className="text-end" style={forthColWidth}>
 															{item.Qnty}
 														</td>
 														<td className="text-end" style={fifthColWidth}>

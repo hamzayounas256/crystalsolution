@@ -771,7 +771,7 @@ export default function ItemPurchaseSummary() {
 		]);
 		rows.push(["", "Total", "", String(totalQnty), String(totalAmount)]);
 		const headers = ["Code", "Description", "Rate", "Qty", "Amount"];
-		const columnWidths = [40, 105, 20, 10, 25];
+		const columnWidths = [40, 103, 18, 15, 25];
 		const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
 		const pageHeight = doc.internal.pageSize.height;
 		const paddingTop = 15;
@@ -809,10 +809,15 @@ export default function ItemPurchaseSummary() {
 			for (let i = startIndex; i < endIndex; i++) {
 				const row = rows[i];
 				const isTotalRow = i === rows.length - 1;
-				const isNegativeQnty = row[3] && row[3].startsWith("-"); // Check if Qnty is negative
-				let textColor = [0, 0, 0];
+				const isNegativeQnty = row[3] && row[3].startsWith("-");
+				let textColor = [0, 0, 0]; // Default text color
 				let fontName = normalFont;
-				let bgColor = isNegativeQnty ? [255, 0, 0] : [255, 255, 255]; // Set red for negative Qnty row
+				const bgColor = [255, 255, 255]; // Always white background
+
+				// Set text color to red for negative quantities (except total row)
+				if (isNegativeQnty && !isTotalRow) {
+					textColor = [255, 0, 0];
+				}
 
 				doc.setDrawColor(0);
 				doc.setFillColor(bgColor[0], bgColor[1], bgColor[2]);
@@ -832,7 +837,7 @@ export default function ItemPurchaseSummary() {
 
 					if (isTotalRow) {
 						doc.setFont(boldFont, "bold");
-						textColor = [0, 0, 0]; // Keep the text color black
+						doc.setTextColor(textColor[0], textColor[1], textColor[2]);
 					} else {
 						doc.setFont(normalFont, "normal");
 					}
@@ -1208,9 +1213,9 @@ export default function ItemPurchaseSummary() {
 					cell.fill = {
 						type: "pattern",
 						pattern: "solid",
-						fgColor: { argb: "FFFF0000" },
+						fgColor: { argb: "FFFFFFFF" },
 					}; // Red color
-					cell.font = { color: { argb: "FFFFFFFF" } }; // White text for contrast
+					cell.font = { color: { argb: "FFFF0000" } }; // White text for contrast
 				});
 			}
 		});
@@ -1807,7 +1812,7 @@ export default function ItemPurchaseSummary() {
 										justifyContent: "evenly",
 									}}
 								>
-									<div className="d-flex align-items-baseline mx-2">
+									<div className="d-flex align-items-center mx-2">
 										<input
 											type="radio"
 											name="dateRange"
@@ -1829,7 +1834,7 @@ export default function ItemPurchaseSummary() {
 											Custom
 										</label>
 									</div>
-									<div className="d-flex align-items-baseline mx-2">
+									<div className="d-flex align-items-center mx-2">
 										<input
 											type="radio"
 											name="dateRange"
@@ -1851,7 +1856,7 @@ export default function ItemPurchaseSummary() {
 											30 Days
 										</label>
 									</div>
-									<div className="d-flex align-items-baseline mx-2">
+									<div className="d-flex align-items-center mx-2">
 										<input
 											type="radio"
 											name="dateRange"
@@ -1873,7 +1878,7 @@ export default function ItemPurchaseSummary() {
 											60 Days
 										</label>
 									</div>
-									<div className="d-flex align-items-baseline mx-2">
+									<div className="d-flex align-items-center mx-2">
 										<input
 											type="radio"
 											name="dateRange"
