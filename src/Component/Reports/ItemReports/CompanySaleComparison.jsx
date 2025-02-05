@@ -242,7 +242,7 @@ export default function CompanySaleComparison() {
 			FIntDat: fromInputDate,
 			FFnlDat: toInputDate,
 			FCtgCod: storeType,
-			FSchTxt: "",
+			FSchTxt: searchQuery,
 		}).toString();
 
 		axios
@@ -1404,7 +1404,9 @@ export default function CompanySaleComparison() {
 										onBlur={(e) =>
 											(e.currentTarget.style.border = `1px solid ${fontcolor}`)
 										}
-										onChange={(e) => setSearchQuery(e.target.value)}
+										onChange={(e) =>
+											setSearchQuery(e.target.value.toUpperCase())
+										}
 									/>
 								</div>
 							</div>
