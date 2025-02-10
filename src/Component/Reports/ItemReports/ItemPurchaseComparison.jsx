@@ -242,7 +242,7 @@ export default function ItemPurchaseComparison() {
 			FIntDat: fromInputDate,
 			FFnlDat: toInputDate,
 			FCmpCod: storeType,
-			FSchTxt: "",
+			FSchTxt: searchQuery,
 		}).toString();
 
 		axios
