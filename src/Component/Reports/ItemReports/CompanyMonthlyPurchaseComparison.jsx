@@ -3,7 +3,12 @@ import { Container, Spinner, Nav } from "react-bootstrap";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../../../ThemeContext";
-import { getUserData, getOrganisationData } from "../../Auth";
+import {
+	getUserData,
+	getOrganisationData,
+	getYearDescription,
+	getLocationnumber,
+} from "../../Auth";
 import NavComponent from "../../MainComponent/Navform/navbarform";
 import SingleButton from "../../MainComponent/Button/SingleButton/SingleButton";
 import Select from "react-select";
@@ -27,16 +32,17 @@ export default function CompanyMonthlyPurchaseComparison() {
 	const user = getUserData();
 	const organisation = getOrganisationData();
 
-	const storeRef = useRef(null);
 	const typeRef = useRef(null);
 	const searchRef = useRef(null);
 	const selectButtonRef = useRef(null);
+	const categoryRef = useRef(null);
+
+	const [categoryType, setCategoryType] = useState("");
+	const [categoryTypeDataValue, setCategoryTypeDataValue] = useState("");
+	const [categoryList, setCategoryList] = useState([]);
 
 	const [searchQuery, setSearchQuery] = useState("");
 	const [transectionType, settransectionType] = useState("");
-
-	const [storeList, setStoreList] = useState([]);
-	const [storeType, setStoreType] = useState("");
 
 	const [jan, setJan] = useState(0);
 	const [feb, setFeb] = useState(0);
@@ -53,6 +59,9 @@ export default function CompanyMonthlyPurchaseComparison() {
 
 	const [total, setTotal] = useState(0);
 
+	const yeardescription = getYearDescription();
+	const locationnumber = getLocationnumber();
+
 	const {
 		isSidebarVisible,
 		toggleSidebar,
@@ -64,6 +73,8 @@ export default function CompanyMonthlyPurchaseComparison() {
 		getyeardescription,
 		getfromdate,
 		gettodate,
+		getfontstyle,
+		getdatafontsize,
 	} = useTheme();
 
 	useEffect(() => {
@@ -76,11 +87,12 @@ export default function CompanyMonthlyPurchaseComparison() {
 		const apiMainUrl = apiLinks + "/CompanyMonthlyPurchaseComparison.php";
 		setIsLoading(true);
 		const formMainData = new URLSearchParams({
-			code: "NASIRTRD",
-			FLocCod: "001",
+			code: organisation.code,
+			FLocCod: locationnumber || getLocationNumber,
+			FYerDsc: yeardescription || getyeardescription,
 			FRepTyp: transectionType,
-			FStrCod: storeType,
-			FSchTxt: "",
+			FCtgCod: categoryType,
+			FSchTxt: searchQuery,
 		}).toString();
 
 		axios
@@ -134,26 +146,26 @@ export default function CompanyMonthlyPurchaseComparison() {
 	// }, []);
 
 	useEffect(() => {
-		//----------------- store dropdown
-		const apiStoreUrl = apiLinks + "/GetCatg.php";
-		const formStoreData = new URLSearchParams({
-			code: "EMART",
+		//----------------- Category dropdown
+		const apiCategoryUrl = apiLinks + "/GetCatg.php";
+		const formCategoryData = new URLSearchParams({
+			code: organisation.code,
 		}).toString();
 		axios
-			.post(apiStoreUrl, formStoreData)
+			.post(apiCategoryUrl, formCategoryData)
 			.then((response) => {
-				setStoreList(response.data);
-				// console.log("STORE"+response.data);
+				setCategoryList(response.data);
+				// console.log("Category"+response.data);
 			})
 			.catch((error) => {
 				console.error("Error fetching data:", error);
 			});
 	}, []);
 
-	// Store List array
-	const optionStore = storeList.map((item) => ({
+	// Category List array
+	const optionCategory = categoryList.map((item) => ({
 		value: item.tctgcod,
-		label: `${item.tctgcod}-${item.tctgdsc.trim()}`,
+		label: item.tctgdsc.trim(),
 	}));
 
 	const DropdownOption = (props) => {
@@ -161,7 +173,7 @@ export default function CompanyMonthlyPurchaseComparison() {
 			<components.Option {...props}>
 				<div
 					style={{
-						fontSize: "12px",
+						fontSize: parseInt(getdatafontsize),
 						paddingBottom: "5px",
 						lineHeight: "3px",
 						color: "black",
@@ -174,14 +186,15 @@ export default function CompanyMonthlyPurchaseComparison() {
 		);
 	};
 
-	// ------------ store style customization
-	const customStylesStore = () => ({
+	// ------------ Category style customization
+	const customStylesCategory = () => ({
 		control: (base, state) => ({
 			...base,
 			height: "24px",
 			minHeight: "unset",
 			width: "275px",
-			fontSize: "12px",
+			fontSize: parseInt(getdatafontsize),
+			fontFamily: getfontstyle,
 			backgroundColor: getcolor,
 			color: fontcolor,
 			borderRadius: 0,
@@ -198,13 +211,24 @@ export default function CompanyMonthlyPurchaseComparison() {
 		dropdownIndicator: (base) => ({
 			...base,
 			padding: 0,
-			fontSize: "18px",
+			marginTop: "-5px",
+			fontSize: parseInt(getdatafontsize),
 			display: "flex",
 			textAlign: "center !important",
 		}),
+		singleValue: (base) => ({
+			...base,
+			marginTop: "-5px",
+			textAlign: "left",
+			color: fontcolor,
+		}),
+		clearIndicator: (base) => ({
+			...base,
+			marginTop: "-5px",
+		}),
 	});
 
-	const exportPDFHandler = async () => {
+	const exportPDFHandler = () => {
 		const doc = new jsPDF({ orientation: "landscape" });
 		const rows = tableData.map((item) => [
 			item.Company,
@@ -255,17 +279,17 @@ export default function CompanyMonthlyPurchaseComparison() {
 			"Tot",
 		];
 		const columnWidths = [
-			80, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
+			42, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 22,
 		];
 		const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
 		const pageHeight = doc.internal.pageSize.height;
 		const paddingTop = 15;
-		doc.setFont("verdana");
-		doc.setFontSize(10);
+		doc.setFont(getfontstyle, "normal");
+		doc.setFontSize(parseInt(getdatafontsize));
 
 		const addTableHeaders = (startX, startY) => {
-			doc.setFont("bold");
-			doc.setFontSize(10);
+			doc.setFont(getfontstyle, "bold");
+			doc.setFontSize(parseInt(getdatafontsize));
 			headers.forEach((header, index) => {
 				const cellWidth = columnWidths[index];
 				const cellHeight = 6;
@@ -279,45 +303,56 @@ export default function CompanyMonthlyPurchaseComparison() {
 				doc.text(header, cellX, cellY, { align: "center" });
 				startX += columnWidths[index];
 			});
-			doc.setFont("verdana");
-			doc.setFontSize(10);
+			doc.setFont(getfontstyle, "normal");
+			doc.setFontSize(parseInt(getdatafontsize));
 		};
 
 		const addTableRows = (startX, startY, startIndex, endIndex) => {
-			const rowHeight = 5;
-			const fontSize = 8;
-			const boldFont = "verdana";
-			const normalFont = "verdana";
+			const rowHeight = 6;
+			const fontSize = parseInt(getdatafontsize);
+			const boldFont = getfontstyle;
+			const normalFont = getfontstyle;
 			const tableWidth = getTotalTableWidth();
 			doc.setFontSize(fontSize);
 
 			for (let i = startIndex; i < endIndex; i++) {
 				const row = rows[i];
-				const isOddRow = i % 2 !== 0;
-				const isRedRow = row[0] && parseInt(row[0]) > 100;
-				let textColor = [0, 0, 0];
+				const isTotalRow = i === rows.length - 1;
+				const isNegativeQnty = row[13] && row[13].startsWith("-");
+				let textColor = [0, 0, 0]; // Default text color
 				let fontName = normalFont;
+				const bgColor = [255, 255, 255]; // Always white background
 
-				// if (isRedRow) {
-				// 	textColor = [255, 0, 0];
-				// 	fontName = boldFont;
-				// }
+				// Set text color to red for negative quantities (except total row)
+				if (isNegativeQnty && !isTotalRow) {
+					textColor = [255, 0, 0];
+				}
 
 				doc.setDrawColor(0);
+				doc.setFillColor(bgColor[0], bgColor[1], bgColor[2]);
 				doc.rect(
 					startX,
 					startY + (i - startIndex + 2) * rowHeight,
 					tableWidth,
-					rowHeight
+					rowHeight,
+					"F"
 				);
 
 				row.forEach((cell, cellIndex) => {
 					const cellY = startY + (i - startIndex + 2) * rowHeight + 3;
-					const cellX = startX + 2;
+					const cellX = startX + 0.5;
 					doc.setTextColor(textColor[0], textColor[1], textColor[2]);
 					doc.setFont(fontName, "normal");
-					const cellValue = String(cell);
 
+					if (isTotalRow) {
+						doc.setFont(boldFont, "bold");
+						doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+					} else {
+						doc.setFont(normalFont, "normal");
+					}
+
+					doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+					const cellValue = String(cell);
 					if (
 						cellIndex === 1 ||
 						cellIndex === 2 ||
@@ -333,7 +368,7 @@ export default function CompanyMonthlyPurchaseComparison() {
 						cellIndex === 12 ||
 						cellIndex === 13
 					) {
-						const rightAlignX = startX + columnWidths[cellIndex] - 2;
+						const rightAlignX = startX + columnWidths[cellIndex] - 0.5;
 						doc.text(cellValue, rightAlignX, cellY, {
 							align: "right",
 							baseline: "middle",
@@ -367,7 +402,7 @@ export default function CompanyMonthlyPurchaseComparison() {
 			const lineY = pageHeight - 15;
 			doc.setLineWidth(0.3);
 			doc.line(lineX, lineY, lineX + lineWidth, lineY);
-			const headingFontSize = 12;
+			const headingFontSize = parseInt(getdatafontsize);
 			const headingX = lineX + 2;
 			const headingY = lineY + 5;
 			doc.setFontSize(headingFontSize);
@@ -386,7 +421,7 @@ export default function CompanyMonthlyPurchaseComparison() {
 			return paddingTop;
 		};
 
-		const rowsPerPage = 29;
+		const rowsPerPage = 23;
 
 		const handlePagination = () => {
 			const addTitle = (
@@ -395,7 +430,7 @@ export default function CompanyMonthlyPurchaseComparison() {
 				time,
 				pageNumber,
 				startY,
-				titleFontSize = 16,
+				titleFontSize = 18,
 				dateTimeFontSize = 8,
 				pageNumberFontSize = 8
 			) => {
@@ -426,26 +461,63 @@ export default function CompanyMonthlyPurchaseComparison() {
 			let pageNumber = 1;
 
 			while (currentPageIndex * rowsPerPage < rows.length) {
-				addTitle(comapnyname, "", "", pageNumber, startY, 20, 10);
+				// Add company name and title
+				doc.setFont(getfontstyle, "bold");
+				addTitle(comapnyname, "", "", pageNumber, startY, 18);
+				doc.setFont(getfontstyle, "normal");
 				startY += 7;
 				addTitle(
-					`Company Monthly Purchase Comparison`,
+					`Company Monthly Purchase Comparison Report`,
 					"",
 					"",
 					pageNumber,
 					startY,
-					14
+					parseInt(getdatafontsize)
 				);
-				startY += 13;
+				startY += 10;
 
-				const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
-				const labelsY = startY + 2;
-				doc.setFontSize(14);
-				doc.setFont("verdana", "bold");
-				doc.setFont("verdana", "normal");
-				startY += 0;
+				// New additional line before the table
+				const typeWord = "Type: ";
+				const typeTerm = transectionType
+					? transectionType === "A"
+						? "AMOUNT"
+						: "QUANTITY"
+					: "ALL";
 
-				addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 39);
+				const searchWord = searchQuery ? "Search: " : "";
+				const searchTerm = searchQuery ? searchQuery : "";
+
+				const categoryWord = "Category: ";
+				const categoryTerm = categoryTypeDataValue
+					? categoryTypeDataValue.label
+					: "ALL";
+
+				const labelXLeftWord = doc.internal.pageSize.width - totalWidth;
+				const labelXLeftTerm = doc.internal.pageSize.width - totalWidth + 25;
+
+				const labelXMiddleWord = doc.internal.pageSize.width - totalWidth + 130;
+				const labelXMiddleTerm = doc.internal.pageSize.width - totalWidth + 145;
+
+				const labelXRightWord = doc.internal.pageSize.width - totalWidth + 220;
+				const labelXRightTerm = doc.internal.pageSize.width - totalWidth + 235;
+
+				doc.setFontSize(parseInt(getdatafontsize));
+
+				doc.setFont(getfontstyle, "bold");
+				doc.text(categoryWord, labelXLeftWord, startY);
+				doc.text(typeWord, labelXMiddleWord, startY);
+				doc.text(searchWord, labelXRightWord, startY);
+
+				doc.setFont(getfontstyle, "normal");
+				doc.text(categoryTerm, labelXLeftTerm, startY);
+				doc.text(typeTerm, labelXMiddleTerm, startY);
+				doc.text(searchTerm, labelXRightTerm, startY);
+
+				// startY += 2; // Adjust the Y-position for the next section
+				addTableHeaders(
+					(doc.internal.pageSize.width - totalWidth) / 2,
+					startY + 6
+				);
 				const startIndex = currentPageIndex * rowsPerPage;
 				const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
 				startY = addTableRows(
@@ -482,7 +554,7 @@ export default function CompanyMonthlyPurchaseComparison() {
 		const time = getCurrentTime();
 
 		handlePagination();
-		doc.save("CompanyMonthlyPurchaseComparison.pdf");
+		doc.save(`CompanyMonthlyPurchaseComparisonReport.pdf`);
 
 		const pdfBlob = doc.output("blob");
 		const pdfFile = new File([pdfBlob], "table_data.pdf", {
@@ -494,10 +566,7 @@ export default function CompanyMonthlyPurchaseComparison() {
 		const workbook = new ExcelJS.Workbook();
 		const worksheet = workbook.addWorksheet("Sheet1");
 		const numColumns = 14;
-		const titleStyle = {
-			font: { bold: true, size: 12 },
-			alignment: { horizontal: "center" },
-		};
+
 		const columnAlignments = [
 			"left",
 			"right",
@@ -515,13 +584,64 @@ export default function CompanyMonthlyPurchaseComparison() {
 			"right",
 		];
 		worksheet.addRow([]);
-		[comapnyname, `Company Monthly Purchase Comparison`].forEach((title, index) => {
-			worksheet.addRow([title]).eachCell((cell) => (cell.style = titleStyle));
-			worksheet.mergeCells(
-				`A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
-			);
-		});
+		[comapnyname, `Company Monthly Purchase Comparison Report`].forEach(
+			(title, index) => {
+				worksheet.addRow([title]).eachCell((cell) => {
+					cell.style = {
+						font: {
+							bold: index === 0 ? true : false,
+							size: index === 0 ? 18 : parseInt(getdatafontsize),
+						},
+						alignment: { horizontal: "center" },
+					};
+				});
+				worksheet.mergeCells(
+					`A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
+				);
+			}
+		);
 		worksheet.addRow([]);
+		worksheet
+			.addRow([
+				`Category: ${
+					categoryTypeDataValue ? categoryTypeDataValue.label : "ALL"
+				}`,
+				"",
+				"",
+				"",
+				"",
+				"",
+				"Type: ",
+				transectionType
+					? transectionType === "A"
+						? "AMOUNT"
+						: "QUANTITY"
+					: "ALL",
+				"",
+				"",
+				"",
+				"",
+				searchQuery ? "Search: " : "",
+				searchQuery ? searchQuery : "",
+			])
+			.eachCell((cell, colNumber) => {
+				if (colNumber === 1 || colNumber === 7) {
+					// Target the cell containing "Search:"
+					cell.font = {
+						bold: true,
+						size: parseInt(getdatafontsize), // Apply dynamic font size if required
+					};
+				}
+				if (colNumber === 13) {
+					// Target the cell containing "Search:"
+					cell.font = {
+						bold: true,
+						size: parseInt(getdatafontsize), // Apply dynamic font size if required
+					};
+				}
+			});
+
+		// worksheet.addRow([]);
 		const headerStyle = {
 			font: { bold: true },
 			alignment: { horizontal: "center" },
@@ -555,10 +675,17 @@ export default function CompanyMonthlyPurchaseComparison() {
 		];
 		const headerRow = worksheet.addRow(headers);
 		headerRow.eachCell((cell) => {
-			cell.style = { ...headerStyle, alignment: { horizontal: "center" } };
+			cell.style = {
+				...headerStyle,
+				alignment: { horizontal: "center" },
+				font: {
+					bold: true,
+					size: parseInt(getdatafontsize),
+				},
+			};
 		});
 		tableData.forEach((item) => {
-			worksheet.addRow([
+			const row = worksheet.addRow([
 				item.Company,
 				item["Jan"],
 				item["Feb"],
@@ -574,6 +701,20 @@ export default function CompanyMonthlyPurchaseComparison() {
 				item["Dec"],
 				item["Total"],
 			]);
+
+			// **Check if Qnty is negative**
+			const isNegativeTotal = item.Total && String(item.Total).startsWith("-");
+
+			if (isNegativeTotal) {
+				row.eachCell((cell) => {
+					cell.fill = {
+						type: "pattern",
+						pattern: "solid",
+						fgColor: { argb: "FFFFFFFF" },
+					}; // WHITE color
+					cell.font = { color: { argb: "FFFF0000" } }; // red text for contrast
+				});
+			}
 		});
 		const totalRow = worksheet.addRow([
 			"Total",
@@ -594,7 +735,7 @@ export default function CompanyMonthlyPurchaseComparison() {
 		totalRow.eachCell((cell) => {
 			cell.font = { bold: true };
 		});
-		[45, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10].forEach(
+		[35, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10].forEach(
 			(width, index) => {
 				worksheet.getColumn(index + 1).width = width;
 			}
@@ -602,7 +743,7 @@ export default function CompanyMonthlyPurchaseComparison() {
 		worksheet.eachRow((row, rowNumber) => {
 			if (rowNumber > 5) {
 				row.eachCell((cell, colNumber) => {
-					if (rowNumber === 5) {
+					if (rowNumber === 6) {
 						cell.alignment = { horizontal: "center" };
 					} else {
 						cell.alignment = { horizontal: columnAlignments[colNumber - 1] };
@@ -616,11 +757,12 @@ export default function CompanyMonthlyPurchaseComparison() {
 				});
 			}
 		});
+		worksheet.getRow(2).height = 20;
 		const buffer = await workbook.xlsx.writeBuffer();
 		const blob = new Blob([buffer], {
 			type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 		});
-		saveAs(blob, "CompanyMonthlyPurchaseComparison.xlsx");
+		saveAs(blob, `CompanyMonthlyPurchaseComparisonReport.xlsx`);
 	};
 
 	const dispatch = useDispatch();
@@ -718,37 +860,11 @@ export default function CompanyMonthlyPurchaseComparison() {
 		};
 	}, []);
 
-	// const contentStyle = {
-	// 	backgroundColor: getcolor,
-	// 	width: isSidebarVisible ? "calc(65vw - 0%)" : "65vw",
-	// 	position: "relative",
-	// 	top: "35%",
-	// 	left: isSidebarVisible ? "50%" : "50%",
-	// 	transform: "translate(-50%, -50%)",
-	// 	transition: isSidebarVisible
-	// 		? "left 3s ease-in-out, width 2s ease-in-out"
-	// 		: "left 3s ease-in-out, width 2s ease-in-out",
-	// 	display: "flex",
-	// 	justifyContent: "center",
-	// 	alignItems: "start",
-	// 	overflowX: "hidden",
-	// 	overflowY: "hidden",
-	// 	wordBreak: "break-word",
-	// 	textAlign: "center",
-	// 	maxWidth: "1400px",
-	// 	fontSize: "15px",
-	// 	fontStyle: "normal",
-	// 	fontWeight: "400",
-	// 	lineHeight: "23px",
-	// 	fontFamily: '"Poppins", sans-serif',
-	// };
-
 	const contentStyle = {
 		backgroundColor: getcolor,
-		height: "100vh",
 		width: isSidebarVisible ? "calc(100vw - 5%)" : "100vw",
 		position: "relative",
-		top: "50%",
+		top: "40%",
 		left: isSidebarVisible ? "50%" : "50%",
 		transform: "translate(-50%, -50%)",
 		transition: isSidebarVisible
@@ -762,11 +878,11 @@ export default function CompanyMonthlyPurchaseComparison() {
 		wordBreak: "break-word",
 		textAlign: "center",
 		maxWidth: "1200px",
-		fontSize: "15px",
+		fontSize: parseInt(getdatafontsize),
 		fontStyle: "normal",
 		fontWeight: "400",
 		lineHeight: "23px",
-		fontFamily: '"Poppins", sans-serif',
+		fontFamily: getfontstyle,
 	};
 
 	const [isFilterApplied, setIsFilterApplied] = useState(false);
@@ -839,7 +955,7 @@ export default function CompanyMonthlyPurchaseComparison() {
 		}
 	}, [selectedIndex]);
 
-	const [menuStoreIsOpen, setMenuStoreIsOpen] = useState(false);
+	const [menuCategoryIsOpen, setMenuCategoryIsOpen] = useState(false);
 
 	const focusNextElement = (currentRef, nextRef) => {
 		if (currentRef.current && nextRef.current) {
@@ -854,10 +970,10 @@ export default function CompanyMonthlyPurchaseComparison() {
 		}
 	};
 
-	const handleStoreEnter = (e) => {
-		if (e.key === "Enter" && !menuStoreIsOpen) {
+	const handleCategoryEnter = (e) => {
+		if (e.key === "Enter" && !menuCategoryIsOpen) {
 			e.preventDefault();
-			focusNextElement(storeRef, typeRef);
+			focusNextElement(categoryRef, typeRef);
 		}
 	};
 
@@ -881,7 +997,7 @@ export default function CompanyMonthlyPurchaseComparison() {
 						borderRadius: "9px",
 					}}
 				>
-					<NavComponent textdata="Company Monthly Purchase Comparison" />
+					<NavComponent textdata="Company Monthly Purchase Comparison Report" />
 
 					{/* ------------1st row */}
 					<div className="row" style={{ height: "20px", margin: "8px" }}>
@@ -908,7 +1024,12 @@ export default function CompanyMonthlyPurchaseComparison() {
 									}}
 								>
 									<label htmlFor="fromDatePicker">
-										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+										<span
+											style={{
+												fontSize: parseInt(getdatafontsize),
+												fontWeight: "bold",
+											}}
+										>
 											Category:&nbsp;&nbsp;
 										</span>
 										<br />
@@ -917,25 +1038,31 @@ export default function CompanyMonthlyPurchaseComparison() {
 								<div>
 									<Select
 										className="List-select-class "
-										ref={storeRef}
-										options={optionStore}
-										onKeyDown={handleStoreEnter}
+										ref={categoryRef}
+										options={optionCategory}
+										onKeyDown={handleCategoryEnter}
 										id="selectedsale"
 										onChange={(selectedOption) => {
 											if (selectedOption && selectedOption.value) {
-												setStoreType(selectedOption.value);
+												const labelPart = selectedOption.label.split("-")[0];
+												setCategoryType(selectedOption.value);
+												setCategoryTypeDataValue({
+													value: selectedOption.value,
+													label: labelPart,
+												});
 											} else {
-												setStoreType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+												setCategoryType("");
+												setCategoryTypeDataValue("");
 											}
 										}}
 										components={{ Option: DropdownOption }}
-										// styles={customStylesStore}
-										styles={customStylesStore()}
+										// styles={customStylesCategory}
+										styles={customStylesCategory()}
 										isClearable
 										placeholder="Search or select..."
-										menuIsOpen={menuStoreIsOpen}
-										onMenuOpen={() => setMenuStoreIsOpen(true)}
-										onMenuClose={() => setMenuStoreIsOpen(false)}
+										menuIsOpen={menuCategoryIsOpen}
+										onMenuOpen={() => setMenuCategoryIsOpen(true)}
+										onMenuClose={() => setMenuCategoryIsOpen(false)}
 									/>
 								</div>
 							</div>
@@ -953,7 +1080,12 @@ export default function CompanyMonthlyPurchaseComparison() {
 									}}
 								>
 									<label htmlFor="transactionType">
-										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+										<span
+											style={{
+												fontSize: parseInt(getdatafontsize),
+												fontWeight: "bold",
+											}}
+										>
 											Type:&nbsp;&nbsp;
 										</span>
 									</label>
@@ -977,13 +1109,13 @@ export default function CompanyMonthlyPurchaseComparison() {
 										// marginLeft: "15px",
 										backgroundColor: getcolor,
 										border: `1px solid ${fontcolor}`,
-										fontSize: "12px",
+										fontSize: parseInt(getdatafontsize),
 										color: fontcolor,
 									}}
 								>
 									<option value="">All</option>
-									<option value="Q">Quantity</option>
 									<option value="A">Amount</option>
+									<option value="Q">Quantity</option>
 								</select>
 							</div>
 
@@ -994,7 +1126,12 @@ export default function CompanyMonthlyPurchaseComparison() {
 							>
 								<div>
 									<label for="searchInput">
-										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+										<span
+											style={{
+												fontSize: parseInt(getdatafontsize),
+												fontWeight: "bold",
+											}}
+										>
 											Search:&nbsp;&nbsp;
 										</span>
 									</label>
@@ -1010,7 +1147,7 @@ export default function CompanyMonthlyPurchaseComparison() {
 										style={{
 											width: "135px",
 											height: "24px",
-											fontSize: "12px",
+											fontSize: parseInt(getdatafontsize),
 											color: fontcolor,
 											backgroundColor: getcolor,
 											border: `1px solid ${fontcolor}`,
@@ -1023,7 +1160,9 @@ export default function CompanyMonthlyPurchaseComparison() {
 										onBlur={(e) =>
 											(e.currentTarget.style.border = `1px solid ${fontcolor}`)
 										}
-										onChange={(e) => setSearchQuery(e.target.value)}
+										onChange={(e) =>
+											setSearchQuery(e.target.value.toUpperCase())
+										}
 									/>
 								</div>
 							</div>
@@ -1042,7 +1181,7 @@ export default function CompanyMonthlyPurchaseComparison() {
 								className="myTable"
 								id="table"
 								style={{
-									fontSize: "12px",
+									fontSize: parseInt(getdatafontsize),
 									width: "100%",
 									position: "relative",
 								}}
@@ -1116,7 +1255,7 @@ export default function CompanyMonthlyPurchaseComparison() {
 								backgroundColor: textColor,
 								borderBottom: `1px solid ${fontcolor}`,
 								overflowY: "auto",
-								maxHeight: "45vh",
+								maxHeight: "55vh",
 								width: "100%",
 								wordBreak: "break-word",
 							}}
@@ -1125,7 +1264,7 @@ export default function CompanyMonthlyPurchaseComparison() {
 								className="myTable"
 								id="tableBody"
 								style={{
-									fontSize: "12px",
+									fontSize: parseInt(getdatafontsize),
 									width: "100%",
 									position: "relative",
 								}}
@@ -1190,7 +1329,8 @@ export default function CompanyMonthlyPurchaseComparison() {
 														}
 														style={{
 															backgroundColor: getcolor,
-															color: fontcolor,
+															color:
+																item.Total?.[0] === "-" ? "red" : fontcolor,
 														}}
 													>
 														<td className="text-start" style={firstColWidth}>
