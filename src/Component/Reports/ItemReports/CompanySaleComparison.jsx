@@ -45,13 +45,11 @@ export default function CompanySaleComparison() {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [transectionType, settransectionType] = useState("");
 
-	const [categoryType, setCategoryType] = useState("");
-
 	const yeardescription = getYearDescription();
 	const locationnumber = getLocationnumber();
 
+	const [categoryType, setCategoryType] = useState("");
 	const [categoryTypeDataValue, setCategoryTypeDataValue] = useState("");
-
 	const [categoryList, setCategoryList] = useState([]);
 
 	const [totalQnty, setTotalQnty] = useState(0);
@@ -670,7 +668,7 @@ export default function CompanySaleComparison() {
 		});
 	};
 
-	const handleDownloadCSV = async () => {
+	const	 handleDownloadCSV = async () => {
 		const workbook = new ExcelJS.Workbook();
 		const worksheet = workbook.addWorksheet("Sheet1");
 		const numColumns = 5;

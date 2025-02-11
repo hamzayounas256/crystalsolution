@@ -1678,7 +1678,7 @@ export default function ItemPurchaseComparison() {
 														}
 														style={{
 															backgroundColor: getcolor,
-															color: fontcolor,
+															color: item.Qnty?.[0] === "-" ? "red" : fontcolor,
 														}}
 													>
 														<td className="text-start" style={firstColWidth}>
