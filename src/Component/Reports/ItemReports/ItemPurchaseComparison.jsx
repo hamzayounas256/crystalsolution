@@ -3,7 +3,12 @@ import { Container, Spinner, Nav } from "react-bootstrap";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../../../ThemeContext";
-import { getUserData, getOrganisationData } from "../../Auth";
+import {
+	getUserData,
+	getOrganisationData,
+	getLocationnumber,
+	getYearDescription,
+} from "../../Auth";
 import NavComponent from "../../MainComponent/Navform/navbarform";
 import SingleButton from "../../MainComponent/Button/SingleButton/SingleButton";
 import Select from "react-select";
@@ -32,15 +37,18 @@ export default function ItemPurchaseComparison() {
 	const toRef = useRef(null);
 	const fromRef = useRef(null);
 
-	const storeRef = useRef(null);
+	const companyRef = useRef(null);
 	const typeRef = useRef(null);
 	const searchRef = useRef(null);
 	const selectButtonRef = useRef(null);
 
 	const [searchQuery, setSearchQuery] = useState("");
 	const [transectionType, settransectionType] = useState("");
-	const [storeType, setStoreType] = useState("");
-	const [storeList, setStoreList] = useState([]);
+	const [companyType, setCompanyType] = useState("");
+
+	const [companyTypeDataValue, setCompanyTypeDataValue] = useState("");
+
+	const [companyList, setCompanyList] = useState([]);
 
 	const [totalQnty, setTotalQnty] = useState(0);
 	const [totalAmount, setTotalAmount] = useState(0);
@@ -68,7 +76,12 @@ export default function ItemPurchaseComparison() {
 		getyeardescription,
 		getfromdate,
 		gettodate,
+		getdatafontsize,
+		getfontstyle,
 	} = useTheme();
+
+	const yeardescription = getYearDescription();
+	const locationnumber = getLocationnumber();
 
 	useEffect(() => {
 		document.documentElement.style.setProperty("--background-color", getcolor);
@@ -236,12 +249,12 @@ export default function ItemPurchaseComparison() {
 		const apiMainUrl = apiLinks + "/ItemPurchaseComparison.php";
 		setIsLoading(true);
 		const formMainData = new URLSearchParams({
-			code: "NASIRTRD",
-			FLocCod: "001",
-			FYerDsc: "2024-2024",
+			code: organisation.code,
+			FLocCod: locationnumber || getLocationNumber,
+			FYerDsc: yeardescription || getyeardescription,
 			FIntDat: fromInputDate,
 			FFnlDat: toInputDate,
-			FCmpCod: storeType,
+			FCmpCod: companyType,
 			FSchTxt: searchQuery,
 		}).toString();
 
@@ -300,26 +313,26 @@ export default function ItemPurchaseComparison() {
 	}, []);
 
 	useEffect(() => {
-		//----------------- store dropdown
-		const apiStoreUrl = apiLinks + "/GetCompany.php";
-		const formStoreData = new URLSearchParams({
-			code: "NASIRTRD",
+		//----------------- Company dropdown
+		const apiCompanyUrl = apiLinks + "/GetCompany.php";
+		const formCompanyData = new URLSearchParams({
+			code: organisation.code,
 		}).toString();
 		axios
-			.post(apiStoreUrl, formStoreData)
+			.post(apiCompanyUrl, formCompanyData)
 			.then((response) => {
-				setStoreList(response.data);
-				// console.log("STORE"+response.data);
+				setCompanyList(response.data);
+				// console.log("Company"+response.data);
 			})
 			.catch((error) => {
 				console.error("Error fetching data:", error);
 			});
 	}, []);
 
-	// Store List array
-	const optionStore = storeList.map((item) => ({
+	// Company List array
+	const optionCompany = companyList.map((item) => ({
 		value: item.tcmpcod,
-		label: `${item.tcmpcod}-${item.tcmpdsc.trim()}`,
+		label: item.tcmpdsc.trim(),
 	}));
 
 	const DropdownOption = (props) => {
@@ -327,7 +340,7 @@ export default function ItemPurchaseComparison() {
 			<components.Option {...props}>
 				<div
 					style={{
-						fontSize: "12px",
+						fontSize: parseInt(getdatafontsize),
 						paddingBottom: "5px",
 						lineHeight: "3px",
 						color: "black",
@@ -340,14 +353,15 @@ export default function ItemPurchaseComparison() {
 		);
 	};
 
-	// ------------ store style customization
-	const customStylesStore = () => ({
+	// ------------ Company style customization
+	const customStylesCompany = () => ({
 		control: (base, state) => ({
 			...base,
 			height: "24px",
 			minHeight: "unset",
 			width: "275px",
-			fontSize: "12px",
+			fontSize: parseInt(getdatafontsize),
+			fontFamily: getfontstyle,
 			backgroundColor: getcolor,
 			color: fontcolor,
 			borderRadius: 0,
@@ -364,9 +378,20 @@ export default function ItemPurchaseComparison() {
 		dropdownIndicator: (base) => ({
 			...base,
 			padding: 0,
-			fontSize: "18px",
+			marginTop: "-5px",
+			fontSize: parseInt(getdatafontsize),
 			display: "flex",
 			textAlign: "center !important",
+		}),
+		singleValue: (base) => ({
+			...base,
+			marginTop: "-5px",
+			textAlign: "left",
+			color: fontcolor,
+		}),
+		clearIndicator: (base) => ({
+			...base,
+			marginTop: "-5px",
 		}),
 	});
 
@@ -392,16 +417,16 @@ export default function ItemPurchaseComparison() {
 			String(totalMargin),
 		]);
 		const headers = ["Code", "Category", "Qnty", "Amount", "Margin"];
-		const columnWidths = [10, 75, 10, 18, 18];
+		const columnWidths = [15, 85, 15, 25, 25];
 		const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
 		const pageHeight = doc.internal.pageSize.height;
 		const paddingTop = 15;
-		doc.setFont("verdana");
-		doc.setFontSize(10);
+		doc.setFont(getfontstyle, "normal");
+		doc.setFontSize(parseInt(getdatafontsize));
 
 		const addTableHeaders = (startX, startY) => {
-			doc.setFont("bold");
-			doc.setFontSize(10);
+			doc.setFont(getfontstyle, "bold");
+			doc.setFontSize(parseInt(getdatafontsize));
 			headers.forEach((header, index) => {
 				const cellWidth = columnWidths[index];
 				const cellHeight = 6;
@@ -415,36 +440,39 @@ export default function ItemPurchaseComparison() {
 				doc.text(header, cellX, cellY, { align: "center" });
 				startX += columnWidths[index];
 			});
-			doc.setFont("verdana");
-			doc.setFontSize(10);
+			doc.setFont(getfontstyle, "normal");
+			doc.setFontSize(parseInt(getdatafontsize));
 		};
 
 		const addTableRows = (startX, startY, startIndex, endIndex) => {
-			const rowHeight = 5;
-			const fontSize = 8;
-			const boldFont = "verdana";
-			const normalFont = "verdana";
+			const rowHeight = 6;
+			const fontSize = parseInt(getdatafontsize);
+			const boldFont = getfontstyle;
+			const normalFont = getfontstyle;
 			const tableWidth = getTotalTableWidth();
 			doc.setFontSize(fontSize);
 
 			for (let i = startIndex; i < endIndex; i++) {
 				const row = rows[i];
-				const isOddRow = i % 2 !== 0;
-				const isRedRow = row[0] && parseInt(row[0]) > 100;
-				let textColor = [0, 0, 0];
+				const isTotalRow = i === rows.length - 1;
+				const isNegativeQnty = row[3] && row[3].startsWith("-");
+				let textColor = [0, 0, 0]; // Default text color
 				let fontName = normalFont;
+				const bgColor = [255, 255, 255]; // Always white background
 
-				// if (isRedRow) {
-				// 	textColor = [255, 0, 0];
-				// 	fontName = boldFont;
-				// }
+				// Set text color to red for negative quantities (except total row)
+				if (isNegativeQnty && !isTotalRow) {
+					textColor = [255, 0, 0];
+				}
 
 				doc.setDrawColor(0);
+				doc.setFillColor(bgColor[0], bgColor[1], bgColor[2]);
 				doc.rect(
 					startX,
 					startY + (i - startIndex + 2) * rowHeight,
 					tableWidth,
-					rowHeight
+					rowHeight,
+					"F"
 				);
 
 				row.forEach((cell, cellIndex) => {
@@ -452,8 +480,16 @@ export default function ItemPurchaseComparison() {
 					const cellX = startX + 2;
 					doc.setTextColor(textColor[0], textColor[1], textColor[2]);
 					doc.setFont(fontName, "normal");
-					const cellValue = String(cell);
 
+					if (isTotalRow) {
+						doc.setFont(boldFont, "bold");
+						doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+					} else {
+						doc.setFont(normalFont, "normal");
+					}
+
+					doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+					const cellValue = String(cell);
 					if (cellIndex === 2 || cellIndex === 3 || cellIndex === 4) {
 						const rightAlignX = startX + columnWidths[cellIndex] - 2;
 						doc.text(cellValue, rightAlignX, cellY, {
@@ -489,7 +525,7 @@ export default function ItemPurchaseComparison() {
 			const lineY = pageHeight - 15;
 			doc.setLineWidth(0.3);
 			doc.line(lineX, lineY, lineX + lineWidth, lineY);
-			const headingFontSize = 12;
+			const headingFontSize = parseInt(getdatafontsize);
 			const headingX = lineX + 2;
 			const headingY = lineY + 5;
 			doc.setFontSize(headingFontSize);
@@ -508,8 +544,7 @@ export default function ItemPurchaseComparison() {
 			return paddingTop;
 		};
 
-		const rowsPerPage = 46; //portrait
-		// const rowsPerPage = 29; //landscape
+		const rowsPerPage = 37;
 
 		const handlePagination = () => {
 			const addTitle = (
@@ -518,7 +553,7 @@ export default function ItemPurchaseComparison() {
 				time,
 				pageNumber,
 				startY,
-				titleFontSize = 16,
+				titleFontSize = 18,
 				dateTimeFontSize = 8,
 				pageNumberFontSize = 8
 			) => {
@@ -549,26 +584,50 @@ export default function ItemPurchaseComparison() {
 			let pageNumber = 1;
 
 			while (currentPageIndex * rowsPerPage < rows.length) {
-				addTitle(comapnyname, "", "", pageNumber, startY, 20, 10);
+				// Add company name and title
+				doc.setFont(getfontstyle, "bold");
+				addTitle(comapnyname, "", "", pageNumber, startY, 18);
+				doc.setFont(getfontstyle, "normal");
 				startY += 7;
 				addTitle(
-					`Item Purchase Comparison From: ${fromInputDate} To: ${toInputDate}`,
+					`Item Purchase Comparison Report From: ${fromInputDate} To: ${toInputDate}`,
 					"",
 					"",
 					pageNumber,
 					startY,
-					14
+					parseInt(getdatafontsize)
 				);
-				startY += 13;
+				startY += 10;
 
-				const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
-				const labelsY = startY + 2;
-				doc.setFontSize(14);
-				doc.setFont("verdana", "bold");
-				doc.setFont("verdana", "normal");
-				startY += 0;
+				const searchWord = searchQuery ? "Search: " : "";
+				const searchTerm = searchQuery ? searchQuery : "";
 
-				addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 39);
+				const companyWord = "Company: ";
+				const companyTerm = companyTypeDataValue
+					? companyTypeDataValue.label
+					: "ALL";
+
+				const labelXLeftWord = doc.internal.pageSize.width - totalWidth - 15;
+				const labelXLeftTerm = doc.internal.pageSize.width - totalWidth + 5;
+
+				const labelXRightWord = doc.internal.pageSize.width - totalWidth + 100;
+				const labelXRightTerm = doc.internal.pageSize.width - totalWidth + 115;
+
+				doc.setFontSize(parseInt(getdatafontsize));
+
+				doc.setFont(getfontstyle, "bold");
+				doc.text(companyWord, labelXLeftWord, startY);
+				doc.text(searchWord, labelXRightWord, startY);
+
+				doc.setFont(getfontstyle, "normal");
+				doc.text(companyTerm, labelXLeftTerm, startY);
+				doc.text(searchTerm, labelXRightTerm, startY);
+
+				// startY += 2; // Adjust the Y-position for the next section
+				addTableHeaders(
+					(doc.internal.pageSize.width - totalWidth) / 2,
+					startY + 6
+				);
 				const startIndex = currentPageIndex * rowsPerPage;
 				const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
 				startY = addTableRows(
@@ -605,7 +664,9 @@ export default function ItemPurchaseComparison() {
 		const time = getCurrentTime();
 
 		handlePagination();
-		doc.save("ItemPurchaseComparison.pdf");
+		doc.save(
+			`ItemPurchaseComparisonReportFrom${fromInputDate}To${toInputDate}.pdf`
+		);
 
 		const pdfBlob = doc.output("blob");
 		const pdfFile = new File([pdfBlob], "table_data.pdf", {
@@ -616,23 +677,53 @@ export default function ItemPurchaseComparison() {
 	const handleDownloadCSV = async () => {
 		const workbook = new ExcelJS.Workbook();
 		const worksheet = workbook.addWorksheet("Sheet1");
-		const numColumns = 9;
-		const titleStyle = {
-			font: { bold: true, size: 12 },
-			alignment: { horizontal: "center" },
-		};
-		const columnAlignments = ["center", "left", "right", "right", "right"];
+		const numColumns = 5;
+
+		const columnAlignments = ["left", "left", "right", "right", "right"];
 		worksheet.addRow([]);
 		[
 			comapnyname,
-			`Item Purchase Comparison From ${fromInputDate} To ${toInputDate}`,
+			`Item Purchase Comparison Report From: ${fromInputDate} to ${toInputDate}`,
 		].forEach((title, index) => {
-			worksheet.addRow([title]).eachCell((cell) => (cell.style = titleStyle));
+			worksheet.addRow([title]).eachCell((cell) => {
+				cell.style = {
+					font: {
+						bold: index === 0 ? true : false,
+						size: index === 0 ? 18 : parseInt(getdatafontsize),
+					},
+					alignment: { horizontal: "center" },
+				};
+			});
 			worksheet.mergeCells(
 				`A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
 			);
 		});
 		worksheet.addRow([]);
+		worksheet
+			.addRow([
+				"Company: ",
+				companyTypeDataValue ? companyTypeDataValue.label : "ALL",
+				"",
+				searchQuery ? "Search: " : "",
+				searchQuery ? searchQuery : "",
+			])
+			.eachCell((cell, colNumber) => {
+				if (colNumber === 1) {
+					// Target the cell containing "Search:"
+					cell.font = {
+						bold: true,
+						size: parseInt(getdatafontsize), // Apply dynamic font size if required
+					};
+				}
+				if (colNumber === 4) {
+					// Target the cell containing "Search:"
+					cell.font = {
+						bold: true,
+						size: parseInt(getdatafontsize), // Apply dynamic font size if required
+					};
+				}
+			});
+
 		const headerStyle = {
 			font: { bold: true },
 			alignment: { horizontal: "center" },
@@ -651,16 +742,37 @@ export default function ItemPurchaseComparison() {
 		const headers = ["Code", "Category", "Qnty", "Amount", "Margin"];
 		const headerRow = worksheet.addRow(headers);
 		headerRow.eachCell((cell) => {
-			cell.style = { ...headerStyle, alignment: { horizontal: "center" } };
+			cell.style = {
+				...headerStyle,
+				alignment: { horizontal: "center" },
+				font: {
+					bold: true,
+					size: parseInt(getdatafontsize),
+				},
+			};
 		});
 		tableData.forEach((item) => {
-			worksheet.addRow([
+			const row = worksheet.addRow([
 				item.tctgcod,
 				item.Category,
 				item.Qnty,
 				item.Amount,
 				item.Margin,
 			]);
+
+			// **Check if Qnty is negative**
+			const isNegativeQnty = item.Qnty && String(item.Qnty).startsWith("-");
+
+			if (isNegativeQnty) {
+				row.eachCell((cell) => {
+					cell.fill = {
+						type: "pattern",
+						pattern: "solid",
+						fgColor: { argb: "FFFFFFFF" },
+					}; // Red color
+					cell.font = { color: { argb: "FFFF0000" } }; // White text for contrast
+				});
+			}
 		});
 		const totalRow = worksheet.addRow([
 			"",
@@ -678,7 +790,7 @@ export default function ItemPurchaseComparison() {
 		worksheet.eachRow((row, rowNumber) => {
 			if (rowNumber > 5) {
 				row.eachCell((cell, colNumber) => {
-					if (rowNumber === 5) {
+					if (rowNumber === 6) {
 						cell.alignment = { horizontal: "center" };
 					} else {
 						cell.alignment = { horizontal: columnAlignments[colNumber - 1] };
@@ -692,11 +804,15 @@ export default function ItemPurchaseComparison() {
 				});
 			}
 		});
+		worksheet.getRow(2).height = 20;
 		const buffer = await workbook.xlsx.writeBuffer();
 		const blob = new Blob([buffer], {
 			type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 		});
-		saveAs(blob, "ItemPurchaseComparison.xlsx");
+		saveAs(
+			blob,
+			`ItemPurchaseComparisonReportFrom${fromInputDate}To${toInputDate}.xlsx`
+		);
 	};
 
 	const dispatch = useDispatch();
@@ -711,23 +827,6 @@ export default function ItemPurchaseComparison() {
 	const [selectedSearch, setSelectedSearch] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
 	const { data, loading, error } = useSelector((state) => state.getuser);
-
-	const handleSearch = (e) => {
-		setSelectedSearch(e.target.value);
-	};
-
-	let totalEntries = 0;
-
-	const getFilteredTableData = () => {
-		let filteredData = tableData;
-		if (selectedSearch.trim() !== "") {
-			const query = selectedSearch.trim().toLowerCase();
-			filteredData = filteredData.filter(
-				(data) => data.tusrnam && data.tusrnam.toLowerCase().includes(query)
-			);
-		}
-		return filteredData;
-	};
 
 	const firstColWidth = {
 		width: "8%",
@@ -766,7 +865,7 @@ export default function ItemPurchaseComparison() {
 		backgroundColor: getcolor,
 		width: isSidebarVisible ? "calc(65vw - 0%)" : "65vw",
 		position: "relative",
-		top: "35%",
+		top: "40%",
 		left: isSidebarVisible ? "50%" : "50%",
 		transform: "translate(-50%, -50%)",
 		transition: isSidebarVisible
@@ -780,11 +879,11 @@ export default function ItemPurchaseComparison() {
 		wordBreak: "break-word",
 		textAlign: "center",
 		maxWidth: "800px",
-		fontSize: "15px",
+		fontSize: parseInt(getdatafontsize),
 		fontStyle: "normal",
 		fontWeight: "400",
 		lineHeight: "23px",
-		fontFamily: '"Poppins", sans-serif',
+		fontFamily: getfontstyle,
 	};
 
 	const [isFilterApplied, setIsFilterApplied] = useState(false);
@@ -892,7 +991,7 @@ export default function ItemPurchaseComparison() {
 		}
 	}, [selectedRadio]);
 
-	const [menuStoreIsOpen, setMenuStoreIsOpen] = useState(false);
+	const [menuCompanyIsOpen, setMenuCompanyIsOpen] = useState(false);
 
 	const focusNextElement = (currentRef, nextRef) => {
 		if (currentRef.current && nextRef.current) {
@@ -983,14 +1082,14 @@ export default function ItemPurchaseComparison() {
 			settoInputDate(formattedDate); // Update the state with formatted date
 
 			// Move focus to the next element
-			focusNextElement(toRef, storeRef);
+			focusNextElement(toRef, companyRef);
 		}
 	};
 
-	const handleStoreEnter = (e) => {
-		if (e.key === "Enter" && !menuStoreIsOpen) {
+	const handleCompanyEnter = (e) => {
+		if (e.key === "Enter" && !menuCompanyIsOpen) {
 			e.preventDefault();
-			focusNextElement(storeRef, searchRef);
+			focusNextElement(companyRef, searchRef);
 		}
 	};
 
@@ -1014,7 +1113,7 @@ export default function ItemPurchaseComparison() {
 						borderRadius: "9px",
 					}}
 				>
-					<NavComponent textdata="Item Purchase Comparison" />
+					<NavComponent textdata="Item Purchase Comparison Report" />
 
 					{/* ------------1st row */}
 					<div
@@ -1044,7 +1143,12 @@ export default function ItemPurchaseComparison() {
 									}}
 								>
 									<label htmlFor="fromDatePicker">
-										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+										<span
+											style={{
+												fontSize: parseInt(getdatafontsize),
+												fontWeight: "bold",
+											}}
+										>
 											From:&nbsp;&nbsp;
 										</span>
 									</label>
@@ -1074,7 +1178,7 @@ export default function ItemPurchaseComparison() {
 											paddingLeft: "5px",
 											outline: "none",
 											border: "none",
-											fontSize: "12px",
+											fontSize: parseInt(getdatafontsize),
 											backgroundColor: getcolor,
 											color: fontcolor,
 											opacity: selectedRadio === "custom" ? 1 : 0.5,
@@ -1113,7 +1217,7 @@ export default function ItemPurchaseComparison() {
 																? "pointer"
 																: "default",
 														marginLeft: "18px",
-														fontSize: "12px",
+														fontSize: parseInt(getdatafontsize),
 														color: fontcolor,
 														opacity: selectedRadio === "custom" ? 1 : 0.5,
 													}}
@@ -1136,7 +1240,12 @@ export default function ItemPurchaseComparison() {
 									}}
 								>
 									<label htmlFor="toDatePicker">
-										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+										<span
+											style={{
+												fontSize: parseInt(getdatafontsize),
+												fontWeight: "bold",
+											}}
+										>
 											To:&nbsp;&nbsp;
 										</span>
 									</label>
@@ -1167,7 +1276,7 @@ export default function ItemPurchaseComparison() {
 											paddingLeft: "5px",
 											outline: "none",
 											border: "none",
-											fontSize: "12px",
+											fontSize: parseInt(getdatafontsize),
 											backgroundColor: getcolor,
 											color: fontcolor,
 											opacity: selectedRadio === "custom" ? 1 : 0.5,
@@ -1205,7 +1314,7 @@ export default function ItemPurchaseComparison() {
 																? "pointer"
 																: "default",
 														marginLeft: "18px",
-														fontSize: "12px",
+														fontSize: parseInt(getdatafontsize),
 														color: fontcolor,
 														opacity: selectedRadio === "custom" ? 1 : 0.5,
 													}}
@@ -1229,7 +1338,7 @@ export default function ItemPurchaseComparison() {
 										justifyContent: "evenly",
 									}}
 								>
-									<div className="d-flex align-items-baseline mx-1">
+									<div className="d-flex align-items-center mx-1">
 										<input
 											type="radio"
 											name="dateRange"
@@ -1244,11 +1353,14 @@ export default function ItemPurchaseComparison() {
 											}
 										/>
 										&nbsp;
-										<label htmlFor="custom" style={{ fontSize: "14px" }}>
+										<label
+											htmlFor="custom"
+											style={{ fontSize: parseInt(getdatafontsize) }}
+										>
 											Custom
 										</label>
 									</div>
-									<div className="d-flex align-items-baseline mx-1">
+									<div className="d-flex align-items-center mx-1">
 										<input
 											type="radio"
 											name="dateRange"
@@ -1263,11 +1375,14 @@ export default function ItemPurchaseComparison() {
 											}
 										/>
 										&nbsp;
-										<label htmlFor="30" style={{ fontSize: "14px" }}>
+										<label
+											htmlFor="30"
+											style={{ fontSize: parseInt(getdatafontsize) }}
+										>
 											30 Days
 										</label>
 									</div>
-									<div className="d-flex align-items-baseline mx-1">
+									<div className="d-flex align-items-center mx-1">
 										<input
 											type="radio"
 											name="dateRange"
@@ -1282,11 +1397,14 @@ export default function ItemPurchaseComparison() {
 											}
 										/>
 										&nbsp;
-										<label htmlFor="60" style={{ fontSize: "14px" }}>
+										<label
+											htmlFor="60"
+											style={{ fontSize: parseInt(getdatafontsize) }}
+										>
 											60 Days
 										</label>
 									</div>
-									<div className="d-flex align-items-baseline mx-1">
+									<div className="d-flex align-items-center mx-1">
 										<input
 											type="radio"
 											name="dateRange"
@@ -1301,7 +1419,10 @@ export default function ItemPurchaseComparison() {
 											}
 										/>
 										&nbsp;
-										<label htmlFor="90" style={{ fontSize: "14px" }}>
+										<label
+											htmlFor="90"
+											style={{ fontSize: parseInt(getdatafontsize) }}
+										>
 											90 Days
 										</label>
 									</div>
@@ -1309,6 +1430,7 @@ export default function ItemPurchaseComparison() {
 							</div>
 						</div>
 					</div>
+
 					{/* --------2nd row */}
 					<div
 						className="row"
@@ -1324,7 +1446,7 @@ export default function ItemPurchaseComparison() {
 								justifyContent: "space-between",
 							}}
 						>
-							{/* Store Select */}
+							{/* Company Select */}
 							<div
 								className="d-flex align-items-center"
 								// style={{ marginRight: "20px" }}
@@ -1337,7 +1459,12 @@ export default function ItemPurchaseComparison() {
 									}}
 								>
 									<label htmlFor="fromDatePicker">
-										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+										<span
+											style={{
+												fontSize: parseInt(getdatafontsize),
+												fontWeight: "bold",
+											}}
+										>
 											Company:&nbsp;&nbsp;
 										</span>{" "}
 										<br />
@@ -1346,25 +1473,31 @@ export default function ItemPurchaseComparison() {
 								<div>
 									<Select
 										className="List-select-class "
-										ref={storeRef}
-										options={optionStore}
-										onKeyDown={handleStoreEnter}
+										ref={companyRef}
+										options={optionCompany}
+										onKeyDown={handleCompanyEnter}
 										id="selectedsale"
 										onChange={(selectedOption) => {
 											if (selectedOption && selectedOption.value) {
-												setStoreType(selectedOption.value);
+												const labelPart = selectedOption.label.split("-")[0];
+												setCompanyType(selectedOption.value);
+												setCompanyTypeDataValue({
+													value: selectedOption.value,
+													label: labelPart,
+												});
 											} else {
-												setStoreType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+												setCompanyType("");
+												setCompanyTypeDataValue("");
 											}
 										}}
 										components={{ Option: DropdownOption }}
-										// styles={customStylesStore}
-										styles={customStylesStore()}
+										// styles={customStylesCompany}
+										styles={customStylesCompany(!companyType)}
 										isClearable
 										placeholder="Search or select..."
-										menuIsOpen={menuStoreIsOpen}
-										onMenuOpen={() => setMenuStoreIsOpen(true)}
-										onMenuClose={() => setMenuStoreIsOpen(false)}
+										menuIsOpen={menuCompanyIsOpen}
+										onMenuOpen={() => setMenuCompanyIsOpen(true)}
+										onMenuClose={() => setMenuCompanyIsOpen(false)}
 									/>
 								</div>
 							</div>
@@ -1376,7 +1509,12 @@ export default function ItemPurchaseComparison() {
 							>
 								<div>
 									<label for="searchInput">
-										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+										<span
+											style={{
+												fontSize: parseInt(getdatafontsize),
+												fontWeight: "bold",
+											}}
+										>
 											Search:&nbsp;&nbsp;
 										</span>
 									</label>
@@ -1392,7 +1530,7 @@ export default function ItemPurchaseComparison() {
 										style={{
 											width: "275px",
 											height: "24px",
-											fontSize: "12px",
+											fontSize: parseInt(getdatafontsize),
 											color: fontcolor,
 											backgroundColor: getcolor,
 											border: `1px solid ${fontcolor}`,
@@ -1405,7 +1543,9 @@ export default function ItemPurchaseComparison() {
 										onBlur={(e) =>
 											(e.currentTarget.style.border = `1px solid ${fontcolor}`)
 										}
-										onChange={(e) => setSearchQuery(e.target.value)}
+										onChange={(e) =>
+											setSearchQuery(e.target.value.toUpperCase())
+										}
 									/>
 								</div>
 							</div>
@@ -1424,7 +1564,7 @@ export default function ItemPurchaseComparison() {
 								className="myTable"
 								id="table"
 								style={{
-									fontSize: "12px",
+									fontSize: parseInt(getdatafontsize),
 									width: "100%",
 									position: "relative",
 									// paddingRight: "2%",
@@ -1450,7 +1590,7 @@ export default function ItemPurchaseComparison() {
 											Code
 										</td>
 										<td className="border-dark" style={secondColWidth}>
-											Category{" "}
+											Category
 										</td>
 										<td className="border-dark" style={thirdColWidth}>
 											Qnty
@@ -1473,7 +1613,7 @@ export default function ItemPurchaseComparison() {
 								backgroundColor: textColor,
 								borderBottom: `1px solid ${fontcolor}`,
 								overflowY: "auto",
-								maxHeight: "45vh",
+								maxHeight: "55vh",
 								width: "100%",
 								wordBreak: "break-word",
 							}}
@@ -1482,7 +1622,7 @@ export default function ItemPurchaseComparison() {
 								className="myTable"
 								id="tableBody"
 								style={{
-									fontSize: "12px",
+									fontSize: parseInt(getdatafontsize),
 									width: "100%",
 									position: "relative",
 								}}
@@ -1541,7 +1681,7 @@ export default function ItemPurchaseComparison() {
 															color: fontcolor,
 														}}
 													>
-														<td className="text-center" style={firstColWidth}>
+														<td className="text-start" style={firstColWidth}>
 															{item.tctgcod}
 														</td>
 														<td className="text-start" style={secondColWidth}>

@@ -1535,7 +1535,7 @@ export default function ItemSaleComparison() {
 										onBlur={(e) =>
 											(e.currentTarget.style.border = `1px solid ${fontcolor}`)
 										}
-										onChange={(e) => setSearchQuery(e.target.value)}
+										onChange={(e) => setSearchQuery(e.target.value.toUpperCase())}
 									/>
 								</div>
 							</div>
