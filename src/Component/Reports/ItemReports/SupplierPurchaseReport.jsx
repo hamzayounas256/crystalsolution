@@ -899,7 +899,7 @@ export default function SupplierPurchaseReport() {
 				searchQuery ? searchQuery : "",
 			])
 			.eachCell((cell, colNumber) => {
-				if (colNumber === 1) {
+				if (colNumber === 1 || colNumber === 4) {
 					// Target the cell containing "Search:"
 					cell.font = {
 						bold: true,

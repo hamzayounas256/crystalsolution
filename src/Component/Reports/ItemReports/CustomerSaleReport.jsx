@@ -3,7 +3,12 @@ import { Container, Spinner, Nav } from "react-bootstrap";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../../../ThemeContext";
-import { getUserData, getOrganisationData } from "../../Auth";
+import {
+	getUserData,
+	getOrganisationData,
+	getYearDescription,
+	getLocationnumber,
+} from "../../Auth";
 import NavComponent from "../../MainComponent/Navform/navbarform";
 import SingleButton from "../../MainComponent/Button/SingleButton/SingleButton";
 import Select from "react-select";
@@ -48,21 +53,19 @@ export default function CustomerSaleReport() {
 
 	const [isAccountValid, setIsAccountValid] = useState(true);
 
-	const [storeType, setStoreType] = useState("");
 	const [companyType, setCompanyType] = useState("");
 	const [categoryType, setCategoryType] = useState("");
 	const [accountType, setAccountType] = useState("");
 
-	const [storeList, setStoreList] = useState([]);
 	const [companyList, setCompanyList] = useState([]);
 	const [categoryList, setCategoryList] = useState([]);
-	const [AccountList, setAccountList] = useState([]);
+	const [accountList, setAccountList] = useState([]);
+
+	const [companyTypeDataValue, setCompanyTypeDataValue] = useState("");
+	const [categoryTypeDataValue, setCategoryTypeDataValue] = useState("");
+	const [accountTypeDataValue, setAccountTypeDataValue] = useState("");
 
 	const [totalQnty, setTotalQnty] = useState(0);
-	const [totalOpening, setTotalOpening] = useState(0);
-	const [totalDebit, setTotalDebit] = useState(0);
-	const [totalCredit, setTotalCredit] = useState(0);
-	const [closingBalance, setClosingBalance] = useState(0);
 	const [totalAmount, setTotalAmount] = useState(0);
 
 	// state for from DatePicker
@@ -76,6 +79,9 @@ export default function CustomerSaleReport() {
 
 	const [selectedRadio, setSelectedRadio] = useState("custom"); // State to track selected radio button
 
+	const yeardescription = getYearDescription();
+	const locationnumber = getLocationnumber();
+
 	const {
 		isSidebarVisible,
 		toggleSidebar,
@@ -87,6 +93,8 @@ export default function CustomerSaleReport() {
 		getyeardescription,
 		getfromdate,
 		gettodate,
+		getdatafontsize,
+		getfontstyle,
 	} = useTheme();
 
 	useEffect(() => {
@@ -141,156 +149,14 @@ export default function CustomerSaleReport() {
 		setfromInputDate(e.target.value);
 	};
 
-	const handlefromKeyPress = (e, inputId) => {
-		if (e.key === "Enter") {
-			e.preventDefault();
-			const fromDateElement = document.getElementById("fromdatevalidation");
-			const formattedInput = fromInputDate.replace(
-				/^(\d{2})(\d{2})(\d{4})$/,
-				"$1-$2-$3"
-			);
-			const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
-
-			if (formattedInput.length === 10 && datePattern.test(formattedInput)) {
-				const [day, month, year] = formattedInput.split("-").map(Number);
-
-				if (month > 12 || month === 0) {
-					toast.error("Please enter a valid month (MM) between 01 and 12");
-					return;
-				}
-
-				const daysInMonth = new Date(year, month, 0).getDate();
-				if (day > daysInMonth || day === 0) {
-					toast.error(`Please enter a valid day (DD) for month ${month}`);
-					return;
-				}
-
-				const currentDate = new Date();
-				const enteredDate = new Date(year, month - 1, day);
-
-				if (GlobalfromDate && enteredDate < GlobalfromDate) {
-					toast.error(
-						`Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-					);
-					return;
-				}
-				if (GlobalfromDate && enteredDate > GlobaltoDate) {
-					toast.error(
-						`Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-					);
-					return;
-				}
-
-				fromDateElement.style.border = `1px solid ${fontcolor}`;
-				setfromInputDate(formattedInput);
-
-				const nextInput = document.getElementById(inputId);
-				if (nextInput) {
-					nextInput.focus();
-					nextInput.select();
-				} else {
-					document.getElementById("submitButton").click();
-				}
-			} else {
-				toast.error("Date must be in the format dd-mm-yyyy");
-			}
-		}
-	};
-
-	const handleToKeyPress = (e) => {
-		if (e.key === "Enter") {
-			e.preventDefault();
-			const toDateElement = document.getElementById("todatevalidation");
-			const formattedInput = toInputDate.replace(
-				/^(\d{2})(\d{2})(\d{4})$/,
-				"$1-$2-$3"
-			);
-			const datePattern = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
-
-			if (formattedInput.length === 10 && datePattern.test(formattedInput)) {
-				const [day, month, year] = formattedInput.split("-").map(Number);
-
-				if (month > 12 || month === 0) {
-					toast.error("Please enter a valid month (MM) between 01 and 12");
-					return;
-				}
-
-				const daysInMonth = new Date(year, month, 0).getDate();
-				if (day > daysInMonth || day === 0) {
-					toast.error(`Please enter a valid day (DD) for month ${month}`);
-					return;
-				}
-
-				const currentDate = new Date();
-				const enteredDate = new Date(year, month - 1, day);
-
-				if (GlobaltoDate && enteredDate > GlobaltoDate) {
-					toast.error(
-						`Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-					);
-					return;
-				}
-
-				if (GlobaltoDate && enteredDate < GlobalfromDate) {
-					toast.error(
-						`Date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-					);
-					return;
-				}
-
-				if (fromInputDate) {
-					const fromDate = new Date(
-						fromInputDate.split("-").reverse().join("-")
-					);
-					if (enteredDate <= fromDate) {
-						toast.error("To date must be after from date");
-						return;
-					}
-				}
-
-				toDateElement.style.border = `1px solid ${fontcolor}`;
-				settoInputDate(formattedInput);
-
-				if (input1Ref.current) {
-					e.preventDefault();
-					input1Ref.current.focus();
-				}
-			} else {
-				toast.error("Date must be in the format dd-mm-yyyy");
-			}
-		}
-	};
-
 	const handleToDateChange = (date) => {
 		setSelectedToDate(date);
 		settoInputDate(date ? formatDate(date) : "");
 		settoCalendarOpen(false);
 	};
+
 	const handleToInputChange = (e) => {
 		settoInputDate(e.target.value);
-	};
-	const handleSaleKeypress = (event, inputId) => {
-		if (event.key === "Enter") {
-			const selectedOption = saleSelectRef.current.state.selectValue;
-			if (selectedOption && selectedOption.value) {
-				setSaleType(selectedOption.value);
-			}
-			const nextInput = document.getElementById(inputId);
-			if (nextInput) {
-				nextInput.focus();
-				nextInput.select();
-			} else {
-				document.getElementById("submitButton").click();
-			}
-		}
-	};
-	const handleKeyPress = (e, nextInputRef) => {
-		if (e.key === "Enter") {
-			e.preventDefault();
-			if (nextInputRef.current) {
-				nextInputRef.current.focus();
-			}
-		}
 	};
 
 	function fetchCustomerSaleReport() {
@@ -388,16 +254,6 @@ export default function CustomerSaleReport() {
 				break;
 		}
 
-		const data = {
-			FIntDat: fromInputDate,
-			FFnlDat: toInputDate,
-			FTrnTyp: transectionType,
-			FAccCod: saleType,
-			code: "EMART",
-			FLocCod: "001",
-			FYerDsc: "2024-2024",
-		};
-		// console.log(data);
 		document.getElementById(
 			"fromdatevalidation"
 		).style.border = `1px solid ${fontcolor}`;
@@ -408,18 +264,17 @@ export default function CustomerSaleReport() {
 		const apiMainUrl = apiLinks + "/CustomerSaleReport.php";
 		setIsLoading(true);
 		const formMainData = new URLSearchParams({
-			code: "NASIRTRD",
+			code: organisation.code,
+			// FLocCod: locationnumber || getLocationNumber,
+			// FYerDsc: yeardescription || getyeardescription,
 			FLocCod: "001",
 			FYerDsc: "2024-2024",
 			FIntDat: fromInputDate,
 			FFnlDat: toInputDate,
-			// FTrnTyp: transectionType,
-			// FStrCod: storeType,
-			// FAccCod: "12-01-001",
 			FAccCod: accountType,
 			FCmpCod: companyType,
 			FCtgCod: categoryType,
-			FSchTxt: "",
+			FSchTxt: searchQuery,
 		}).toString();
 
 		axios
@@ -476,21 +331,6 @@ export default function CustomerSaleReport() {
 	}, []);
 
 	useEffect(() => {
-		//----------------- store dropdown
-		const apiStoreUrl = apiLinks + "/GetStore.php";
-		const formStoreData = new URLSearchParams({
-			code: organisation.code,
-		}).toString();
-		axios
-			.post(apiStoreUrl, formStoreData)
-			.then((response) => {
-				setStoreList(response.data);
-				// console.log("STORE"+response.data);
-			})
-			.catch((error) => {
-				console.error("Error fetching data:", error);
-			});
-
 		//-------------- Account dropdown
 		const apiAccountUrl = apiLinks + "/GetActiveCustomer.php";
 		const formAccountData = new URLSearchParams({
@@ -541,29 +381,23 @@ export default function CustomerSaleReport() {
 			});
 	}, []);
 
-	// Store List array
-	const optionStore = storeList.map((item) => ({
-		value: item.tstrcod,
-		label: `${item.tstrcod}-${item.tstrdsc.trim()}`,
-	}));
-
 	// Account List array
-	const optionAccount = AccountList.map((item) => ({
+	const optionAccount = accountList.map((item) => ({
 		value: item.tacccod,
-		label: `${item.taccdsc.trim()}`,
+		label: item.taccdsc.trim(),
 		// label: `${item.tacccod}-${item.taccdsc.trim()}`,
 	}));
 
 	// Company List array
 	const optionCompany = companyList.map((item) => ({
 		value: item.tcmpcod,
-		label: `${item.tcmpcod}-${item.tcmpdsc.trim()}`,
+		label: item.tcmpdsc.trim(),
 	}));
 
 	// Category List array
 	const optionCategory = categoryList.map((item) => ({
 		value: item.tctgcod,
-		label: `${item.tctgcod}-${item.tctgdsc.trim()}`,
+		label: item.tctgdsc.trim(),
 	}));
 
 	const DropdownOption = (props) => {
@@ -571,7 +405,7 @@ export default function CustomerSaleReport() {
 			<components.Option {...props}>
 				<div
 					style={{
-						fontSize: "12px",
+						fontSize: parseInt(getdatafontsize),
 						paddingBottom: "5px",
 						lineHeight: "3px",
 						color: "black",
@@ -584,73 +418,57 @@ export default function CustomerSaleReport() {
 		);
 	};
 
-	// ------------ store style customization
-	const customStylesStore = () => ({
-		control: (base, state) => ({
-			...base,
-			height: "24px",
-			minHeight: "unset",
-			width: "275px",
-			fontSize: "12px",
-			backgroundColor: getcolor,
-			color: fontcolor,
-			borderRadius: 0,
-			// border: hasError ? "2px solid red" : `1px solid ${fontcolor}`,
-			transition: "border-color 0.15s ease-in-out",
-			"&:hover": {
-				borderColor: state.isFocused ? base.borderColor : "black",
-			},
-			padding: "0 8px",
-			display: "flex",
-			// alignItems: "center",
-			justifyContent: "space-between",
-		}),
-		dropdownIndicator: (base) => ({
-			...base,
-			padding: 0,
-			fontSize: "18px",
-			display: "flex",
-			textAlign: "center !important",
-		}),
-	});
-
 	// ------------ Account style customization
 	const customStylesAccount = () => ({
 		control: (base, state) => ({
 			...base,
 			height: "24px",
 			minHeight: "unset",
-			width: 275,
-			fontSize: "12px",
+			width: "275px",
+			fontSize: parseInt(getdatafontsize),
+			fontFamily: getfontstyle,
 			backgroundColor: getcolor,
 			color: fontcolor,
 			borderRadius: 0,
-			border: isAccountValid ? `1px solid ${fontcolor}` : "2px solid red",
+			// border: hasError ? "2px solid red" : `1px solid ${fontcolor}`,
 			transition: "border-color 0.15s ease-in-out",
 			"&:hover": {
 				borderColor: state.isFocused ? base.borderColor : "black",
 			},
 			padding: "0 8px",
 			display: "flex",
+			// alignItems: "center",
 			justifyContent: "space-between",
 		}),
 		dropdownIndicator: (base) => ({
 			...base,
 			padding: 0,
-			fontSize: "18px",
+			marginTop: "-5px",
+			fontSize: parseInt(getdatafontsize),
 			display: "flex",
 			textAlign: "center !important",
 		}),
+		singleValue: (base) => ({
+			...base,
+			marginTop: "-5px",
+			textAlign: "left",
+			color: fontcolor,
+		}),
+		clearIndicator: (base) => ({
+			...base,
+			marginTop: "-5px",
+		}),
 	});
 
-	// ------------ company style customization
+	// ------------ Company style customization
 	const customStylesCompany = () => ({
 		control: (base, state) => ({
 			...base,
 			height: "24px",
 			minHeight: "unset",
-			width: 275,
-			fontSize: "12px",
+			width: "275px",
+			fontSize: parseInt(getdatafontsize),
+			fontFamily: getfontstyle,
 			backgroundColor: getcolor,
 			color: fontcolor,
 			borderRadius: 0,
@@ -667,20 +485,32 @@ export default function CustomerSaleReport() {
 		dropdownIndicator: (base) => ({
 			...base,
 			padding: 0,
-			fontSize: "18px",
+			marginTop: "-5px",
+			fontSize: parseInt(getdatafontsize),
 			display: "flex",
 			textAlign: "center !important",
 		}),
+		singleValue: (base) => ({
+			...base,
+			marginTop: "-5px",
+			textAlign: "left",
+			color: fontcolor,
+		}),
+		clearIndicator: (base) => ({
+			...base,
+			marginTop: "-5px",
+		}),
 	});
 
-	// ------------ category style customization
+	// ------------ Category style customization
 	const customStylesCategory = () => ({
 		control: (base, state) => ({
 			...base,
 			height: "24px",
 			minHeight: "unset",
-			width: 275,
-			fontSize: "12px",
+			width: "275px",
+			fontSize: parseInt(getdatafontsize),
+			fontFamily: getfontstyle,
 			backgroundColor: getcolor,
 			color: fontcolor,
 			borderRadius: 0,
@@ -697,38 +527,44 @@ export default function CustomerSaleReport() {
 		dropdownIndicator: (base) => ({
 			...base,
 			padding: 0,
-			fontSize: "18px",
+			marginTop: "-5px",
+			fontSize: parseInt(getdatafontsize),
 			display: "flex",
 			textAlign: "center !important",
 		}),
+		singleValue: (base) => ({
+			...base,
+			marginTop: "-5px",
+			textAlign: "left",
+			color: fontcolor,
+		}),
+		clearIndicator: (base) => ({
+			...base,
+			marginTop: "-5px",
+		}),
 	});
-
-	const handleTransactionTypeChange = (event) => {
-		const selectedTransactionType = event.target.value;
-		settransectionType(selectedTransactionType);
-	};
 
 	const exportPDFHandler = () => {
 		const doc = new jsPDF({ orientation: "portrait" });
 		const rows = tableData.map((item) => [
 			item.code,
 			item.Description,
-			item.Rate,
+			item.Rate.toFixed(2),
 			item.Qnty,
 			item["Amount"],
 		]);
 		rows.push(["", "Total", "", String(totalQnty), String(totalAmount)]);
-		const headers = ["Code", "Description", "Rate", "Qnty", "Amount"];
-		const columnWidths = [35, 80, 20, 10, 20];
+		const headers = ["Code", "Description", "Rate", "Qty", "Amount"];
+		const columnWidths = [40, 105, 20, 10, 25];
 		const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
 		const pageHeight = doc.internal.pageSize.height;
 		const paddingTop = 15;
-		doc.setFont("verdana");
-		doc.setFontSize(10);
+		doc.setFont(getfontstyle, "normal");
+		doc.setFontSize(parseInt(getdatafontsize));
 
 		const addTableHeaders = (startX, startY) => {
-			doc.setFont("bold");
-			doc.setFontSize(10);
+			doc.setFont(getfontstyle, "bold");
+			doc.setFontSize(parseInt(getdatafontsize));
 			headers.forEach((header, index) => {
 				const cellWidth = columnWidths[index];
 				const cellHeight = 6;
@@ -742,36 +578,39 @@ export default function CustomerSaleReport() {
 				doc.text(header, cellX, cellY, { align: "center" });
 				startX += columnWidths[index];
 			});
-			doc.setFont("verdana");
-			doc.setFontSize(10);
+			doc.setFont(getfontstyle, "normal");
+			doc.setFontSize(parseInt(getdatafontsize));
 		};
 
 		const addTableRows = (startX, startY, startIndex, endIndex) => {
-			const rowHeight = 5;
-			const fontSize = 8;
-			const boldFont = "verdana";
-			const normalFont = "verdana";
+			const rowHeight = 6;
+			const fontSize = parseInt(getdatafontsize);
+			const boldFont = getfontstyle;
+			const normalFont = getfontstyle;
 			const tableWidth = getTotalTableWidth();
 			doc.setFontSize(fontSize);
 
 			for (let i = startIndex; i < endIndex; i++) {
 				const row = rows[i];
-				const isOddRow = i % 2 !== 0;
-				const isRedRow = row[0] && parseInt(row[0]) > 100;
-				let textColor = [0, 0, 0];
+				const isTotalRow = i === rows.length - 1;
+				const isNegativeQnty = row[3] && row[3].startsWith("-");
+				let textColor = [0, 0, 0]; // Default text color
 				let fontName = normalFont;
+				const bgColor = [255, 255, 255]; // Always white background
 
-				// if (isRedRow) {
-				// 	textColor = [255, 0, 0];
-				// 	fontName = boldFont;
-				// }
+				// Set text color to red for negative quantities (except total row)
+				if (isNegativeQnty && !isTotalRow) {
+					textColor = [255, 0, 0];
+				}
 
 				doc.setDrawColor(0);
+				doc.setFillColor(bgColor[0], bgColor[1], bgColor[2]);
 				doc.rect(
 					startX,
 					startY + (i - startIndex + 2) * rowHeight,
 					tableWidth,
-					rowHeight
+					rowHeight,
+					"F"
 				);
 
 				row.forEach((cell, cellIndex) => {
@@ -779,10 +618,18 @@ export default function CustomerSaleReport() {
 					const cellX = startX + 2;
 					doc.setTextColor(textColor[0], textColor[1], textColor[2]);
 					doc.setFont(fontName, "normal");
-					const cellValue = String(cell);
 
+					if (isTotalRow) {
+						doc.setFont(boldFont, "bold");
+						doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+					} else {
+						doc.setFont(normalFont, "normal");
+					}
+
+					doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+					const cellValue = String(cell);
 					if (cellIndex === 2 || cellIndex === 3 || cellIndex === 4) {
-						const rightAlignX = startX + columnWidths[cellIndex] - 2;
+						const rightAlignX = startX + columnWidths[cellIndex] - 0.5;
 						doc.text(cellValue, rightAlignX, cellY, {
 							align: "right",
 							baseline: "middle",
@@ -816,7 +663,7 @@ export default function CustomerSaleReport() {
 			const lineY = pageHeight - 15;
 			doc.setLineWidth(0.3);
 			doc.line(lineX, lineY, lineX + lineWidth, lineY);
-			const headingFontSize = 12;
+			const headingFontSize = parseInt(getdatafontsize);
 			const headingX = lineX + 2;
 			const headingY = lineY + 5;
 			doc.setFontSize(headingFontSize);
@@ -835,7 +682,7 @@ export default function CustomerSaleReport() {
 			return paddingTop;
 		};
 
-		const rowsPerPage = 46;
+		const rowsPerPage = 37;
 
 		const handlePagination = () => {
 			const addTitle = (
@@ -844,7 +691,7 @@ export default function CustomerSaleReport() {
 				time,
 				pageNumber,
 				startY,
-				titleFontSize = 16,
+				titleFontSize = 18,
 				dateTimeFontSize = 8,
 				pageNumberFontSize = 8
 			) => {
@@ -875,7 +722,10 @@ export default function CustomerSaleReport() {
 			let pageNumber = 1;
 
 			while (currentPageIndex * rowsPerPage < rows.length) {
-				addTitle(comapnyname, "", "", pageNumber, startY, 20, 10);
+				// Add company name and title
+				doc.setFont(getfontstyle, "bold");
+				addTitle(comapnyname, "", "", pageNumber, startY, 18);
+				doc.setFont(getfontstyle, "normal");
 				startY += 7;
 				addTitle(
 					`Customer Sale Report From: ${fromInputDate} To: ${toInputDate}`,
@@ -883,18 +733,63 @@ export default function CustomerSaleReport() {
 					"",
 					pageNumber,
 					startY,
-					14
+					parseInt(getdatafontsize)
 				);
-				startY += 13;
+				startY += 10;
 
-				const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
-				const labelsY = startY + 2;
-				doc.setFontSize(14);
-				doc.setFont("verdana", "bold");
-				doc.setFont("verdana", "normal");
-				startY += 0;
+				const searchWord = searchQuery ? "Search: " : "";
+				const searchTerm = searchQuery ? searchQuery : "";
 
-				addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 39);
+				const companyWord = "Company: ";
+				const companyTerm = companyTypeDataValue
+					? companyTypeDataValue.label
+					: "ALL";
+
+				const accountWord = "Account: ";
+				const accountTerm = accountTypeDataValue
+					? accountTypeDataValue.label
+					: "ALL";
+
+				const categoryWord = "Category: ";
+				const categoryTerm = categoryTypeDataValue
+					? categoryTypeDataValue.label
+					: "ALL";
+
+				const labelXLeftWord = doc.internal.pageSize.width - totalWidth + 10;
+				const labelXLeftTerm = doc.internal.pageSize.width - totalWidth + 35;
+
+				const labelXRightWord = doc.internal.pageSize.width - totalWidth + 150;
+				const labelXRightTerm = doc.internal.pageSize.width - totalWidth + 165;
+
+				doc.setFontSize(parseInt(getdatafontsize));
+
+				doc.setFont(getfontstyle, "bold");
+				doc.text(accountWord, labelXLeftWord, startY);
+
+				doc.setFont(getfontstyle, "normal");
+				doc.text(accountTerm, labelXLeftTerm, startY);
+				startY += 5;
+
+				doc.setFont(getfontstyle, "bold");
+				doc.text(companyWord, labelXLeftWord, startY);
+
+				doc.setFont(getfontstyle, "normal");
+				doc.text(companyTerm, labelXLeftTerm, startY);
+				startY += 5;
+
+				doc.setFont(getfontstyle, "bold");
+				doc.text(categoryWord, labelXLeftWord, startY);
+				doc.text(searchWord, labelXRightWord, startY);
+
+				doc.setFont(getfontstyle, "normal");
+				doc.text(categoryTerm, labelXLeftTerm, startY);
+				doc.text(searchTerm, labelXRightTerm, startY);
+
+				// startY += 2; // Adjust the Y-position for the next section
+				addTableHeaders(
+					(doc.internal.pageSize.width - totalWidth) / 2,
+					startY + 6
+				);
 				const startIndex = currentPageIndex * rowsPerPage;
 				const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
 				startY = addTableRows(
@@ -931,7 +826,7 @@ export default function CustomerSaleReport() {
 		const time = getCurrentTime();
 
 		handlePagination();
-		doc.save("CustomerSaleReport.pdf");
+		doc.save(`CustomerSaleReportFrom${fromInputDate}To${toInputDate}.pdf`);
 
 		const pdfBlob = doc.output("blob");
 		const pdfFile = new File([pdfBlob], "table_data.pdf", {
@@ -943,22 +838,71 @@ export default function CustomerSaleReport() {
 		const workbook = new ExcelJS.Workbook();
 		const worksheet = workbook.addWorksheet("Sheet1");
 		const numColumns = 5;
-		const titleStyle = {
-			font: { bold: true, size: 12 },
-			alignment: { horizontal: "center" },
-		};
-		const columnAlignments = ["left", "left", "right", "center", "right"];
+
+		const columnAlignments = ["left", "left", "right", "right", "right"];
 		worksheet.addRow([]);
 		[
 			comapnyname,
-			`Customer Sale Report From ${fromInputDate} To ${toInputDate}`,
+			`Customer Sale Report From: ${fromInputDate} to ${toInputDate}`,
 		].forEach((title, index) => {
-			worksheet.addRow([title]).eachCell((cell) => (cell.style = titleStyle));
+			worksheet.addRow([title]).eachCell((cell) => {
+				cell.style = {
+					font: {
+						bold: index === 0 ? true : false,
+						size: index === 0 ? 18 : parseInt(getdatafontsize),
+					},
+					alignment: { horizontal: "center" },
+				};
+			});
 			worksheet.mergeCells(
 				`A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
 			);
 		});
 		worksheet.addRow([]);
+		worksheet
+			.addRow([
+				"Account: ",
+				accountTypeDataValue ? accountTypeDataValue.label : "ALL",
+			])
+			.eachCell((cell, colNumber) => {
+				if (colNumber === 1) {
+					cell.font = {
+						bold: true,
+						size: parseInt(getdatafontsize), // Apply dynamic font size if required
+					};
+				}
+			});
+		worksheet
+			.addRow([
+				"Company: ",
+				companyTypeDataValue ? companyTypeDataValue.label : "ALL",
+			])
+			.eachCell((cell, colNumber) => {
+				if (colNumber === 1) {
+					cell.font = {
+						bold: true,
+						size: parseInt(getdatafontsize), // Apply dynamic font size if required
+					};
+				}
+			});
+		worksheet
+			.addRow([
+				"Category: ",
+				categoryTypeDataValue ? categoryTypeDataValue.label : "ALL",
+				"",
+				searchQuery ? "Search: " : "",
+				searchQuery ? searchQuery : "",
+			])
+			.eachCell((cell, colNumber) => {
+				if (colNumber === 1 || colNumber === 4) {
+					// Target the cell containing "Search:"
+					cell.font = {
+						bold: true,
+						size: parseInt(getdatafontsize), // Apply dynamic font size if required
+					};
+				}
+			});
+
 		const headerStyle = {
 			font: { bold: true },
 			alignment: { horizontal: "center" },
@@ -977,16 +921,37 @@ export default function CustomerSaleReport() {
 		const headers = ["Code", "Description", "Rate", "Qnty", "Amount"];
 		const headerRow = worksheet.addRow(headers);
 		headerRow.eachCell((cell) => {
-			cell.style = { ...headerStyle, alignment: { horizontal: "center" } };
+			cell.style = {
+				...headerStyle,
+				alignment: { horizontal: "center" },
+				font: {
+					bold: true,
+					size: parseInt(getdatafontsize),
+				},
+			};
 		});
 		tableData.forEach((item) => {
-			worksheet.addRow([
+			const row = worksheet.addRow([
 				item.code,
 				item.Description,
-				item.Rate,
+				item.Rate.toFixed(2),
 				item.Qnty,
 				item["Amount"],
 			]);
+
+			// **Check if Qnty is negative**
+			const isNegativeQnty = item.Qnty && String(item.Qnty).startsWith("-");
+
+			if (isNegativeQnty) {
+				row.eachCell((cell) => {
+					cell.fill = {
+						type: "pattern",
+						pattern: "solid",
+						fgColor: { argb: "FFFFFFFF" },
+					}; // Red color
+					cell.font = { color: { argb: "FFFF0000" } }; // White text for contrast
+				});
+			}
 		});
 		const totalRow = worksheet.addRow([
 			"",
@@ -1002,9 +967,9 @@ export default function CustomerSaleReport() {
 			worksheet.getColumn(index + 1).width = width;
 		});
 		worksheet.eachRow((row, rowNumber) => {
-			if (rowNumber > 5) {
+			if (rowNumber > 7) {
 				row.eachCell((cell, colNumber) => {
-					if (rowNumber === 5) {
+					if (rowNumber === 8) {
 						cell.alignment = { horizontal: "center" };
 					} else {
 						cell.alignment = { horizontal: columnAlignments[colNumber - 1] };
@@ -1018,11 +983,12 @@ export default function CustomerSaleReport() {
 				});
 			}
 		});
+		worksheet.getRow(2).height = 20;
 		const buffer = await workbook.xlsx.writeBuffer();
 		const blob = new Blob([buffer], {
 			type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 		});
-		saveAs(blob, "CustomerSaleReport.xlsx");
+		saveAs(blob, `CustomerSaleReportFrom${fromInputDate}To${toInputDate}.xlsx`);
 	};
 
 	const dispatch = useDispatch();
@@ -1037,23 +1003,6 @@ export default function CustomerSaleReport() {
 	const [selectedSearch, setSelectedSearch] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
 	const { data, loading, error } = useSelector((state) => state.getuser);
-
-	const handleSearch = (e) => {
-		setSelectedSearch(e.target.value);
-	};
-
-	let totalEntries = 0;
-
-	const getFilteredTableData = () => {
-		let filteredData = tableData;
-		if (selectedSearch.trim() !== "") {
-			const query = selectedSearch.trim().toLowerCase();
-			filteredData = filteredData.filter(
-				(data) => data.tusrnam && data.tusrnam.toLowerCase().includes(query)
-			);
-		}
-		return filteredData;
-	};
 
 	const firstColWidth = {
 		width: "20%",
@@ -1106,11 +1055,11 @@ export default function CustomerSaleReport() {
 		wordBreak: "break-word",
 		textAlign: "center",
 		maxWidth: "800px",
-		fontSize: "15px",
+		fontSize: parseInt(getdatafontsize),
 		fontStyle: "normal",
 		fontWeight: "400",
 		lineHeight: "23px",
-		fontFamily: '"Poppins", sans-serif',
+		fontFamily: getfontstyle,
 	};
 
 	const [isFilterApplied, setIsFilterApplied] = useState(false);
@@ -1219,7 +1168,6 @@ export default function CustomerSaleReport() {
 	const [menuCompanyIsOpen, setMenuCompanyIsOpen] = useState(false);
 	const [menuCategoryIsOpen, setMenuCategoryIsOpen] = useState(false);
 	const [menuAccountIsOpen, setMenuAccountIsOpen] = useState(false);
-	const [menuStoreIsOpen, setMenuStoreIsOpen] = useState(false);
 
 	const focusNextElement = (currentRef, nextRef) => {
 		if (currentRef.current && nextRef.current) {
@@ -1335,34 +1283,10 @@ export default function CustomerSaleReport() {
 		}
 	};
 
-	const handleStoreEnter = (e) => {
-		if (e.key === "Enter" && !menuStoreIsOpen) {
-			e.preventDefault();
-			focusNextElement(storeRef, typeRef);
-		}
-	};
-
-	const handleTypeEnter = (e) => {
-		if (e.key === "Enter") {
-			e.preventDefault();
-			focusNextElement(typeRef, searchRef);
-		}
-	};
-
 	const handleSearchEnter = (e) => {
 		if (e.key === "Enter") {
 			e.preventDefault();
 			focusNextElement(searchRef, selectButtonRef);
-		}
-	};
-
-	const handleAccountChange = (selectedOption) => {
-		if (selectedOption && selectedOption.value) {
-			setAccountType(selectedOption.value);
-			setIsAccountValid(true); // Reset validation state
-		} else {
-			setAccountType("");
-			setIsAccountValid(false); // Set validation state to false
 		}
 	};
 
@@ -1418,7 +1342,12 @@ export default function CustomerSaleReport() {
 									}}
 								>
 									<label htmlFor="fromDatePicker">
-										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+										<span
+											style={{
+												fontSize: parseInt(getdatafontsize),
+												fontWeight: "bold",
+											}}
+										>
 											From:&nbsp;&nbsp;
 										</span>
 									</label>
@@ -1448,7 +1377,7 @@ export default function CustomerSaleReport() {
 											paddingLeft: "5px",
 											outline: "none",
 											border: "none",
-											fontSize: "12px",
+											fontSize: parseInt(getdatafontsize),
 											backgroundColor: getcolor,
 											color: fontcolor,
 											opacity: selectedRadio === "custom" ? 1 : 0.5,
@@ -1487,7 +1416,7 @@ export default function CustomerSaleReport() {
 																? "pointer"
 																: "default",
 														marginLeft: "18px",
-														fontSize: "12px",
+														fontSize: parseInt(getdatafontsize),
 														color: fontcolor,
 														opacity: selectedRadio === "custom" ? 1 : 0.5,
 													}}
@@ -1510,7 +1439,12 @@ export default function CustomerSaleReport() {
 									}}
 								>
 									<label htmlFor="toDatePicker">
-										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+										<span
+											style={{
+												fontSize: parseInt(getdatafontsize),
+												fontWeight: "bold",
+											}}
+										>
 											To:&nbsp;&nbsp;
 										</span>
 									</label>
@@ -1541,7 +1475,7 @@ export default function CustomerSaleReport() {
 											paddingLeft: "5px",
 											outline: "none",
 											border: "none",
-											fontSize: "12px",
+											fontSize: parseInt(getdatafontsize),
 											backgroundColor: getcolor,
 											color: fontcolor,
 											opacity: selectedRadio === "custom" ? 1 : 0.5,
@@ -1579,7 +1513,7 @@ export default function CustomerSaleReport() {
 																? "pointer"
 																: "default",
 														marginLeft: "18px",
-														fontSize: "12px",
+														fontSize: parseInt(getdatafontsize),
 														color: fontcolor,
 														opacity: selectedRadio === "custom" ? 1 : 0.5,
 													}}
@@ -1603,7 +1537,7 @@ export default function CustomerSaleReport() {
 										justifyContent: "evenly",
 									}}
 								>
-									<div className="d-flex align-items-baseline mx-2">
+									<div className="d-flex align-items-center mx-2">
 										<input
 											type="radio"
 											name="dateRange"
@@ -1618,11 +1552,14 @@ export default function CustomerSaleReport() {
 											}
 										/>
 										&nbsp;
-										<label htmlFor="custom" style={{ fontSize: "14px" }}>
+										<label
+											htmlFor="custom"
+											style={{ fontSize: parseInt(getdatafontsize) }}
+										>
 											Custom
 										</label>
 									</div>
-									<div className="d-flex align-items-baseline mx-2">
+									<div className="d-flex align-items-center mx-2">
 										<input
 											type="radio"
 											name="dateRange"
@@ -1637,11 +1574,14 @@ export default function CustomerSaleReport() {
 											}
 										/>
 										&nbsp;
-										<label htmlFor="30" style={{ fontSize: "14px" }}>
+										<label
+											htmlFor="30"
+											style={{ fontSize: parseInt(getdatafontsize) }}
+										>
 											30 Days
 										</label>
 									</div>
-									<div className="d-flex align-items-baseline mx-2">
+									<div className="d-flex align-items-center mx-2">
 										<input
 											type="radio"
 											name="dateRange"
@@ -1656,11 +1596,14 @@ export default function CustomerSaleReport() {
 											}
 										/>
 										&nbsp;
-										<label htmlFor="60" style={{ fontSize: "14px" }}>
+										<label
+											htmlFor="60"
+											style={{ fontSize: parseInt(getdatafontsize) }}
+										>
 											60 Days
 										</label>
 									</div>
-									<div className="d-flex align-items-baseline mx-2">
+									<div className="d-flex align-items-center mx-2">
 										<input
 											type="radio"
 											name="dateRange"
@@ -1675,7 +1618,10 @@ export default function CustomerSaleReport() {
 											}
 										/>
 										&nbsp;
-										<label htmlFor="90" style={{ fontSize: "14px" }}>
+										<label
+											htmlFor="90"
+											style={{ fontSize: parseInt(getdatafontsize) }}
+										>
 											90 Days
 										</label>
 									</div>
@@ -1711,7 +1657,12 @@ export default function CustomerSaleReport() {
 									}}
 								>
 									<label htmlFor="fromDatePicker">
-										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+										<span
+											style={{
+												fontSize: parseInt(getdatafontsize),
+												fontWeight: "bold",
+											}}
+										>
 											Account:&nbsp;&nbsp;
 										</span>{" "}
 										<br />
@@ -1724,8 +1675,23 @@ export default function CustomerSaleReport() {
 										options={optionAccount}
 										onKeyDown={handleAccountEnter}
 										id="selectedsale"
-										onChange={handleAccountChange}
+										onChange={(selectedOption) => {
+											if (selectedOption && selectedOption.value) {
+												const labelPart = selectedOption.label.split("-")[0];
+												setAccountType(selectedOption.value);
+												setAccountTypeDataValue({
+													value: selectedOption.value,
+													label: labelPart,
+												});
+												setIsAccountValid(true);
+											} else {
+												setAccountType("");
+												setIsAccountValid(false);
+												setAccountTypeDataValue("");
+											}
+										}}
 										components={{ Option: DropdownOption }}
+										// styles={customStylesCategory}
 										styles={customStylesAccount()}
 										isClearable
 										placeholder="Search or select..."
@@ -1765,9 +1731,14 @@ export default function CustomerSaleReport() {
 									}}
 								>
 									<label htmlFor="fromDatePicker">
-										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+										<span
+											style={{
+												fontSize: parseInt(getdatafontsize),
+												fontWeight: "bold",
+											}}
+										>
 											Company:&nbsp;&nbsp;
-										</span>{" "}
+										</span>
 										<br />
 									</label>
 								</div>
@@ -1780,13 +1751,19 @@ export default function CustomerSaleReport() {
 										id="selectedsale"
 										onChange={(selectedOption) => {
 											if (selectedOption && selectedOption.value) {
+												const labelPart = selectedOption.label.split("-")[0];
 												setCompanyType(selectedOption.value);
+												setCompanyTypeDataValue({
+													value: selectedOption.value,
+													label: labelPart,
+												});
 											} else {
-												setCompanyType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+												setCompanyType("");
+												setCompanyTypeDataValue("");
 											}
 										}}
 										components={{ Option: DropdownOption }}
-										// styles={customStylesStore}
+										// styles={customStylesCategory}
 										styles={customStylesCompany()}
 										isClearable
 										placeholder="Search or select..."
@@ -1796,53 +1773,7 @@ export default function CustomerSaleReport() {
 									/>
 								</div>
 							</div>
-
-							{/* Type */}
-							{/* <div
-								className="d-flex align-items-center"
-								style={{ marginRight: "20px" }}
-							>
-								<div
-									style={{
-										width: "60px",
-										display: "flex",
-										justifyContent: "end",
-									}}
-								>
-									<label htmlFor="transactionType">
-										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
-											Type:&nbsp;&nbsp;
-										</span>
-									</label>
-								</div>
-								<select
-									ref={typeRef}
-									onKeyDown={handleTypeEnter}
-									id="submitButton"
-									name="type"
-									onFocus={(e) =>
-										(e.currentTarget.style.border = "4px solid red")
-									}
-									onBlur={(e) =>
-										(e.currentTarget.style.border = `1px solid ${fontcolor}`)
-									}
-									value={transectionType}
-									onChange={handleTransactionTypeChange}
-									style={{
-										width: "275px",
-										height: "24px",
-										// marginLeft: "15px",
-										backgroundColor: getcolor,
-										border: `1px solid ${fontcolor}`,
-										fontSize: "12px",
-										color: fontcolor,
-									}}
-								>
-									<option value="">All</option>
-									<option value="INV">Sale</option>
-									<option value="SRN">Sale Return</option>
-								</select>
-							</div> */}
+							<div></div>
 						</div>
 					</div>
 
@@ -1874,9 +1805,14 @@ export default function CustomerSaleReport() {
 									}}
 								>
 									<label htmlFor="fromDatePicker">
-										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+										<span
+											style={{
+												fontSize: parseInt(getdatafontsize),
+												fontWeight: "bold",
+											}}
+										>
 											Category:&nbsp;&nbsp;
-										</span>{" "}
+										</span>
 										<br />
 									</label>
 								</div>
@@ -1889,13 +1825,19 @@ export default function CustomerSaleReport() {
 										id="selectedsale"
 										onChange={(selectedOption) => {
 											if (selectedOption && selectedOption.value) {
+												const labelPart = selectedOption.label.split("-")[0];
 												setCategoryType(selectedOption.value);
+												setCategoryTypeDataValue({
+													value: selectedOption.value,
+													label: labelPart,
+												});
 											} else {
-												setCategoryType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+												setCategoryType("");
+												setCategoryTypeDataValue("");
 											}
 										}}
 										components={{ Option: DropdownOption }}
-										// styles={customStylesStore}
+										// styles={customStylesCategory}
 										styles={customStylesCategory()}
 										isClearable
 										placeholder="Search or select..."
@@ -1913,7 +1855,12 @@ export default function CustomerSaleReport() {
 							>
 								<div>
 									<label for="searchInput">
-										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
+										<span
+											style={{
+												fontSize: parseInt(getdatafontsize),
+												fontWeight: "bold",
+											}}
+										>
 											Search:&nbsp;&nbsp;
 										</span>
 									</label>
@@ -1929,7 +1876,7 @@ export default function CustomerSaleReport() {
 										style={{
 											width: "275px",
 											height: "24px",
-											fontSize: "12px",
+											fontSize: parseInt(getdatafontsize),
 											color: fontcolor,
 											backgroundColor: getcolor,
 											border: `1px solid ${fontcolor}`,
@@ -1942,7 +1889,9 @@ export default function CustomerSaleReport() {
 										onBlur={(e) =>
 											(e.currentTarget.style.border = `1px solid ${fontcolor}`)
 										}
-										onChange={(e) => setSearchQuery(e.target.value)}
+										onChange={(e) =>
+											setSearchQuery(e.target.value.toUpperCase())
+										}
 									/>
 								</div>
 							</div>
@@ -1960,7 +1909,7 @@ export default function CustomerSaleReport() {
 								className="myTable"
 								id="table"
 								style={{
-									fontSize: "12px",
+									fontSize: parseInt(getdatafontsize),
 									width: "100%",
 									position: "relative",
 									paddingRight: "2%",
@@ -2008,7 +1957,7 @@ export default function CustomerSaleReport() {
 								backgroundColor: textColor,
 								borderBottom: `1px solid ${fontcolor}`,
 								overflowY: "auto",
-								maxHeight: "45vh",
+								maxHeight: "48vh",
 								width: "100%",
 								wordBreak: "break-word",
 							}}
@@ -2017,7 +1966,7 @@ export default function CustomerSaleReport() {
 								className="myTable"
 								id="tableBody"
 								style={{
-									fontSize: "12px",
+									fontSize: parseInt(getdatafontsize),
 									width: "100%",
 									position: "relative",
 								}}
@@ -2073,7 +2022,7 @@ export default function CustomerSaleReport() {
 														}
 														style={{
 															backgroundColor: getcolor,
-															color: fontcolor,
+															color: item.Qnty?.[0] === "-" ? "red" : fontcolor,
 														}}
 													>
 														<td className="text-start" style={firstColWidth}>
@@ -2085,7 +2034,7 @@ export default function CustomerSaleReport() {
 														<td className="text-end" style={thirdColWidth}>
 															{item.Rate}
 														</td>
-														<td className="text-center" style={forthColWidth}>
+														<td className="text-end" style={forthColWidth}>
 															{item.Qnty}
 														</td>
 														<td className="text-end" style={fifthColWidth}>
