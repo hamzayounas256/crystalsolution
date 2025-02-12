@@ -27,50 +27,36 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./ItemReports.css";
 
-export default function ItemSaleReport() {
+export default function ItemStockReport() {
 	const navigate = useNavigate();
 	const user = getUserData();
 	const organisation = getOrganisationData();
-
-	const saleSelectRef = useRef(null);
-	const input1Ref = useRef(null);
-	const input2Ref = useRef(null);
-	const input3Ref = useRef(null);
 
 	const toRef = useRef(null);
 	const fromRef = useRef(null);
 	const companyRef = useRef(null);
 	const categoryRef = useRef(null);
 	const capacityRef = useRef(null);
-	const storeRef = useRef(null);
 	const typeRef = useRef(null);
 	const searchRef = useRef(null);
 	const selectButtonRef = useRef(null);
 
-	const [saleType, setSaleType] = useState("");
 	const [searchQuery, setSearchQuery] = useState("");
 	const [transectionType, settransectionType] = useState("");
 
-	const [storeType, setStoreType] = useState("");
 	const [companyType, setCompanyType] = useState("");
 	const [categoryType, setCategoryType] = useState("");
 	const [capacityType, setCapacityType] = useState("");
 
-	const [storeTypeDataValue, setStoreTypeDataValue] = useState("");
 	const [companyTypeDataValue, setCompanyTypeDataValue] = useState("");
 	const [categoryTypeDataValue, setCategoryTypeDataValue] = useState("");
 	const [capacityTypeDataValue, setCapacityTypeDataValue] = useState("");
 
-	const [storeList, setStoreList] = useState([]);
 	const [companyList, setCompanyList] = useState([]);
 	const [categoryList, setCategoryList] = useState([]);
 	const [capacityList, setCapacityList] = useState([]);
 
 	const [totalQnty, setTotalQnty] = useState(0);
-	const [totalOpening, setTotalOpening] = useState(0);
-	const [totalDebit, setTotalDebit] = useState(0);
-	const [totalCredit, setTotalCredit] = useState(0);
-	const [closingBalance, setClosingBalance] = useState(0);
 	const [totalAmount, setTotalAmount] = useState(0);
 
 	// state for from DatePicker
@@ -145,14 +131,6 @@ export default function ItemSaleReport() {
 		const year = date.getFullYear();
 		return `${day}-${month}-${year}`;
 	};
-	const handlefromDateChange = (date) => {
-		setSelectedfromDate(date);
-		setfromInputDate(date ? formatDate(date) : "");
-		setfromCalendarOpen(false);
-	};
-	const handlefromInputChange = (e) => {
-		setfromInputDate(e.target.value);
-	};
 
 	const handleToDateChange = (date) => {
 		setSelectedToDate(date);
@@ -163,10 +141,7 @@ export default function ItemSaleReport() {
 		settoInputDate(e.target.value);
 	};
 
-	function fetchItemSaleReport() {
-		const fromDateElement = document.getElementById("fromdatevalidation");
-		const toDateElement = document.getElementById("todatevalidation");
-
+	function fetchItemStockReport() {
 		const dateRegex = /^\d{2}-\d{2}-\d{4}$/;
 
 		let hasError = false;
@@ -219,53 +194,34 @@ export default function ItemSaleReport() {
 		}
 
 		switch (errorType) {
-			case "fromDate":
-				toast.error("From date is required");
-				return;
 			case "toDate":
-				toast.error("To date is required");
-				return;
-			case "fromDateInvalid":
-				toast.error("From date must be in the format dd-mm-yyyy");
+				toast.error("Rep Date is required");
 				return;
 			case "toDateInvalid":
-				toast.error("To date must be in the format dd-mm-yyyy");
-				return;
-			case "fromDateBeforeGlobal":
-				toast.error(
-					`From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-				);
-				return;
-			case "fromDateAfterGlobal":
-				toast.error(
-					`From date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
-				);
+				toast.error("Rep date must be in the format dd-mm-yyyy");
 				return;
 			case "toDateAfterGlobal":
 				toast.error(
-					`To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+					`Rep date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
 				);
 				return;
 			case "toDateBeforeGlobal":
 				toast.error(
-					`To date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
+					`Rep date must be after ${GlobalfromDate1} and before ${GlobaltoDate1}`
 				);
-				return;
-			case "toDateBeforeFromDate":
-				toast.error("To date must be after from date");
 				return;
 			default:
 				break;
 		}
 
-		document.getElementById(
-			"fromdatevalidation"
-		).style.border = `1px solid ${fontcolor}`;
+		// document.getElementById(
+		// 	"fromdatevalidation"
+		// ).style.border = `1px solid ${fontcolor}`;
 		document.getElementById(
 			"todatevalidation"
 		).style.border = `1px solid ${fontcolor}`;
 
-		const apiMainUrl = apiLinks + "/ItemSaleReport.php";
+		const apiMainUrl = apiLinks + "/ItemStockReport.php";
 		setIsLoading(true);
 		const formMainData = new URLSearchParams({
 			// code: "EMART",
@@ -274,13 +230,12 @@ export default function ItemSaleReport() {
 			code: organisation.code,
 			// FLocCod: locationnumber || getLocationNumber,
 			// FYerDsc: yeardescription || getyeardescription,
-			FIntDat: fromInputDate,
-			FFnlDat: toInputDate,
-			FTrnTyp: transectionType,
-			FStrCod: storeType,
-			FCapCod: capacityType,
+			// FIntDat: fromInputDate,
+			FRepDat: toInputDate,
+			FRepTyp: transectionType,
 			FCmpCod: companyType,
 			FCtgCod: categoryType,
+			FCapCod: capacityType,
 			FSchTxt: searchQuery,
 		}).toString();
 
@@ -312,11 +267,11 @@ export default function ItemSaleReport() {
 	useEffect(() => {
 		const hasComponentMountedPreviously =
 			sessionStorage.getItem("componentMounted");
-		if (!hasComponentMountedPreviously || (fromRef && fromRef.current)) {
-			if (fromRef && fromRef.current) {
+		if (!hasComponentMountedPreviously || (toRef && toRef.current)) {
+			if (toRef && toRef.current) {
 				setTimeout(() => {
-					fromRef.current.focus();
-					fromRef.current.select();
+					toRef.current.focus();
+					toRef.current.select();
 				}, 0);
 			}
 			sessionStorage.setItem("componentMounted", "true");
@@ -338,21 +293,6 @@ export default function ItemSaleReport() {
 	}, []);
 
 	useEffect(() => {
-		//----------------- store dropdown
-		const apiStoreUrl = apiLinks + "/GetStore.php";
-		const formStoreData = new URLSearchParams({
-			code: organisation.code,
-		}).toString();
-		axios
-			.post(apiStoreUrl, formStoreData)
-			.then((response) => {
-				setStoreList(response.data);
-				// console.log("STORE"+response.data);
-			})
-			.catch((error) => {
-				console.error("Error fetching data:", error);
-			});
-
 		//-------------- capacity dropdown
 		const apiCapacityUrl = apiLinks + "/GetCapacity.php";
 		const formCapacityData = new URLSearchParams({
@@ -403,12 +343,6 @@ export default function ItemSaleReport() {
 			});
 	}, []);
 
-	// Store List array
-	const optionStore = storeList.map((item) => ({
-		value: item.tstrcod,
-		label: item.tstrdsc.trim(),
-	}));
-
 	// Capacity List array
 	const optionCapacity = capacityList.map((item) => ({
 		value: item.tcapcod,
@@ -444,48 +378,6 @@ export default function ItemSaleReport() {
 			</components.Option>
 		);
 	};
-
-	// ------------ Store style customization
-	const customStylesStore = () => ({
-		control: (base, state) => ({
-			...base,
-			height: "24px",
-			minHeight: "unset",
-			width: "275px",
-			fontSize: getdatafontsize,
-			fontFamily: getfontstyle,
-			backgroundColor: getcolor,
-			color: fontcolor,
-			borderRadius: 0,
-			// border: hasError ? "2px solid red" : `1px solid ${fontcolor}`,
-			transition: "border-color 0.15s ease-in-out",
-			"&:hover": {
-				borderColor: state.isFocused ? base.borderColor : "black",
-			},
-			padding: "0 8px",
-			display: "flex",
-			// alignItems: "center",
-			justifyContent: "space-between",
-		}),
-		dropdownIndicator: (base) => ({
-			...base,
-			padding: 0,
-			marginTop: "-5px",
-			fontSize: parseInt(getdatafontsize),
-			display: "flex",
-			textAlign: "center !important",
-		}),
-		singleValue: (base) => ({
-			...base,
-			marginTop: "-5px",
-			textAlign: "left",
-			color: fontcolor,
-		}),
-		clearIndicator: (base) => ({
-			...base,
-			marginTop: "-5px",
-		}),
-	});
 
 	// ------------ Company style customization
 	const customStylesCompany = () => ({
@@ -621,37 +513,24 @@ export default function ItemSaleReport() {
 	const exportPDFHandler = () => {
 		const doc = new jsPDF({ orientation: "landscape" });
 		const rows = tableData.map((item) => [
-			item.Date,
-			item["Trn#"],
-			item.Type,
+			item.Code,
 			item.Description,
-			item.Store,
-			item.Rate,
+			item["Last Date"],
+			item["Pur Rate"],
 			item.Qnty,
-			item["Sale Amount"],
+			item["Amount"],
 		]);
-		rows.push([
-			"",
-			"",
-			"",
-			"Total",
-			"",
-			"",
-			String(totalQnty),
-			String(totalAmount),
-		]);
+		rows.push(["", "Total", "", "", String(totalQnty), String(totalAmount)]);
 
 		const headers = [
-			"Date",
-			"Trn#",
-			"Type",
+			"Code",
 			"Description",
-			"Store",
+			"Last Date",
 			"Rate",
 			"Qnty",
 			"Amount",
 		];
-		const columnWidths = [25, 20, 13, 110, 15, 25, 15, 25];
+		const columnWidths = [45, 100, 25, 20, 15, 25];
 		const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
 		const pageHeight = doc.internal.pageSize.height;
 		const paddingTop = 15;
@@ -689,7 +568,7 @@ export default function ItemSaleReport() {
 			for (let i = startIndex; i < endIndex; i++) {
 				const row = rows[i];
 				const isTotalRow = i === rows.length - 1;
-				const isNegativeQnty = row[6] && row[6].startsWith("-");
+				const isNegativeQnty = row[4] && row[4].startsWith("-");
 				let textColor = [0, 0, 0]; // Default text color
 				let fontName = normalFont;
 				const bgColor = [255, 255, 255]; // Always white background
@@ -724,13 +603,7 @@ export default function ItemSaleReport() {
 
 					doc.setTextColor(textColor[0], textColor[1], textColor[2]);
 					const cellValue = String(cell);
-					if (
-						cellIndex === 1 ||
-						cellIndex === 4 ||
-						cellIndex === 5 ||
-						cellIndex === 6 ||
-						cellIndex === 7
-					) {
+					if (cellIndex === 3 || cellIndex === 4 || cellIndex === 5) {
 						const rightAlignX = startX + columnWidths[cellIndex] - 2;
 						doc.text(cellValue, rightAlignX, cellY, {
 							align: "right",
@@ -830,7 +703,7 @@ export default function ItemSaleReport() {
 				doc.setFont(getfontstyle, "normal");
 				startY += 7;
 				addTitle(
-					`Item Sale Report From: ${fromInputDate} To: ${toInputDate}`,
+					`Item Stock Report Rep Date: ${toInputDate}`,
 					"",
 					"",
 					pageNumber,
@@ -841,11 +714,7 @@ export default function ItemSaleReport() {
 
 				// New additional line before the table
 				const typeWord = "Type: ";
-				const typeTerm = transectionType
-					? transectionType === "INV"
-						? "SALE"
-						: "SALE RETURN"
-					: "ALL";
+				const typeTerm = transectionType ? transectionType : "ALL";
 
 				const searchWord = searchQuery ? "Search: " : "";
 				const searchTerm = searchQuery ? searchQuery : "";
@@ -865,24 +734,19 @@ export default function ItemSaleReport() {
 					? capacityTypeDataValue.label
 					: "ALL";
 
-				const storeWord = "Store: ";
-				const storeTerm = storeTypeDataValue ? storeTypeDataValue.label : "ALL";
+				const labelXLeftWord = doc.internal.pageSize.width - totalWidth - 15;
+				const labelXLeftTerm = doc.internal.pageSize.width - totalWidth + 10;
 
-				const labelXLeftWord = doc.internal.pageSize.width - totalWidth;
-				const labelXLeftTerm = doc.internal.pageSize.width - totalWidth + 25;
-
-				const labelXRightWord = doc.internal.pageSize.width - totalWidth + 160;
-				const labelXRightTerm = doc.internal.pageSize.width - totalWidth + 175;
+				const labelXRightWord = doc.internal.pageSize.width - totalWidth + 150;
+				const labelXRightTerm = doc.internal.pageSize.width - totalWidth + 165;
 
 				doc.setFontSize(parseInt(getdatafontsize));
 
 				doc.setFont(getfontstyle, "bold");
 				doc.text(companyWord, labelXLeftWord, startY);
-				doc.text(storeWord, labelXRightWord, startY);
 
 				doc.setFont(getfontstyle, "normal");
 				doc.text(companyTerm, labelXLeftTerm, startY);
-				doc.text(storeTerm, labelXRightTerm, startY);
 
 				startY += 5; // Adjust the Y-position for the next section
 				doc.setFont(getfontstyle, "bold");
@@ -943,7 +807,7 @@ export default function ItemSaleReport() {
 		const time = getCurrentTime();
 
 		handlePagination();
-		doc.save(`ItemSaleReportFrom${fromInputDate}To${toInputDate}.pdf`);
+		doc.save(`ItemStockReportFrom${fromInputDate}To${toInputDate}.pdf`);
 
 		const pdfBlob = doc.output("blob");
 		const pdfFile = new File([pdfBlob], "table_data.pdf", {
@@ -954,58 +818,41 @@ export default function ItemSaleReport() {
 	const handleDownloadCSV = async () => {
 		const workbook = new ExcelJS.Workbook();
 		const worksheet = workbook.addWorksheet("Sheet1");
-		const numColumns = 8;
+		const numColumns = 6;
 
 		const columnAlignments = [
 			"left",
-			"right",
-			"center",
 			"left",
-			"right",
+			"left",
 			"right",
 			"right",
 			"right",
 		];
 		worksheet.addRow([]);
-		[
-			comapnyname,
-			`Item Sale Report From: ${fromInputDate} to ${toInputDate}`,
-		].forEach((title, index) => {
-			worksheet.addRow([title]).eachCell((cell) => {
-				cell.style = {
-					font: {
-						bold: index === 0 ? true : false,
-						size: index === 0 ? 18 : parseInt(getdatafontsize),
-					},
-					alignment: { horizontal: "center" },
-				};
-			});
-			worksheet.mergeCells(
-				`A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
-			);
-		});
+		[comapnyname, `Item Stock Report Rep Date: ${toInputDate}`].forEach(
+			(title, index) => {
+				worksheet.addRow([title]).eachCell((cell) => {
+					cell.style = {
+						font: {
+							bold: index === 0 ? true : false,
+							size: index === 0 ? 18 : parseInt(getdatafontsize),
+						},
+						alignment: { horizontal: "center" },
+					};
+				});
+				worksheet.mergeCells(
+					`A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
+				);
+			}
+		);
 		worksheet.addRow([]);
 		worksheet
 			.addRow([
 				"Company: ",
 				companyTypeDataValue ? companyTypeDataValue.label : "ALL",
-				"",
-				"",
-				"",
-				"",
-				"Store: ",
-				storeTypeDataValue ? storeTypeDataValue.label : "ALL",
 			])
 			.eachCell((cell, colNumber) => {
 				if (colNumber === 1) {
-					// Target the cell containing "Search:"
-					cell.font = {
-						bold: true,
-						size: parseInt(getdatafontsize), // Apply dynamic font size if required
-					};
-				}
-				if (colNumber === 6) {
-					// Target the cell containing "Search:"
 					cell.font = {
 						bold: true,
 						size: parseInt(getdatafontsize), // Apply dynamic font size if required
@@ -1018,25 +865,11 @@ export default function ItemSaleReport() {
 				categoryTypeDataValue ? categoryTypeDataValue.label : "ALL",
 				"",
 				"",
-				"",
-				"",
 				"Type: ",
-				transectionType
-					? transectionType === "INV"
-						? "SALE"
-						: "SALE RETURN"
-					: "ALL",
+				transectionType ? transectionType : "ALL",
 			])
 			.eachCell((cell, colNumber) => {
-				if (colNumber === 1) {
-					// Target the cell containing "Search:"
-					cell.font = {
-						bold: true,
-						size: parseInt(getdatafontsize), // Apply dynamic font size if required
-					};
-				}
-				if (colNumber === 6) {
-					// Target the cell containing "Search:"
+				if (colNumber === 1 || colNumber === 5) {
 					cell.font = {
 						bold: true,
 						size: parseInt(getdatafontsize), // Apply dynamic font size if required
@@ -1049,21 +882,11 @@ export default function ItemSaleReport() {
 				capacityTypeDataValue ? capacityTypeDataValue.label : "ALL",
 				"",
 				"",
-				"",
-				"",
 				searchQuery ? "Search: " : "",
 				searchQuery ? searchQuery : "",
 			])
 			.eachCell((cell, colNumber) => {
-				if (colNumber === 1) {
-					// Target the cell containing "Search:"
-					cell.font = {
-						bold: true,
-						size: parseInt(getdatafontsize), // Apply dynamic font size if required
-					};
-				}
-				if (colNumber === 6) {
-					// Target the cell containing "Search:"
+				if (colNumber === 1 || colNumber === 5) {
 					cell.font = {
 						bold: true,
 						size: parseInt(getdatafontsize), // Apply dynamic font size if required
@@ -1087,11 +910,9 @@ export default function ItemSaleReport() {
 			},
 		};
 		const headers = [
-			"Date",
-			"Trn#",
-			"Type",
+			"Code",
 			"Description",
-			"Store",
+			"Last Date",
 			"Rate",
 			"Qnty",
 			"Amount",
@@ -1109,14 +930,12 @@ export default function ItemSaleReport() {
 		});
 		tableData.forEach((item) => {
 			const row = worksheet.addRow([
-				item.Date,
-				item["Trn#"],
-				item.Type,
+				item.Code,
 				item.Description,
-				item.Store,
-				item.Rate,
+				item["Last Date"],
+				item["Pur Rate"],
 				item.Qnty,
-				item["Sale Amount"],
+				item["Amount"],
 			]);
 
 			// **Check if Qnty is negative**
@@ -1135,8 +954,6 @@ export default function ItemSaleReport() {
 		});
 		const totalRow = worksheet.addRow([
 			"",
-			"",
-			"",
 			"Total",
 			"",
 			"",
@@ -1146,7 +963,7 @@ export default function ItemSaleReport() {
 		totalRow.eachCell((cell) => {
 			cell.font = { bold: true };
 		});
-		[12, 7, 6, 45, 7, 12, 7, 12].forEach((width, index) => {
+		[17, 40, 12, 10, 7, 12].forEach((width, index) => {
 			worksheet.getColumn(index + 1).width = width;
 		});
 		worksheet.eachRow((row, rowNumber) => {
@@ -1171,7 +988,7 @@ export default function ItemSaleReport() {
 		const blob = new Blob([buffer], {
 			type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 		});
-		saveAs(blob, `ItemSaleReportFrom${fromInputDate}To${toInputDate}.xlsx`);
+		saveAs(blob, `ItemStockReportRepDate${toInputDate}.xlsx`);
 	};
 
 	const dispatch = useDispatch();
@@ -1188,31 +1005,25 @@ export default function ItemSaleReport() {
 	const { data, loading, error } = useSelector((state) => state.getuser);
 
 	const firstColWidth = {
-		width: "11%",
+		width: "18%",
 	};
 	const secondColWidth = {
-		width: "8%",
+		width: "40%",
 	};
 	const thirdColWidth = {
-		width: "6%",
+		width: "11%",
 	};
 	const forthColWidth = {
-		width: "42%",
+		width: "11%",
 	};
 	const fifthColWidth = {
-		width: "6%",
+		width: "7%",
 	};
 	const sixthColWidth = {
-		width: "9%",
-	};
-	const seventhColWidth = {
-		width: "6%",
-	};
-	const eighthColWidth = {
-		width: "12%",
+		width: "13%",
 	};
 
-	useHotkeys("s", fetchItemSaleReport);
+	useHotkeys("s", fetchItemStockReport);
 	useHotkeys("alt+p", exportPDFHandler);
 	useHotkeys("alt+e", handleDownloadCSV);
 	useHotkeys("esc", () => navigate("/MainPage"));
@@ -1324,43 +1135,9 @@ export default function ItemSaleReport() {
 		}
 	}, [selectedIndex]);
 
-	const parseDate = (dateString) => {
-		const [day, month, year] = dateString.split("-").map(Number);
-		return new Date(year, month - 1, day);
-	};
-
-	const handleRadioChange = (days) => {
-		const toDate = parseDate(toInputDate);
-		const fromDate = new Date(toDate);
-		fromDate.setUTCDate(fromDate.getUTCDate() - days);
-
-		setSelectedfromDate(fromDate);
-		setfromInputDate(formatDate(fromDate));
-		setSelectedRadio(days === 0 ? "custom" : `${days}days`);
-	};
-
-	useEffect(() => {
-		if (selectedRadio === "custom") {
-			const currentDate = new Date();
-			const firstDateOfCurrentMonth = new Date(
-				currentDate.getFullYear(),
-				currentDate.getMonth(),
-				1
-			);
-			setSelectedfromDate(firstDateOfCurrentMonth);
-			setfromInputDate(formatDate(firstDateOfCurrentMonth));
-			setSelectedToDate(currentDate);
-			settoInputDate(formatDate(currentDate));
-		} else {
-			const days = parseInt(selectedRadio.replace("days", ""));
-			handleRadioChange(days);
-		}
-	}, [selectedRadio]);
-
 	const [menuCompanyIsOpen, setMenuCompanyIsOpen] = useState(false);
 	const [menuCategoryIsOpen, setMenuCategoryIsOpen] = useState(false);
 	const [menuCapacityIsOpen, setMenuCapacityIsOpen] = useState(false);
-	const [menuStoreIsOpen, setMenuStoreIsOpen] = useState(false);
 
 	const focusNextElement = (currentRef, nextRef) => {
 		if (currentRef.current && nextRef.current) {
@@ -1472,14 +1249,7 @@ export default function ItemSaleReport() {
 	const handleCapacityEnter = (e) => {
 		if (e.key === "Enter" && !menuCapacityIsOpen) {
 			e.preventDefault();
-			focusNextElement(capacityRef, storeRef);
-		}
-	};
-
-	const handleStoreEnter = (e) => {
-		if (e.key === "Enter" && !menuStoreIsOpen) {
-			e.preventDefault();
-			focusNextElement(storeRef, typeRef);
+			focusNextElement(capacityRef, typeRef);
 		}
 	};
 
@@ -1510,7 +1280,7 @@ export default function ItemSaleReport() {
 						borderRadius: "9px",
 					}}
 				>
-					<NavComponent textdata="Item Sale Report" />
+					<NavComponent textdata="Item Stock Report" />
 
 					{/* ------------1st row */}
 					<div
@@ -1527,7 +1297,7 @@ export default function ItemSaleReport() {
 								justifyContent: "space-between",
 							}}
 						>
-							{/* From Date */}
+							{/* Rep Date */}
 							<div
 								className="d-flex align-items-center"
 								style={{ marginLeft: "20px" }}
@@ -1539,103 +1309,6 @@ export default function ItemSaleReport() {
 										justifyContent: "end",
 									}}
 								>
-									<label htmlFor="fromDatePicker">
-										<span
-											style={{
-												fontSize: parseInt(getdatafontsize),
-												fontWeight: "bold",
-											}}
-										>
-											From:&nbsp;&nbsp;
-										</span>
-									</label>
-								</div>
-								<div
-									id="fromdatevalidation"
-									style={{
-										width: "135px",
-										border: `1px solid ${fontcolor}`,
-										display: "flex",
-										alignItems: "center",
-										height: "24px",
-										justifyContent: "center",
-										background: getcolor,
-									}}
-									onFocus={(e) =>
-										(e.currentTarget.style.border = "2px solid red")
-									}
-									onBlur={(e) =>
-										(e.currentTarget.style.border = `1px solid ${fontcolor}`)
-									}
-								>
-									<input
-										style={{
-											height: "20px",
-											width: "90px",
-											paddingLeft: "5px",
-											outline: "none",
-											border: "none",
-											fontSize: parseInt(getdatafontsize),
-											backgroundColor: getcolor,
-											color: fontcolor,
-											opacity: selectedRadio === "custom" ? 1 : 0.5,
-											pointerEvents:
-												selectedRadio === "custom" ? "auto" : "none",
-										}}
-										id="frominputid"
-										value={fromInputDate}
-										ref={fromRef}
-										onChange={handlefromInputChange}
-										onKeyDown={handleFromDateEnter}
-										autoComplete="off"
-										placeholder="dd-mm-yyyy"
-										aria-label="Date Input"
-										disabled={selectedRadio !== "custom"}
-									/>
-									<DatePicker
-										selected={selectedfromDate}
-										onChange={handlefromDateChange}
-										dateFormat="dd-MM-yyyy"
-										popperPlacement="bottom"
-										showPopperArrow={false}
-										open={fromCalendarOpen}
-										dropdownMode="select"
-										customInput={
-											<div>
-												<BsCalendar
-													onClick={
-														selectedRadio === "custom"
-															? toggleFromCalendar
-															: undefined
-													}
-													style={{
-														cursor:
-															selectedRadio === "custom"
-																? "pointer"
-																: "default",
-														marginLeft: "18px",
-														fontSize: parseInt(getdatafontsize),
-														color: fontcolor,
-														opacity: selectedRadio === "custom" ? 1 : 0.5,
-													}}
-													disabled={selectedRadio !== "custom"}
-												/>
-											</div>
-										}
-										disabled={selectedRadio !== "custom"}
-									/>
-								</div>
-							</div>
-
-							{/* To Date */}
-							<div className="d-flex align-items-center">
-								<div
-									style={{
-										width: "60px",
-										display: "flex",
-										justifyContent: "end",
-									}}
-								>
 									<label htmlFor="toDatePicker">
 										<span
 											style={{
@@ -1643,7 +1316,7 @@ export default function ItemSaleReport() {
 												fontWeight: "bold",
 											}}
 										>
-											To:&nbsp;&nbsp;
+											Rep Date:&nbsp;&nbsp;
 										</span>
 									</label>
 								</div>
@@ -1724,107 +1397,7 @@ export default function ItemSaleReport() {
 								</div>
 							</div>
 
-							{/* radio checks */}
-							<div
-								className="d-flex align-items-center"
-								style={{ marginRight: "15px" }}
-							>
-								<div
-									style={{
-										display: "flex",
-										justifyContent: "evenly",
-									}}
-								>
-									<div className="d-flex align-items-center mx-2">
-										<input
-											type="radio"
-											name="dateRange"
-											id="custom"
-											checked={selectedRadio === "custom"}
-											onChange={() => handleRadioChange(0)}
-											onFocus={(e) =>
-												(e.currentTarget.style.border = "2px solid red")
-											}
-											onBlur={(e) =>
-												(e.currentTarget.style.border = `1px solid ${fontcolor}`)
-											}
-										/>
-										&nbsp;
-										<label
-											htmlFor="custom"
-											style={{ fontSize: parseInt(getdatafontsize) }}
-										>
-											Custom
-										</label>
-									</div>
-									<div className="d-flex align-items-center mx-2">
-										<input
-											type="radio"
-											name="dateRange"
-											id="30"
-											checked={selectedRadio === "30days"}
-											onChange={() => handleRadioChange(30)}
-											onFocus={(e) =>
-												(e.currentTarget.style.border = "2px solid red")
-											}
-											onBlur={(e) =>
-												(e.currentTarget.style.border = `1px solid ${fontcolor}`)
-											}
-										/>
-										&nbsp;
-										<label
-											htmlFor="30"
-											style={{ fontSize: parseInt(getdatafontsize) }}
-										>
-											30 Days
-										</label>
-									</div>
-									<div className="d-flex align-items-center mx-2">
-										<input
-											type="radio"
-											name="dateRange"
-											id="60"
-											checked={selectedRadio === "60days"}
-											onChange={() => handleRadioChange(60)}
-											onFocus={(e) =>
-												(e.currentTarget.style.border = "2px solid red")
-											}
-											onBlur={(e) =>
-												(e.currentTarget.style.border = `1px solid ${fontcolor}`)
-											}
-										/>
-										&nbsp;
-										<label
-											htmlFor="60"
-											style={{ fontSize: parseInt(getdatafontsize) }}
-										>
-											60 Days
-										</label>
-									</div>
-									<div className="d-flex align-items-center mx-2">
-										<input
-											type="radio"
-											name="dateRange"
-											id="90"
-											checked={selectedRadio === "90days"}
-											onChange={() => handleRadioChange(90)}
-											onFocus={(e) =>
-												(e.currentTarget.style.border = "2px solid red")
-											}
-											onBlur={(e) =>
-												(e.currentTarget.style.border = `1px solid ${fontcolor}`)
-											}
-										/>
-										&nbsp;
-										<label
-											htmlFor="90"
-											style={{ fontSize: parseInt(getdatafontsize) }}
-										>
-											90 Days
-										</label>
-									</div>
-								</div>
-							</div>
+							<div></div>
 						</div>
 					</div>
 					{/* --------2nd row */}
@@ -1895,62 +1468,7 @@ export default function ItemSaleReport() {
 								</div>
 							</div>
 
-							{/* Store Select */}
-							<div
-								className="d-flex align-items-center"
-								style={{ marginRight: "20px" }}
-							>
-								<div
-									style={{
-										width: "100px",
-										display: "flex",
-										justifyContent: "end",
-									}}
-								>
-									<label htmlFor="fromDatePicker">
-										<span
-											style={{
-												fontSize: parseInt(getdatafontsize),
-												fontWeight: "bold",
-											}}
-										>
-											Store:&nbsp;&nbsp;
-										</span>{" "}
-										<br />
-									</label>
-								</div>
-								<div>
-									<Select
-										className="List-select-class "
-										ref={storeRef}
-										options={optionStore}
-										onKeyDown={handleStoreEnter}
-										id="selectedsale"
-										onChange={(selectedOption) => {
-											if (selectedOption && selectedOption.value) {
-												console.log(selectedOption);
-												const labelPart = selectedOption.label.split("-")[0];
-												setStoreType(selectedOption.value);
-												setStoreTypeDataValue({
-													value: selectedOption.value,
-													label: labelPart,
-												});
-											} else {
-												setStoreType("");
-												setStoreTypeDataValue("");
-											}
-										}}
-										components={{ Option: DropdownOption }}
-										// styles={customStylesStore}
-										styles={customStylesStore()}
-										isClearable
-										placeholder="Search or select..."
-										menuIsOpen={menuStoreIsOpen}
-										onMenuOpen={() => setMenuStoreIsOpen(true)}
-										onMenuClose={() => setMenuStoreIsOpen(false)}
-									/>
-								</div>
-							</div>
+							<div></div>
 						</div>
 					</div>
 
@@ -2072,8 +1590,8 @@ export default function ItemSaleReport() {
 									}}
 								>
 									<option value="">All</option>
-									<option value="INV">Sale</option>
-									<option value="SRN">Sale Return</option>
+									{/* <option value="INV">Sale</option>
+									<option value="SRN">Sale Return</option> */}
 								</select>
 							</div>
 						</div>
@@ -2204,7 +1722,7 @@ export default function ItemSaleReport() {
 						<div
 							style={{
 								overflowY: "auto",
-								width: "98.5%",
+								width: "97.9%",
 							}}
 						>
 							<table
@@ -2214,7 +1732,6 @@ export default function ItemSaleReport() {
 									fontSize: parseInt(getdatafontsize),
 									width: "100%",
 									position: "relative",
-									paddingRight: "2%",
 								}}
 							>
 								<thead
@@ -2234,27 +1751,21 @@ export default function ItemSaleReport() {
 										}}
 									>
 										<td className="border-dark" style={firstColWidth}>
-											Date
+											Code
 										</td>
 										<td className="border-dark" style={secondColWidth}>
-											Trn#
-										</td>
-										<td className="border-dark" style={thirdColWidth}>
-											Type
-										</td>
-										<td className="border-dark" style={forthColWidth}>
 											Description
 										</td>
-										<td className="border-dark" style={fifthColWidth}>
-											Store
+										<td className="border-dark" style={thirdColWidth}>
+											Last Date
 										</td>
-										<td className="border-dark" style={sixthColWidth}>
+										<td className="border-dark" style={forthColWidth}>
 											Rate
 										</td>
-										<td className="border-dark" style={seventhColWidth}>
+										<td className="border-dark" style={fifthColWidth}>
 											Qnty
 										</td>
-										<td className="border-dark" style={eighthColWidth}>
+										<td className="border-dark" style={sixthColWidth}>
 											Amount
 										</td>
 									</tr>
@@ -2290,7 +1801,7 @@ export default function ItemSaleReport() {
 													backgroundColor: getcolor,
 												}}
 											>
-												<td colSpan="8" className="text-center">
+												<td colSpan="6" className="text-center">
 													<Spinner animation="border" variant="primary" />
 												</td>
 											</tr>
@@ -2303,7 +1814,7 @@ export default function ItemSaleReport() {
 															color: fontcolor,
 														}}
 													>
-														{Array.from({ length: 8 }).map((_, colIndex) => (
+														{Array.from({ length: 6 }).map((_, colIndex) => (
 															<td key={`blank-${rowIndex}-${colIndex}`}>
 																&nbsp;
 															</td>
@@ -2318,8 +1829,6 @@ export default function ItemSaleReport() {
 												<td style={forthColWidth}></td>
 												<td style={fifthColWidth}></td>
 												<td style={sixthColWidth}></td>
-												<td style={seventhColWidth}></td>
-												<td style={eighthColWidth}></td>
 											</tr>
 										</>
 									) : (
@@ -2341,28 +1850,22 @@ export default function ItemSaleReport() {
 														}}
 													>
 														<td className="text-start" style={firstColWidth}>
-															{item.Date}
+															{item.Code}
 														</td>
-														<td className="text-end" style={secondColWidth}>
-															{item["Trn#"]}
+														<td className="text-start" style={secondColWidth}>
+															{item["Description"]}
 														</td>
-														<td className="text-center" style={thirdColWidth}>
-															{item.Type}
+														<td className="text-start" style={thirdColWidth}>
+															{item["Last Date"]}
 														</td>
-														<td className="text-start" style={forthColWidth}>
-															{item.Description}
+														<td className="text-end" style={forthColWidth}>
+															{item["Pur Rate"]}
 														</td>
 														<td className="text-end" style={fifthColWidth}>
-															{item["Store"]}
-														</td>
-														<td className="text-end" style={sixthColWidth}>
-															{item["Rate"]}
-														</td>
-														<td className="text-end" style={seventhColWidth}>
 															{item["Qnty"]}
 														</td>
-														<td className="text-end" style={eighthColWidth}>
-															{item["Sale Amount"]}
+														<td className="text-end" style={sixthColWidth}>
+															{item["Amount"]}
 														</td>
 													</tr>
 												);
@@ -2377,7 +1880,7 @@ export default function ItemSaleReport() {
 														color: fontcolor,
 													}}
 												>
-													{Array.from({ length: 8 }).map((_, colIndex) => (
+													{Array.from({ length: 6 }).map((_, colIndex) => (
 														<td key={`blank-${rowIndex}-${colIndex}`}>
 															&nbsp;
 														</td>
@@ -2391,8 +1894,6 @@ export default function ItemSaleReport() {
 												<td style={forthColWidth}></td>
 												<td style={fifthColWidth}></td>
 												<td style={sixthColWidth}></td>
-												<td style={seventhColWidth}></td>
-												<td style={eighthColWidth}></td>
 											</tr>
 										</>
 									)}
@@ -2407,7 +1908,7 @@ export default function ItemSaleReport() {
 							borderTop: `1px solid ${fontcolor}`,
 							height: "24px",
 							display: "flex",
-							paddingRight: "1.7%",
+							paddingRight: "2.1%",
 						}}
 					>
 						<div
@@ -2444,26 +1945,12 @@ export default function ItemSaleReport() {
 								background: getcolor,
 								borderRight: `1px solid ${fontcolor}`,
 							}}
-						></div>
-						<div
-							style={{
-								...sixthColWidth,
-								background: getcolor,
-								borderRight: `1px solid ${fontcolor}`,
-							}}
-						></div>
-						<div
-							style={{
-								...seventhColWidth,
-								background: getcolor,
-								borderRight: `1px solid ${fontcolor}`,
-							}}
 						>
 							<span className="mobileledger_total">{totalQnty}</span>
 						</div>
 						<div
 							style={{
-								...eighthColWidth,
+								...sixthColWidth,
 								background: getcolor,
 								borderRight: `1px solid ${fontcolor}`,
 							}}
@@ -2509,7 +1996,7 @@ export default function ItemSaleReport() {
 							id="searchsubmit"
 							text="Select"
 							ref={selectButtonRef}
-							onClick={fetchItemSaleReport}
+							onClick={fetchItemStockReport}
 							style={{ backgroundColor: "#186DB7", width: "120px" }}
 							onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
 							onBlur={(e) =>
