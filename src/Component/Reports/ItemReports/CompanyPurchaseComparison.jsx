@@ -1353,7 +1353,7 @@ export default function CompanyPurchaseComparison() {
 										justifyContent: "evenly",
 									}}
 								>
-									<div className="d-flex align-items-baseline mx-1">
+									<div className="d-flex align-items-center mx-1">
 										<input
 											type="radio"
 											name="dateRange"
@@ -1375,7 +1375,7 @@ export default function CompanyPurchaseComparison() {
 											Custom
 										</label>
 									</div>
-									<div className="d-flex align-items-baseline mx-1">
+									<div className="d-flex align-items-center mx-1">
 										<input
 											type="radio"
 											name="dateRange"
@@ -1397,7 +1397,7 @@ export default function CompanyPurchaseComparison() {
 											30 Days
 										</label>
 									</div>
-									<div className="d-flex align-items-baseline mx-1">
+									<div className="d-flex align-items-center mx-1">
 										<input
 											type="radio"
 											name="dateRange"
@@ -1419,7 +1419,7 @@ export default function CompanyPurchaseComparison() {
 											60 Days
 										</label>
 									</div>
-									<div className="d-flex align-items-baseline mx-1">
+									<div className="d-flex align-items-center mx-1">
 										<input
 											type="radio"
 											name="dateRange"
@@ -1493,7 +1493,7 @@ export default function CompanyPurchaseComparison() {
 										id="selectedsale"
 										onChange={(selectedOption) => {
 											if (selectedOption && selectedOption.value) {
-												const labelPart = selectedOption.label.split("-")[0];
+												const labelPart = selectedOption.label;
 												setCategoryType(selectedOption.value);
 												setCategoryTypeDataValue({
 													value: selectedOption.value,
@@ -1695,7 +1695,7 @@ export default function CompanyPurchaseComparison() {
 															color: item.Qnty?.[0] === "-" ? "red" : fontcolor,
 														}}
 													>
-														<td className="text-center" style={firstColWidth}>
+														<td className="text-start" style={firstColWidth}>
 															{item.tcmpcod}
 														</td>
 														<td className="text-start" style={secondColWidth}>

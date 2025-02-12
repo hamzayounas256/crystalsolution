@@ -997,15 +997,7 @@ export default function ItemSaleReport() {
 				storeTypeDataValue ? storeTypeDataValue.label : "ALL",
 			])
 			.eachCell((cell, colNumber) => {
-				if (colNumber === 1) {
-					// Target the cell containing "Search:"
-					cell.font = {
-						bold: true,
-						size: parseInt(getdatafontsize), // Apply dynamic font size if required
-					};
-				}
-				if (colNumber === 6) {
-					// Target the cell containing "Search:"
+				if (colNumber === 1 || colNumber === 7) {
 					cell.font = {
 						bold: true,
 						size: parseInt(getdatafontsize), // Apply dynamic font size if required
@@ -1028,15 +1020,7 @@ export default function ItemSaleReport() {
 					: "ALL",
 			])
 			.eachCell((cell, colNumber) => {
-				if (colNumber === 1) {
-					// Target the cell containing "Search:"
-					cell.font = {
-						bold: true,
-						size: parseInt(getdatafontsize), // Apply dynamic font size if required
-					};
-				}
-				if (colNumber === 6) {
-					// Target the cell containing "Search:"
+				if (colNumber === 1 || colNumber === 7) {
 					cell.font = {
 						bold: true,
 						size: parseInt(getdatafontsize), // Apply dynamic font size if required
@@ -1055,15 +1039,7 @@ export default function ItemSaleReport() {
 				searchQuery ? searchQuery : "",
 			])
 			.eachCell((cell, colNumber) => {
-				if (colNumber === 1) {
-					// Target the cell containing "Search:"
-					cell.font = {
-						bold: true,
-						size: parseInt(getdatafontsize), // Apply dynamic font size if required
-					};
-				}
-				if (colNumber === 6) {
-					// Target the cell containing "Search:"
+				if (colNumber === 1 || colNumber === 7) {
 					cell.font = {
 						bold: true,
 						size: parseInt(getdatafontsize), // Apply dynamic font size if required
@@ -1872,7 +1848,7 @@ export default function ItemSaleReport() {
 										id="selectedsale"
 										onChange={(selectedOption) => {
 											if (selectedOption && selectedOption.value) {
-												const labelPart = selectedOption.label.split("-")[0];
+												const labelPart = selectedOption.label;
 												setCompanyType(selectedOption.value);
 												setCompanyTypeDataValue({
 													value: selectedOption.value,
@@ -1929,7 +1905,7 @@ export default function ItemSaleReport() {
 										onChange={(selectedOption) => {
 											if (selectedOption && selectedOption.value) {
 												console.log(selectedOption);
-												const labelPart = selectedOption.label.split("-")[0];
+												const labelPart = selectedOption.label;
 												setStoreType(selectedOption.value);
 												setStoreTypeDataValue({
 													value: selectedOption.value,
@@ -2002,7 +1978,7 @@ export default function ItemSaleReport() {
 										id="selectedsale"
 										onChange={(selectedOption) => {
 											if (selectedOption && selectedOption.value) {
-												const labelPart = selectedOption.label.split("-")[0];
+												const labelPart = selectedOption.label;
 												setCategoryType(selectedOption.value);
 												setCategoryTypeDataValue({
 													value: selectedOption.value,
@@ -2127,7 +2103,7 @@ export default function ItemSaleReport() {
 										id="selectedsale"
 										onChange={(selectedOption) => {
 											if (selectedOption && selectedOption.value) {
-												const labelPart = selectedOption.label.split("-")[0];
+												const labelPart = selectedOption.label;
 												setCapacityType(selectedOption.value);
 												setCapacityTypeDataValue({
 													value: selectedOption.value,

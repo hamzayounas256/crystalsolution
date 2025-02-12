@@ -331,7 +331,7 @@ export default function CompanySaleComparison() {
 	// Category List array
 	const optionCategory = categoryList.map((item) => ({
 		value: item.tctgcod,
-		label: `${item.tctgcod}-${item.tctgdsc.trim()}`,
+		label: item.tctgdsc.trim(),
 	}));
 
 	const DropdownOption = (props) => {
@@ -359,7 +359,7 @@ export default function CompanySaleComparison() {
 			height: "24px",
 			minHeight: "unset",
 			width: "275px",
-			fontSize: parseInt(getdatafontsize),
+			fontSize: getdatafontsize,
 			fontFamily: getfontstyle,
 			backgroundColor: getcolor,
 			color: fontcolor,
@@ -668,7 +668,7 @@ export default function CompanySaleComparison() {
 		});
 	};
 
-	const	 handleDownloadCSV = async () => {
+	const handleDownloadCSV = async () => {
 		const workbook = new ExcelJS.Workbook();
 		const worksheet = workbook.addWorksheet("Sheet1");
 		const numColumns = 5;
@@ -1106,7 +1106,7 @@ export default function CompanySaleComparison() {
 						borderRadius: "9px",
 					}}
 				>
-					<NavComponent textdata="Company Sale Comparison" />
+					<NavComponent textdata="Company Sale Comparison Report" />
 
 					{/* ------------1st row */}
 					<div
@@ -1471,7 +1471,7 @@ export default function CompanySaleComparison() {
 										id="selectedsale"
 										onChange={(selectedOption) => {
 											if (selectedOption && selectedOption.value) {
-												const labelPart = selectedOption.label.split("-")[0];
+												const labelPart = selectedOption.label;
 												setCategoryType(selectedOption.value);
 												setCategoryTypeDataValue({
 													value: selectedOption.value,
@@ -1673,7 +1673,7 @@ export default function CompanySaleComparison() {
 															color: item.Qnty?.[0] === "-" ? "red" : fontcolor,
 														}}
 													>
-														<td className="text-center" style={firstColWidth}>
+														<td className="text-start" style={firstColWidth}>
 															{item.tcmpcod}
 														</td>
 														<td className="text-start" style={secondColWidth}>

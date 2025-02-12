@@ -423,7 +423,7 @@ export default function ItemSaleSummary() {
 			FCapCod: capacityType,
 			FCmpCod: companyType,
 			FCtgCod: categoryType,
-			FSchTxt: "",
+			FSchTxt: searchQuery,
 		}).toString();
 
 		axios
@@ -594,7 +594,8 @@ export default function ItemSaleSummary() {
 			height: "24px",
 			minHeight: "unset",
 			width: "275px",
-			fontSize: parseInt(getdatafontsize),
+			fontSize: getdatafontsize,
+			fontFamily: getfontstyle,
 			backgroundColor: getcolor,
 			color: fontcolor,
 			borderRadius: 0,
@@ -611,9 +612,20 @@ export default function ItemSaleSummary() {
 		dropdownIndicator: (base) => ({
 			...base,
 			padding: 0,
-			fontSize: parseInt(getdatafontsize),
+			marginTop: "-5px",
+			fontSize: "18px",
 			display: "flex",
 			textAlign: "center !important",
+		}),
+		singleValue: (base) => ({
+			...base,
+			marginTop: "-5px",
+			textAlign: "left",
+			color: fontcolor,
+		}),
+		clearIndicator: (base) => ({
+			...base,
+			marginTop: "-5px",
 		}),
 	});
 
@@ -623,8 +635,9 @@ export default function ItemSaleSummary() {
 			...base,
 			height: "24px",
 			minHeight: "unset",
-			width: 275,
-			fontSize: parseInt(getdatafontsize),
+			width: "275px",
+			fontSize: getdatafontsize,
+			fontFamily: getfontstyle,
 			backgroundColor: getcolor,
 			color: fontcolor,
 			borderRadius: 0,
@@ -641,9 +654,20 @@ export default function ItemSaleSummary() {
 		dropdownIndicator: (base) => ({
 			...base,
 			padding: 0,
-			fontSize: parseInt(getdatafontsize),
+			marginTop: "-5px",
+			fontSize: "18px",
 			display: "flex",
 			textAlign: "center !important",
+		}),
+		singleValue: (base) => ({
+			...base,
+			marginTop: "-5px",
+			textAlign: "left",
+			color: fontcolor,
+		}),
+		clearIndicator: (base) => ({
+			...base,
+			marginTop: "-5px",
 		}),
 	});
 
@@ -653,8 +677,9 @@ export default function ItemSaleSummary() {
 			...base,
 			height: "24px",
 			minHeight: "unset",
-			width: 275,
-			fontSize: parseInt(getdatafontsize),
+			width: "275px",
+			fontSize: getdatafontsize,
+			fontFamily: getfontstyle,
 			backgroundColor: getcolor,
 			color: fontcolor,
 			borderRadius: 0,
@@ -671,9 +696,20 @@ export default function ItemSaleSummary() {
 		dropdownIndicator: (base) => ({
 			...base,
 			padding: 0,
-			fontSize: parseInt(getdatafontsize),
+			marginTop: "-5px",
+			fontSize: "18px",
 			display: "flex",
 			textAlign: "center !important",
+		}),
+		singleValue: (base) => ({
+			...base,
+			marginTop: "-5px",
+			textAlign: "left",
+			color: fontcolor,
+		}),
+		clearIndicator: (base) => ({
+			...base,
+			marginTop: "-5px",
 		}),
 	});
 
@@ -683,8 +719,9 @@ export default function ItemSaleSummary() {
 			...base,
 			height: "24px",
 			minHeight: "unset",
-			width: 275,
-			fontSize: parseInt(getdatafontsize),
+			width: "275px",
+			fontSize: getdatafontsize,
+			fontFamily: getfontstyle,
 			backgroundColor: getcolor,
 			color: fontcolor,
 			borderRadius: 0,
@@ -701,9 +738,20 @@ export default function ItemSaleSummary() {
 		dropdownIndicator: (base) => ({
 			...base,
 			padding: 0,
-			fontSize: parseInt(getdatafontsize),
+			marginTop: "-5px",
+			fontSize: "18px",
 			display: "flex",
 			textAlign: "center !important",
+		}),
+		singleValue: (base) => ({
+			...base,
+			marginTop: "-5px",
+			textAlign: "left",
+			color: fontcolor,
+		}),
+		clearIndicator: (base) => ({
+			...base,
+			marginTop: "-5px",
 		}),
 	});
 
@@ -1537,7 +1585,7 @@ export default function ItemSaleSummary() {
 						borderRadius: "9px",
 					}}
 				>
-					<NavComponent textdata="Item Sale Summary" />
+					<NavComponent textdata="Item Sale Summary Report" />
 
 					{/* ------------1st row */}
 					<div
@@ -1899,7 +1947,7 @@ export default function ItemSaleSummary() {
 										id="selectedsale"
 										onChange={(selectedOption) => {
 											if (selectedOption && selectedOption.value) {
-												const labelPart = selectedOption.label.split("-")[0];
+												const labelPart = selectedOption.label;
 												setCompanyType(selectedOption.value);
 												setCompanyTypeDataValue({
 													value: selectedOption.value,
@@ -1956,7 +2004,7 @@ export default function ItemSaleSummary() {
 										onChange={(selectedOption) => {
 											if (selectedOption && selectedOption.value) {
 												console.log(selectedOption);
-												const labelPart = selectedOption.label.split("-")[0];
+												const labelPart = selectedOption.label;
 												setStoreType(selectedOption.value);
 												setStoreTypeDataValue({
 													value: selectedOption.value,
@@ -2029,7 +2077,7 @@ export default function ItemSaleSummary() {
 										id="selectedsale"
 										onChange={(selectedOption) => {
 											if (selectedOption && selectedOption.value) {
-												const labelPart = selectedOption.label.split("-")[0];
+												const labelPart = selectedOption.label;
 												setCategoryType(selectedOption.value);
 												setCategoryTypeDataValue({
 													value: selectedOption.value,
@@ -2154,7 +2202,7 @@ export default function ItemSaleSummary() {
 										id="selectedsale"
 										onChange={(selectedOption) => {
 											if (selectedOption && selectedOption.value) {
-												const labelPart = selectedOption.label.split("-")[0];
+												const labelPart = selectedOption.label;
 												setCapacityType(selectedOption.value);
 												setCapacityTypeDataValue({
 													value: selectedOption.value,

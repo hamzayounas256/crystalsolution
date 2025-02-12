@@ -425,7 +425,7 @@ export default function ItemPurchaseSummary() {
 			FCapCod: capacityType,
 			FCmpCod: companyType,
 			FCtgCod: categoryType,
-			FSchTxt: "",
+			FSchTxt: searchQuery,
 		}).toString();
 
 		axios
@@ -501,8 +501,8 @@ export default function ItemPurchaseSummary() {
 		const apiCapacityUrl = apiLinks + "/GetCapacity.php";
 		const formCapacityData = new URLSearchParams({
 			// FLocCod: getLocationNumber,
-			code: organisation.code,
-			// code: "EMART",
+			// code: organisation.code,
+			code: "EMART",
 		}).toString();
 		axios
 			.post(apiCapacityUrl, formCapacityData)
@@ -589,6 +589,10 @@ export default function ItemPurchaseSummary() {
 		);
 	};
 
+	useEffect(() => {
+		document.documentElement.style.setProperty("--background-color", getcolor);
+	}, [getcolor]);
+
 	// ------------ store style customization
 	const customStylesStore = () => ({
 		control: (base, state) => ({
@@ -596,7 +600,8 @@ export default function ItemPurchaseSummary() {
 			height: "24px",
 			minHeight: "unset",
 			width: "275px",
-			fontSize: parseInt(getdatafontsize),
+			fontSize: getdatafontsize,
+			fontFamily: getfontstyle,
 			backgroundColor: getcolor,
 			color: fontcolor,
 			borderRadius: 0,
@@ -614,7 +619,7 @@ export default function ItemPurchaseSummary() {
 			...base,
 			padding: 0,
 			marginTop: "-5px",
-			fontSize: parseInt(getdatafontsize),
+			fontSize: "18px",
 			display: "flex",
 			textAlign: "center !important",
 		}),
@@ -629,17 +634,16 @@ export default function ItemPurchaseSummary() {
 			marginTop: "-5px",
 		}),
 	});
-	useEffect(() => {
-		document.documentElement.style.setProperty("--background-color", getcolor);
-	}, [getcolor]);
+
 	// ------------ capacity style customization
 	const customStylesCapacity = () => ({
 		control: (base, state) => ({
 			...base,
 			height: "24px",
 			minHeight: "unset",
-			width: 275,
-			fontSize: parseInt(getdatafontsize),
+			width: "275px",
+			fontSize: getdatafontsize,
+			fontFamily: getfontstyle,
 			backgroundColor: getcolor,
 			color: fontcolor,
 			borderRadius: 0,
@@ -657,7 +661,7 @@ export default function ItemPurchaseSummary() {
 			...base,
 			padding: 0,
 			marginTop: "-5px",
-			fontSize: parseInt(getdatafontsize),
+			fontSize: "18px",
 			display: "flex",
 			textAlign: "center !important",
 		}),
@@ -679,8 +683,9 @@ export default function ItemPurchaseSummary() {
 			...base,
 			height: "24px",
 			minHeight: "unset",
-			width: 275,
-			fontSize: parseInt(getdatafontsize),
+			width: "275px",
+			fontSize: getdatafontsize,
+			fontFamily: getfontstyle,
 			backgroundColor: getcolor,
 			color: fontcolor,
 			borderRadius: 0,
@@ -698,7 +703,7 @@ export default function ItemPurchaseSummary() {
 			...base,
 			padding: 0,
 			marginTop: "-5px",
-			fontSize: parseInt(getdatafontsize),
+			fontSize: "18px",
 			display: "flex",
 			textAlign: "center !important",
 		}),
@@ -720,8 +725,9 @@ export default function ItemPurchaseSummary() {
 			...base,
 			height: "24px",
 			minHeight: "unset",
-			width: 275,
-			fontSize: parseInt(getdatafontsize),
+			width: "275px",
+			fontSize: getdatafontsize,
+			fontFamily: getfontstyle,
 			backgroundColor: getcolor,
 			color: fontcolor,
 			borderRadius: 0,
@@ -739,7 +745,7 @@ export default function ItemPurchaseSummary() {
 			...base,
 			padding: 0,
 			marginTop: "-5px",
-			fontSize: parseInt(getdatafontsize),
+			fontSize: "18px",
 			display: "flex",
 			textAlign: "center !important",
 		}),
@@ -985,8 +991,8 @@ export default function ItemPurchaseSummary() {
 				const labelXLeftWord = doc.internal.pageSize.width - totalWidth;
 				const labelXLeftTerm = doc.internal.pageSize.width - totalWidth + 20;
 
-				const labelXRightWord = doc.internal.pageSize.width - totalWidth + 140;
-				const labelXRightTerm = doc.internal.pageSize.width - totalWidth + 155;
+				const labelXRightWord = doc.internal.pageSize.width - totalWidth + 120;
+				const labelXRightTerm = doc.internal.pageSize.width - totalWidth + 135;
 
 				doc.setFontSize(parseInt(getdatafontsize));
 
@@ -1587,7 +1593,7 @@ export default function ItemPurchaseSummary() {
 						borderRadius: "9px",
 					}}
 				>
-					<NavComponent textdata="Item Purchase Summary" />
+					<NavComponent textdata="Item Purchase Summary Report" />
 
 					{/* ------------1st row */}
 					<div
@@ -1950,7 +1956,7 @@ export default function ItemPurchaseSummary() {
 										id="selectedsale"
 										onChange={(selectedOption) => {
 											if (selectedOption && selectedOption.value) {
-												const labelPart = selectedOption.label.split("-")[0];
+												const labelPart = selectedOption.label;
 												setCompanyType(selectedOption.value);
 												setCompanyTypeDataValue({
 													value: selectedOption.value,
@@ -2007,7 +2013,7 @@ export default function ItemPurchaseSummary() {
 										onChange={(selectedOption) => {
 											if (selectedOption && selectedOption.value) {
 												console.log(selectedOption);
-												const labelPart = selectedOption.label.split("-")[0];
+												const labelPart = selectedOption.label;
 												setStoreType(selectedOption.value);
 												setStoreTypeDataValue({
 													value: selectedOption.value,
@@ -2080,7 +2086,7 @@ export default function ItemPurchaseSummary() {
 										id="selectedsale"
 										onChange={(selectedOption) => {
 											if (selectedOption && selectedOption.value) {
-												const labelPart = selectedOption.label.split("-")[0];
+												const labelPart = selectedOption.label;
 												setCategoryType(selectedOption.value);
 												setCategoryTypeDataValue({
 													value: selectedOption.value,
@@ -2205,7 +2211,7 @@ export default function ItemPurchaseSummary() {
 										id="selectedsale"
 										onChange={(selectedOption) => {
 											if (selectedOption && selectedOption.value) {
-												const labelPart = selectedOption.label.split("-")[0];
+												const labelPart = selectedOption.label;
 												setCapacityType(selectedOption.value);
 												setCapacityTypeDataValue({
 													value: selectedOption.value,

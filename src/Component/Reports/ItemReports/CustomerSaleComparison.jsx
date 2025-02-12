@@ -1698,7 +1698,7 @@ export default function CustomerSaleComparison() {
 										id="selectedsale"
 										onChange={(selectedOption) => {
 											if (selectedOption && selectedOption.value) {
-												const labelPart = selectedOption.label.split("-")[0];
+												const labelPart = selectedOption.label;
 												setAccountType(selectedOption.value);
 												setIsAccountValid(true);
 												setAccountTypeDataValue({
@@ -1772,7 +1772,7 @@ export default function CustomerSaleComparison() {
 										id="selectedsale"
 										onChange={(selectedOption) => {
 											if (selectedOption && selectedOption.value) {
-												const labelPart = selectedOption.label.split("-")[0];
+												const labelPart = selectedOption.label;
 												setCompanyType(selectedOption.value);
 												setCompanyTypeDataValue({
 													value: selectedOption.value,
@@ -1897,7 +1897,7 @@ export default function CustomerSaleComparison() {
 										id="selectedsale"
 										onChange={(selectedOption) => {
 											if (selectedOption && selectedOption.value) {
-												const labelPart = selectedOption.label.split("-")[0];
+												const labelPart = selectedOption.label;
 												setCategoryType(selectedOption.value);
 												setCategoryTypeDataValue({
 													value: selectedOption.value,

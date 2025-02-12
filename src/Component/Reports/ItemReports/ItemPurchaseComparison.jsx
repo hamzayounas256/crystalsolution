@@ -1479,7 +1479,7 @@ export default function ItemPurchaseComparison() {
 										id="selectedsale"
 										onChange={(selectedOption) => {
 											if (selectedOption && selectedOption.value) {
-												const labelPart = selectedOption.label.split("-")[0];
+												const labelPart = selectedOption.label ;
 												setCompanyType(selectedOption.value);
 												setCompanyTypeDataValue({
 													value: selectedOption.value,

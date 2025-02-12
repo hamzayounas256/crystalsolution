@@ -444,7 +444,8 @@ export default function ItemPurchaseReport() {
 			height: "24px",
 			minHeight: "unset",
 			width: "275px",
-			fontSize: parseInt(getdatafontsize),
+			fontSize: getdatafontsize,
+			fontFamily: getfontstyle,
 			backgroundColor: getcolor,
 			color: fontcolor,
 			borderRadius: 0,
@@ -462,7 +463,7 @@ export default function ItemPurchaseReport() {
 			...base,
 			padding: 0,
 			marginTop: "-5px",
-			fontSize: parseInt(getdatafontsize),
+			fontSize: "18px",
 			display: "flex",
 			textAlign: "center !important",
 		}),
@@ -484,8 +485,9 @@ export default function ItemPurchaseReport() {
 			...base,
 			height: "24px",
 			minHeight: "unset",
-			width: 275,
-			fontSize: parseInt(getdatafontsize),
+			width: "275px",
+			fontSize: getdatafontsize,
+			fontFamily: getfontstyle,
 			backgroundColor: getcolor,
 			color: fontcolor,
 			borderRadius: 0,
@@ -503,7 +505,7 @@ export default function ItemPurchaseReport() {
 			...base,
 			padding: 0,
 			marginTop: "-5px",
-			fontSize: parseInt(getdatafontsize),
+			fontSize: "18px",
 			display: "flex",
 			textAlign: "center !important",
 		}),
@@ -520,13 +522,14 @@ export default function ItemPurchaseReport() {
 	});
 
 	// ------------ company style customization
-	const customStylesCompany = (hasError) => ({
+	const customStylesCompany = () => ({
 		control: (base, state) => ({
 			...base,
 			height: "24px",
 			minHeight: "unset",
-			width: 275,
-			fontSize: parseInt(getdatafontsize),
+			width: "275px",
+			fontSize: getdatafontsize,
+			fontFamily: getfontstyle,
 			backgroundColor: getcolor,
 			color: fontcolor,
 			borderRadius: 0,
@@ -537,14 +540,14 @@ export default function ItemPurchaseReport() {
 			},
 			padding: "0 8px",
 			display: "flex",
-			alignItems: "center",
+			// alignItems: "center",
 			justifyContent: "space-between",
 		}),
 		dropdownIndicator: (base) => ({
 			...base,
 			padding: 0,
 			marginTop: "-5px",
-			fontSize: parseInt(getdatafontsize),
+			fontSize: "18px",
 			display: "flex",
 			textAlign: "center !important",
 		}),
@@ -565,8 +568,9 @@ export default function ItemPurchaseReport() {
 			...base,
 			height: "24px",
 			minHeight: "unset",
-			width: 275,
-			fontSize: parseInt(getdatafontsize),
+			width: "275px",
+			fontSize: getdatafontsize,
+			fontFamily: getfontstyle,
 			backgroundColor: getcolor,
 			color: fontcolor,
 			borderRadius: 0,
@@ -584,7 +588,7 @@ export default function ItemPurchaseReport() {
 			...base,
 			padding: 0,
 			marginTop: "-5px",
-			fontSize: parseInt(getdatafontsize),
+			fontSize: "18px",
 			display: "flex",
 			textAlign: "center !important",
 		}),
@@ -941,7 +945,7 @@ export default function ItemPurchaseReport() {
 	const handleDownloadCSV = async () => {
 		const workbook = new ExcelJS.Workbook();
 		const worksheet = workbook.addWorksheet("Sheet1");
-		const numColumns = 7;
+		const numColumns = 8;
 
 		const columnAlignments = [
 			"left",
@@ -984,14 +988,7 @@ export default function ItemPurchaseReport() {
 				storeTypeDataValue ? storeTypeDataValue.label : "ALL",
 			])
 			.eachCell((cell, colNumber) => {
-				if (colNumber === 1) {
-					// Target the cell containing "Search:"
-					cell.font = {
-						bold: true,
-						size: parseInt(getdatafontsize), // Apply dynamic font size if required
-					};
-				}
-				if (colNumber === 6) {
+				if (colNumber === 1 || colNumber === 7) {
 					// Target the cell containing "Search:"
 					cell.font = {
 						bold: true,
@@ -1015,14 +1012,7 @@ export default function ItemPurchaseReport() {
 					: "ALL",
 			])
 			.eachCell((cell, colNumber) => {
-				if (colNumber === 1) {
-					// Target the cell containing "Search:"
-					cell.font = {
-						bold: true,
-						size: parseInt(getdatafontsize), // Apply dynamic font size if required
-					};
-				}
-				if (colNumber === 6) {
+				if (colNumber === 1 || colNumber === 7) {
 					// Target the cell containing "Search:"
 					cell.font = {
 						bold: true,
@@ -1042,14 +1032,7 @@ export default function ItemPurchaseReport() {
 				searchQuery ? searchQuery : "",
 			])
 			.eachCell((cell, colNumber) => {
-				if (colNumber === 1) {
-					// Target the cell containing "Search:"
-					cell.font = {
-						bold: true,
-						size: parseInt(getdatafontsize), // Apply dynamic font size if required
-					};
-				}
-				if (colNumber === 6) {
+				if (colNumber === 1 || colNumber === 7) {
 					// Target the cell containing "Search:"
 					cell.font = {
 						bold: true,
@@ -1859,7 +1842,7 @@ export default function ItemPurchaseReport() {
 										id="selectedsale"
 										onChange={(selectedOption) => {
 											if (selectedOption && selectedOption.value) {
-												const labelPart = selectedOption.label.split("-")[0];
+												const labelPart = selectedOption.label;
 												setCompanyType(selectedOption.value);
 												setCompanyTypeDataValue({
 													value: selectedOption.value,
@@ -1916,7 +1899,7 @@ export default function ItemPurchaseReport() {
 										onChange={(selectedOption) => {
 											if (selectedOption && selectedOption.value) {
 												console.log(selectedOption);
-												const labelPart = selectedOption.label.split("-")[0];
+												const labelPart = selectedOption.label;
 												setStoreType(selectedOption.value);
 												setStoreTypeDataValue({
 													value: selectedOption.value,
@@ -1989,7 +1972,7 @@ export default function ItemPurchaseReport() {
 										id="selectedsale"
 										onChange={(selectedOption) => {
 											if (selectedOption && selectedOption.value) {
-												const labelPart = selectedOption.label.split("-")[0];
+												const labelPart = selectedOption.label;
 												setCategoryType(selectedOption.value);
 												setCategoryTypeDataValue({
 													value: selectedOption.value,
@@ -2114,7 +2097,7 @@ export default function ItemPurchaseReport() {
 										id="selectedsale"
 										onChange={(selectedOption) => {
 											if (selectedOption && selectedOption.value) {
-												const labelPart = selectedOption.label.split("-")[0];
+												const labelPart = selectedOption.label;
 												setCapacityType(selectedOption.value);
 												setCapacityTypeDataValue({
 													value: selectedOption.value,

@@ -36,14 +36,13 @@ export default function CompanyMonthlySaleComparison() {
 	const searchRef = useRef(null);
 	const selectButtonRef = useRef(null);
 	const categoryRef = useRef(null);
-	
+
 	const [categoryType, setCategoryType] = useState("");
 	const [categoryTypeDataValue, setCategoryTypeDataValue] = useState("");
 	const [categoryList, setCategoryList] = useState([]);
 
 	const [searchQuery, setSearchQuery] = useState("");
 	const [transectionType, settransectionType] = useState("");
-
 
 	const [jan, setJan] = useState(0);
 	const [feb, setFeb] = useState(0);
@@ -1029,7 +1028,7 @@ export default function CompanyMonthlySaleComparison() {
 										id="selectedsale"
 										onChange={(selectedOption) => {
 											if (selectedOption && selectedOption.value) {
-												const labelPart = selectedOption.label.split("-")[0];
+												const labelPart = selectedOption.label;
 												setCategoryType(selectedOption.value);
 												setCategoryTypeDataValue({
 													value: selectedOption.value,
@@ -1098,7 +1097,7 @@ export default function CompanyMonthlySaleComparison() {
 										color: fontcolor,
 									}}
 								>
-									<option value="">All</option>
+									{/* <option value="">All</option> */}
 									<option value="A">Amount</option>
 									<option value="Q">Quantity</option>
 								</select>
