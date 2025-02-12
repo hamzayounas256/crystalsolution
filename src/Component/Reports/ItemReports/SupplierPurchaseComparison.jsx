@@ -3,7 +3,12 @@ import { Container, Spinner, Nav } from "react-bootstrap";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../../../ThemeContext";
-import { getUserData, getOrganisationData } from "../../Auth";
+import {
+	getUserData,
+	getOrganisationData,
+	getYearDescription,
+	getLocationnumber,
+} from "../../Auth";
 import NavComponent from "../../MainComponent/Navform/navbarform";
 import SingleButton from "../../MainComponent/Button/SingleButton/SingleButton";
 import Select from "react-select";
@@ -48,15 +53,17 @@ export default function SupplierPurchaseComparison() {
 
 	const [isAccountValid, setIsAccountValid] = useState(true);
 
-	const [storeType, setStoreType] = useState("");
 	const [companyType, setCompanyType] = useState("");
 	const [categoryType, setCategoryType] = useState("");
 	const [accountType, setAccountType] = useState("");
 
-	const [storeList, setStoreList] = useState([]);
 	const [companyList, setCompanyList] = useState([]);
 	const [categoryList, setCategoryList] = useState([]);
 	const [AccountList, setAccountList] = useState([]);
+
+	const [companyTypeDataValue, setCompanyTypeDataValue] = useState("");
+	const [categoryTypeDataValue, setCategoryTypeDataValue] = useState("");
+	const [accountTypeDataValue, setAccountTypeDataValue] = useState("");
 
 	const [totalQnty, setTotalQnty] = useState(0);
 	const [totalOpening, setTotalOpening] = useState(0);
@@ -76,6 +83,9 @@ export default function SupplierPurchaseComparison() {
 
 	const [selectedRadio, setSelectedRadio] = useState("custom"); // State to track selected radio button
 
+	const yeardescription = getYearDescription();
+	const locationnumber = getLocationnumber();
+
 	const {
 		isSidebarVisible,
 		toggleSidebar,
@@ -87,6 +97,8 @@ export default function SupplierPurchaseComparison() {
 		getyeardescription,
 		getfromdate,
 		gettodate,
+		getdatafontsize,
+		getfontstyle,
 	} = useTheme();
 
 	useEffect(() => {
@@ -265,18 +277,19 @@ export default function SupplierPurchaseComparison() {
 		const apiMainUrl = apiLinks + "/SupplierPurchaseComparison.php";
 		setIsLoading(true);
 		const formMainData = new URLSearchParams({
-			code: "NASIRTRD",
+			code: organisation.code,
 			FLocCod: "001",
 			FYerDsc: "2024-2024",
+			// FLocCod: locationnumber || getLocationNumber,
+			// FYerDsc: yeardescription || getyeardescription,
 			FIntDat: fromInputDate,
 			FFnlDat: toInputDate,
-			// FTrnTyp: transectionType,
-			// FStrCod: storeType,
-			// FAccCod: "12-01-001",
+			// FAccCod: "21-01-0001",
 			FAccCod: accountType,
 			FCmpCod: companyType,
 			FCtgCod: categoryType,
-			FSchTxt: "",
+			FRepTyp: transectionType,
+			FSchTxt: searchQuery,
 		}).toString();
 
 		axios
@@ -333,27 +346,12 @@ export default function SupplierPurchaseComparison() {
 	}, []);
 
 	useEffect(() => {
-		//----------------- store dropdown
-		const apiStoreUrl = apiLinks + "/GetStore.php";
-		const formStoreData = new URLSearchParams({
-			code: organisation.code,
-		}).toString();
-		axios
-			.post(apiStoreUrl, formStoreData)
-			.then((response) => {
-				setStoreList(response.data);
-				// console.log("STORE"+response.data);
-			})
-			.catch((error) => {
-				console.error("Error fetching data:", error);
-			});
-
 		//-------------- Account dropdown
 		const apiAccountUrl = apiLinks + "/GetActiveSupplier.php";
 		const formAccountData = new URLSearchParams({
 			// FLocCod: getLocationNumber,
 			// code: organisation.code,
-			code: "NASIRTRD",
+			code: organisation.code,
 		}).toString();
 		axios
 			.post(apiAccountUrl, formAccountData)
@@ -385,7 +383,7 @@ export default function SupplierPurchaseComparison() {
 		const formCategoryData = new URLSearchParams({
 			// FLocCod: getLocationNumber,
 			// code: organisation.code,
-			code: "EMART",
+			code: organisation.code,
 		}).toString();
 		axios
 			.post(apiCategoryUrl, formCategoryData)
@@ -398,29 +396,23 @@ export default function SupplierPurchaseComparison() {
 			});
 	}, []);
 
-	// Store List array
-	const optionStore = storeList.map((item) => ({
-		value: item.tstrcod,
-		label: `${item.tstrcod}-${item.tstrdsc.trim()}`,
-	}));
-
 	// Account List array
 	const optionAccount = AccountList.map((item) => ({
 		value: item.tacccod,
-		label: `${item.taccdsc.trim()}`,
+		label: item.taccdsc.trim(),
 		// label: `${item.tacccod}-${item.taccdsc.trim()}`,
 	}));
 
 	// Company List array
 	const optionCompany = companyList.map((item) => ({
 		value: item.tcmpcod,
-		label: `${item.tcmpcod}-${item.tcmpdsc.trim()}`,
+		label: item.tcmpdsc.trim(),
 	}));
 
 	// Category List array
 	const optionCategory = categoryList.map((item) => ({
 		value: item.tctgcod,
-		label: `${item.tctgcod}-${item.tctgdsc.trim()}`,
+		label: item.tctgdsc.trim(),
 	}));
 
 	const DropdownOption = (props) => {
@@ -441,73 +433,57 @@ export default function SupplierPurchaseComparison() {
 		);
 	};
 
-	// ------------ store style customization
-	const customStylesStore = () => ({
-		control: (base, state) => ({
-			...base,
-			height: "24px",
-			minHeight: "unset",
-			width: "275px",
-			fontSize: "12px",
-			backgroundColor: getcolor,
-			color: fontcolor,
-			borderRadius: 0,
-			// border: hasError ? "2px solid red" : `1px solid ${fontcolor}`,
-			transition: "border-color 0.15s ease-in-out",
-			"&:hover": {
-				borderColor: state.isFocused ? base.borderColor : "black",
-			},
-			padding: "0 8px",
-			display: "flex",
-			// alignItems: "center",
-			justifyContent: "space-between",
-		}),
-		dropdownIndicator: (base) => ({
-			...base,
-			padding: 0,
-			fontSize: "18px",
-			display: "flex",
-			textAlign: "center !important",
-		}),
-	});
-
 	// ------------ Account style customization
 	const customStylesAccount = () => ({
 		control: (base, state) => ({
 			...base,
 			height: "24px",
 			minHeight: "unset",
-			width: 275,
-			fontSize: "12px",
+			width: "275px",
+			fontSize: getdatafontsize,
+			fontFamily: getfontstyle,
 			backgroundColor: getcolor,
 			color: fontcolor,
 			borderRadius: 0,
-			border: isAccountValid ? `1px solid ${fontcolor}` : "2px solid red",
+			// border: hasError ? "2px solid red" : `1px solid ${fontcolor}`,
 			transition: "border-color 0.15s ease-in-out",
 			"&:hover": {
 				borderColor: state.isFocused ? base.borderColor : "black",
 			},
 			padding: "0 8px",
 			display: "flex",
+			// alignItems: "center",
 			justifyContent: "space-between",
 		}),
 		dropdownIndicator: (base) => ({
 			...base,
 			padding: 0,
-			fontSize: "18px",
+			marginTop: "-5px",
+			fontSize: parseInt(getdatafontsize),
 			display: "flex",
 			textAlign: "center !important",
 		}),
+		singleValue: (base) => ({
+			...base,
+			marginTop: "-5px",
+			textAlign: "left",
+			color: fontcolor,
+		}),
+		clearIndicator: (base) => ({
+			...base,
+			marginTop: "-5px",
+		}),
 	});
 
-	// ------------ company style customization
+	// ------------ Company style customization
 	const customStylesCompany = () => ({
 		control: (base, state) => ({
 			...base,
 			height: "24px",
 			minHeight: "unset",
-			width: 275,
-			fontSize: "12px",
+			width: "275px",
+			fontSize: getdatafontsize,
+			fontFamily: getfontstyle,
 			backgroundColor: getcolor,
 			color: fontcolor,
 			borderRadius: 0,
@@ -524,20 +500,32 @@ export default function SupplierPurchaseComparison() {
 		dropdownIndicator: (base) => ({
 			...base,
 			padding: 0,
-			fontSize: "18px",
+			marginTop: "-5px",
+			fontSize: parseInt(getdatafontsize),
 			display: "flex",
 			textAlign: "center !important",
 		}),
+		singleValue: (base) => ({
+			...base,
+			marginTop: "-5px",
+			textAlign: "left",
+			color: fontcolor,
+		}),
+		clearIndicator: (base) => ({
+			...base,
+			marginTop: "-5px",
+		}),
 	});
 
-	// ------------ category style customization
+	// ------------ Category style customization
 	const customStylesCategory = () => ({
 		control: (base, state) => ({
 			...base,
 			height: "24px",
 			minHeight: "unset",
-			width: 275,
-			fontSize: "12px",
+			width: "275px",
+			fontSize: getdatafontsize,
+			fontFamily: getfontstyle,
 			backgroundColor: getcolor,
 			color: fontcolor,
 			borderRadius: 0,
@@ -554,9 +542,20 @@ export default function SupplierPurchaseComparison() {
 		dropdownIndicator: (base) => ({
 			...base,
 			padding: 0,
-			fontSize: "18px",
+			marginTop: "-5px",
+			fontSize: parseInt(getdatafontsize),
 			display: "flex",
 			textAlign: "center !important",
+		}),
+		singleValue: (base) => ({
+			...base,
+			marginTop: "-5px",
+			textAlign: "left",
+			color: fontcolor,
+		}),
+		clearIndicator: (base) => ({
+			...base,
+			marginTop: "-5px",
 		}),
 	});
 
@@ -575,16 +574,16 @@ export default function SupplierPurchaseComparison() {
 		]);
 		rows.push(["", "Total", String(totalQnty), String(totalAmount)]);
 		const headers = ["Code", "Description", "Qnty", "Amount"];
-		const columnWidths = [20, 80, 10, 20];
+		const columnWidths = [30, 100, 15, 30];
 		const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
 		const pageHeight = doc.internal.pageSize.height;
 		const paddingTop = 15;
-		doc.setFont("verdana");
-		doc.setFontSize(10);
+		doc.setFont(getfontstyle, "normal");
+		doc.setFontSize(parseInt(getdatafontsize));
 
 		const addTableHeaders = (startX, startY) => {
-			doc.setFont("bold");
-			doc.setFontSize(10);
+			doc.setFont(getfontstyle, "bold");
+			doc.setFontSize(parseInt(getdatafontsize));
 			headers.forEach((header, index) => {
 				const cellWidth = columnWidths[index];
 				const cellHeight = 6;
@@ -598,36 +597,39 @@ export default function SupplierPurchaseComparison() {
 				doc.text(header, cellX, cellY, { align: "center" });
 				startX += columnWidths[index];
 			});
-			doc.setFont("verdana");
-			doc.setFontSize(10);
+			doc.setFont(getfontstyle, "normal");
+			doc.setFontSize(parseInt(getdatafontsize));
 		};
 
 		const addTableRows = (startX, startY, startIndex, endIndex) => {
-			const rowHeight = 5;
-			const fontSize = 8;
-			const boldFont = "verdana";
-			const normalFont = "verdana";
+			const rowHeight = 6;
+			const fontSize = parseInt(getdatafontsize);
+			const boldFont = getfontstyle;
+			const normalFont = getfontstyle;
 			const tableWidth = getTotalTableWidth();
 			doc.setFontSize(fontSize);
 
 			for (let i = startIndex; i < endIndex; i++) {
 				const row = rows[i];
-				const isOddRow = i % 2 !== 0;
-				const isRedRow = row[0] && parseInt(row[0]) > 100;
-				let textColor = [0, 0, 0];
+				const isTotalRow = i === rows.length - 1;
+				const isNegativeQnty = row[3] && row[3].startsWith("-");
+				let textColor = [0, 0, 0]; // Default text color
 				let fontName = normalFont;
+				const bgColor = [255, 255, 255]; // Always white background
 
-				// if (isRedRow) {
-				// 	textColor = [255, 0, 0];
-				// 	fontName = boldFont;
-				// }
+				// Set text color to red for negative quantities (except total row)
+				if (isNegativeQnty && !isTotalRow) {
+					textColor = [255, 0, 0];
+				}
 
 				doc.setDrawColor(0);
+				doc.setFillColor(bgColor[0], bgColor[1], bgColor[2]);
 				doc.rect(
 					startX,
 					startY + (i - startIndex + 2) * rowHeight,
 					tableWidth,
-					rowHeight
+					rowHeight,
+					"F"
 				);
 
 				row.forEach((cell, cellIndex) => {
@@ -635,10 +637,18 @@ export default function SupplierPurchaseComparison() {
 					const cellX = startX + 2;
 					doc.setTextColor(textColor[0], textColor[1], textColor[2]);
 					doc.setFont(fontName, "normal");
-					const cellValue = String(cell);
 
+					if (isTotalRow) {
+						doc.setFont(boldFont, "bold");
+						doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+					} else {
+						doc.setFont(normalFont, "normal");
+					}
+
+					doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+					const cellValue = String(cell);
 					if (cellIndex === 2 || cellIndex === 3) {
-						const rightAlignX = startX + columnWidths[cellIndex] - 2;
+						const rightAlignX = startX + columnWidths[cellIndex] - 0.5;
 						doc.text(cellValue, rightAlignX, cellY, {
 							align: "right",
 							baseline: "middle",
@@ -672,7 +682,7 @@ export default function SupplierPurchaseComparison() {
 			const lineY = pageHeight - 15;
 			doc.setLineWidth(0.3);
 			doc.line(lineX, lineY, lineX + lineWidth, lineY);
-			const headingFontSize = 12;
+			const headingFontSize = parseInt(getdatafontsize);
 			const headingX = lineX + 2;
 			const headingY = lineY + 5;
 			doc.setFontSize(headingFontSize);
@@ -691,7 +701,7 @@ export default function SupplierPurchaseComparison() {
 			return paddingTop;
 		};
 
-		const rowsPerPage = 46;
+		const rowsPerPage = 37;
 
 		const handlePagination = () => {
 			const addTitle = (
@@ -700,7 +710,7 @@ export default function SupplierPurchaseComparison() {
 				time,
 				pageNumber,
 				startY,
-				titleFontSize = 16,
+				titleFontSize = 18,
 				dateTimeFontSize = 8,
 				pageNumberFontSize = 8
 			) => {
@@ -731,26 +741,83 @@ export default function SupplierPurchaseComparison() {
 			let pageNumber = 1;
 
 			while (currentPageIndex * rowsPerPage < rows.length) {
-				addTitle(comapnyname, "", "", pageNumber, startY, 20, 10);
+				// Add company name and title
+				doc.setFont(getfontstyle, "bold");
+				addTitle(comapnyname, "", "", pageNumber, startY, 18);
+				doc.setFont(getfontstyle, "normal");
 				startY += 7;
 				addTitle(
-					`Supplier Purchase Comparison From: ${fromInputDate} To: ${toInputDate}`,
+					`Supplier Purchase Comparison Report From: ${fromInputDate} To: ${toInputDate}`,
 					"",
 					"",
 					pageNumber,
 					startY,
-					14
+					parseInt(getdatafontsize)
 				);
-				startY += 13;
+				startY += 10;
 
-				const labelsX = (doc.internal.pageSize.width - totalWidth) / 2;
-				const labelsY = startY + 2;
-				doc.setFontSize(14);
-				doc.setFont("verdana", "bold");
-				doc.setFont("verdana", "normal");
-				startY += 0;
+				const searchWord = searchQuery ? "Search: " : "";
+				const searchTerm = searchQuery ? searchQuery : "";
 
-				addTableHeaders((doc.internal.pageSize.width - totalWidth) / 2, 39);
+				const companyWord = "Company: ";
+				const companyTerm = companyTypeDataValue
+					? companyTypeDataValue.label
+					: "ALL";
+
+				const accountWord = "Account: ";
+				const accountTerm = accountTypeDataValue
+					? accountTypeDataValue.label
+					: "ALL";
+
+				const categoryWord = "Category: ";
+				const categoryTerm = categoryTypeDataValue
+					? categoryTypeDataValue.label
+					: "ALL";
+
+				const typeWord = "Type: ";
+				const typeTerm = transectionType
+					? transectionType === "BIL"
+						? "PURCHASE"
+						: "PURCHASE RETURN"
+					: "ALL";
+
+				const labelXLeftWord = doc.internal.pageSize.width - totalWidth - 10;
+				const labelXLeftTerm = doc.internal.pageSize.width - totalWidth + 12;
+
+				const labelXRightWord = doc.internal.pageSize.width - totalWidth + 100;
+				const labelXRightTerm = doc.internal.pageSize.width - totalWidth + 115;
+
+				doc.setFontSize(parseInt(getdatafontsize));
+
+				doc.setFont(getfontstyle, "bold");
+				doc.text(accountWord, labelXLeftWord, startY);
+
+				doc.setFont(getfontstyle, "normal");
+				doc.text(accountTerm, labelXLeftTerm, startY);
+				startY += 5;
+
+				doc.setFont(getfontstyle, "bold");
+				doc.text(companyWord, labelXLeftWord, startY);
+				doc.text(typeWord, labelXRightWord, startY);
+
+				doc.setFont(getfontstyle, "normal");
+				doc.text(companyTerm, labelXLeftTerm, startY);
+				doc.text(typeTerm, labelXRightTerm, startY);
+				startY += 5;
+
+				doc.setFont(getfontstyle, "bold");
+				doc.text(categoryWord, labelXLeftWord, startY);
+				doc.text(searchWord, labelXRightWord, startY);
+
+				doc.setFont(getfontstyle, "normal");
+				doc.text(categoryTerm, labelXLeftTerm, startY);
+				doc.text(searchTerm, labelXRightTerm, startY);
+
+				// startY += 2; // Adjust the Y-position for the next section
+				addTableHeaders(
+					(doc.internal.pageSize.width - totalWidth) / 2,
+					startY + 6
+				);
 				const startIndex = currentPageIndex * rowsPerPage;
 				const endIndex = Math.min(startIndex + rowsPerPage, rows.length);
 				startY = addTableRows(
@@ -787,7 +854,9 @@ export default function SupplierPurchaseComparison() {
 		const time = getCurrentTime();
 
 		handlePagination();
-		doc.save("SupplierPurchaseComparison.pdf");
+		doc.save(
+			`SupplierPurchaseComparisonReportFrom${fromInputDate}To${toInputDate}.pdf`
+		);
 
 		const pdfBlob = doc.output("blob");
 		const pdfFile = new File([pdfBlob], "table_data.pdf", {
@@ -798,23 +867,77 @@ export default function SupplierPurchaseComparison() {
 	const handleDownloadCSV = async () => {
 		const workbook = new ExcelJS.Workbook();
 		const worksheet = workbook.addWorksheet("Sheet1");
-		const numColumns = 4;
-		const titleStyle = {
-			font: { bold: true, size: 12 },
-			alignment: { horizontal: "center" },
-		};
-		const columnAlignments = ["left", "left", "center", "right"];
+		const numColumns = 5;
+
+		const columnAlignments = ["left", "left", "right", "right"];
 		worksheet.addRow([]);
 		[
 			comapnyname,
-			`Supplier Purchase Comparison From ${fromInputDate} To ${toInputDate}`,
+			`Supplier Purchase Comparison Report From: ${fromInputDate} to ${toInputDate}`,
 		].forEach((title, index) => {
-			worksheet.addRow([title]).eachCell((cell) => (cell.style = titleStyle));
+			worksheet.addRow([title]).eachCell((cell) => {
+				cell.style = {
+					font: {
+						bold: index === 0 ? true : false,
+						size: index === 0 ? 18 : parseInt(getdatafontsize),
+					},
+					alignment: { horizontal: "center" },
+				};
+			});
 			worksheet.mergeCells(
 				`A${index + 2}:${String.fromCharCode(64 + numColumns)}${index + 2}`
 			);
 		});
 		worksheet.addRow([]);
+		worksheet
+			.addRow([
+				"Account: ",
+				accountTypeDataValue ? accountTypeDataValue.label : "ALL",
+			])
+			.eachCell((cell, colNumber) => {
+				if (colNumber === 1) {
+					cell.font = {
+						bold: true,
+						size: parseInt(getdatafontsize), // Apply dynamic font size if required
+					};
+				}
+			});
+		worksheet
+			.addRow([
+				"Company: ",
+				companyTypeDataValue ? companyTypeDataValue.label : "ALL",
+				"Type: ",
+				transectionType
+					? transectionType === "BIL"
+						? "PURCHASE"
+						: "PURCHASE RETURN"
+					: "ALL",
+			])
+			.eachCell((cell, colNumber) => {
+				if (colNumber === 1 || colNumber === 3) {
+					cell.font = {
+						bold: true,
+						size: parseInt(getdatafontsize), // Apply dynamic font size if required
+					};
+				}
+			});
+		worksheet
+			.addRow([
+				"Category: ",
+				categoryTypeDataValue ? categoryTypeDataValue.label : "ALL",
+				searchQuery ? "Search: " : "",
+				searchQuery ? searchQuery : "",
+			])
+			.eachCell((cell, colNumber) => {
+				if (colNumber === 1 || colNumber === 3) {
+					// Target the cell containing "Search:"
+					cell.font = {
+						bold: true,
+						size: parseInt(getdatafontsize), // Apply dynamic font size if required
+					};
+				}
+			});
+
 		const headerStyle = {
 			font: { bold: true },
 			alignment: { horizontal: "center" },
@@ -833,15 +956,36 @@ export default function SupplierPurchaseComparison() {
 		const headers = ["Code", "Description", "Qnty", "Amount"];
 		const headerRow = worksheet.addRow(headers);
 		headerRow.eachCell((cell) => {
-			cell.style = { ...headerStyle, alignment: { horizontal: "center" } };
+			cell.style = {
+				...headerStyle,
+				alignment: { horizontal: "center" },
+				font: {
+					bold: true,
+					size: parseInt(getdatafontsize),
+				},
+			};
 		});
 		tableData.forEach((item) => {
-			worksheet.addRow([
+			const row = worksheet.addRow([
 				item.code,
 				item.Description,
 				item.Qnty,
 				item["Amount"],
 			]);
+
+			// **Check if Qnty is negative**
+			const isNegativeQnty = item.Qnty && String(item.Qnty).startsWith("-");
+
+			if (isNegativeQnty) {
+				row.eachCell((cell) => {
+					cell.fill = {
+						type: "pattern",
+						pattern: "solid",
+						fgColor: { argb: "FFFFFFFF" },
+					}; // Red color
+					cell.font = { color: { argb: "FFFF0000" } }; // White text for contrast
+				});
+			}
 		});
 		const totalRow = worksheet.addRow(["", "Total", totalQnty, totalAmount]);
 		totalRow.eachCell((cell) => {
@@ -851,9 +995,9 @@ export default function SupplierPurchaseComparison() {
 			worksheet.getColumn(index + 1).width = width;
 		});
 		worksheet.eachRow((row, rowNumber) => {
-			if (rowNumber > 5) {
+			if (rowNumber > 7) {
 				row.eachCell((cell, colNumber) => {
-					if (rowNumber === 5) {
+					if (rowNumber === 8) {
 						cell.alignment = { horizontal: "center" };
 					} else {
 						cell.alignment = { horizontal: columnAlignments[colNumber - 1] };
@@ -867,11 +1011,15 @@ export default function SupplierPurchaseComparison() {
 				});
 			}
 		});
+		worksheet.getRow(2).height = 20;
 		const buffer = await workbook.xlsx.writeBuffer();
 		const blob = new Blob([buffer], {
 			type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 		});
-		saveAs(blob, "SupplierPurchaseComparison.xlsx");
+		saveAs(
+			blob,
+			`SupplierPurchaseComparisonReportFrom${fromInputDate}To${toInputDate}.xlsx`
+		);
 	};
 
 	const dispatch = useDispatch();
@@ -886,23 +1034,6 @@ export default function SupplierPurchaseComparison() {
 	const [selectedSearch, setSelectedSearch] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
 	const { data, loading, error } = useSelector((state) => state.getuser);
-
-	const handleSearch = (e) => {
-		setSelectedSearch(e.target.value);
-	};
-
-	let totalEntries = 0;
-
-	const getFilteredTableData = () => {
-		let filteredData = tableData;
-		if (selectedSearch.trim() !== "") {
-			const query = selectedSearch.trim().toLowerCase();
-			filteredData = filteredData.filter(
-				(data) => data.tusrnam && data.tusrnam.toLowerCase().includes(query)
-			);
-		}
-		return filteredData;
-	};
 
 	const firstColWidth = {
 		width: "12%",
@@ -1177,14 +1308,7 @@ export default function SupplierPurchaseComparison() {
 	const handleCategoryEnter = (e) => {
 		if (e.key === "Enter" && !menuCategoryIsOpen) {
 			e.preventDefault();
-			focusNextElement(categoryRef, searchRef);
-		}
-	};
-
-	const handleStoreEnter = (e) => {
-		if (e.key === "Enter" && !menuStoreIsOpen) {
-			e.preventDefault();
-			focusNextElement(storeRef, typeRef);
+			focusNextElement(categoryRef, typeRef);
 		}
 	};
 
@@ -1199,16 +1323,6 @@ export default function SupplierPurchaseComparison() {
 		if (e.key === "Enter") {
 			e.preventDefault();
 			focusNextElement(searchRef, selectButtonRef);
-		}
-	};
-
-	const handleAccountChange = (selectedOption) => {
-		if (selectedOption && selectedOption.value) {
-			setAccountType(selectedOption.value);
-			setIsAccountValid(true); // Reset validation state
-		} else {
-			setAccountType("");
-			setIsAccountValid(false); // Set validation state to false
 		}
 	};
 
@@ -1234,7 +1348,7 @@ export default function SupplierPurchaseComparison() {
 						borderRadius: "9px",
 					}}
 				>
-					<NavComponent textdata="Supplier Purchase Comparison" />
+					<NavComponent textdata="Supplier Purchase Comparison Report" />
 
 					{/* ------------1st row */}
 					<div
@@ -1449,7 +1563,7 @@ export default function SupplierPurchaseComparison() {
 										justifyContent: "evenly",
 									}}
 								>
-									<div className="d-flex align-items-baseline mx-2">
+									<div className="d-flex align-items-center mx-2">
 										<input
 											type="radio"
 											name="dateRange"
@@ -1468,7 +1582,7 @@ export default function SupplierPurchaseComparison() {
 											Custom
 										</label>
 									</div>
-									<div className="d-flex align-items-baseline mx-2">
+									<div className="d-flex align-items-center mx-2">
 										<input
 											type="radio"
 											name="dateRange"
@@ -1487,7 +1601,7 @@ export default function SupplierPurchaseComparison() {
 											30 Days
 										</label>
 									</div>
-									<div className="d-flex align-items-baseline mx-2">
+									<div className="d-flex align-items-center mx-2">
 										<input
 											type="radio"
 											name="dateRange"
@@ -1506,7 +1620,7 @@ export default function SupplierPurchaseComparison() {
 											60 Days
 										</label>
 									</div>
-									<div className="d-flex align-items-baseline mx-2">
+									<div className="d-flex align-items-center mx-2">
 										<input
 											type="radio"
 											name="dateRange"
@@ -1570,8 +1684,23 @@ export default function SupplierPurchaseComparison() {
 										options={optionAccount}
 										onKeyDown={handleAccountEnter}
 										id="selectedsale"
-										onChange={handleAccountChange}
+										onChange={(selectedOption) => {
+											if (selectedOption && selectedOption.value) {
+												const labelPart = selectedOption.label.split("-")[0];
+												setAccountType(selectedOption.value);
+												setAccountTypeDataValue({
+													value: selectedOption.value,
+													label: labelPart,
+												});
+												setIsAccountValid(true);
+											} else {
+												setAccountType("");
+												setAccountTypeDataValue("");
+												setIsAccountValid(false);
+											}
+										}}
 										components={{ Option: DropdownOption }}
+										// styles={customStylesCategory}
 										styles={customStylesAccount()}
 										isClearable
 										placeholder="Search or select..."
@@ -1626,13 +1755,19 @@ export default function SupplierPurchaseComparison() {
 										id="selectedsale"
 										onChange={(selectedOption) => {
 											if (selectedOption && selectedOption.value) {
+												const labelPart = selectedOption.label.split("-")[0];
 												setCompanyType(selectedOption.value);
+												setCompanyTypeDataValue({
+													value: selectedOption.value,
+													label: labelPart,
+												});
 											} else {
-												setCompanyType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+												setCompanyType("");
+												setCompanyTypeDataValue("");
 											}
 										}}
 										components={{ Option: DropdownOption }}
-										// styles={customStylesStore}
+										// styles={customStylesCategory}
 										styles={customStylesCompany()}
 										isClearable
 										placeholder="Search or select..."
@@ -1722,7 +1857,7 @@ export default function SupplierPurchaseComparison() {
 									<label htmlFor="fromDatePicker">
 										<span style={{ fontSize: "15px", fontWeight: "bold" }}>
 											Category:&nbsp;&nbsp;
-										</span>{" "}
+										</span>
 										<br />
 									</label>
 								</div>
@@ -1735,13 +1870,19 @@ export default function SupplierPurchaseComparison() {
 										id="selectedsale"
 										onChange={(selectedOption) => {
 											if (selectedOption && selectedOption.value) {
+												const labelPart = selectedOption.label.split("-")[0];
 												setCategoryType(selectedOption.value);
+												setCategoryTypeDataValue({
+													value: selectedOption.value,
+													label: labelPart,
+												});
 											} else {
-												setCategoryType(""); // Clear the saleType state when selectedOption is null (i.e., when the selection is cleared)
+												setCategoryType("");
+												setCategoryTypeDataValue("");
 											}
 										}}
 										components={{ Option: DropdownOption }}
-										// styles={customStylesStore}
+										// styles={customStylesCategory}
 										styles={customStylesCategory()}
 										isClearable
 										placeholder="Search or select..."
@@ -1788,7 +1929,9 @@ export default function SupplierPurchaseComparison() {
 										onBlur={(e) =>
 											(e.currentTarget.style.border = `1px solid ${fontcolor}`)
 										}
-										onChange={(e) => setSearchQuery(e.target.value)}
+										onChange={(e) =>
+											setSearchQuery(e.target.value.toUpperCase())
+										}
 									/>
 								</div>
 							</div>
@@ -1915,7 +2058,7 @@ export default function SupplierPurchaseComparison() {
 														}
 														style={{
 															backgroundColor: getcolor,
-															color: fontcolor,
+															color: item.Qnty?.[0] === "-" ? "red" : fontcolor,
 														}}
 													>
 														<td className="text-start" style={firstColWidth}>
@@ -1924,7 +2067,7 @@ export default function SupplierPurchaseComparison() {
 														<td className="text-start" style={secondColWidth}>
 															{item.Description}
 														</td>
-														<td className="text-center" style={thirdColWidth}>
+														<td className="text-end" style={thirdColWidth}>
 															{item.Qnty}
 														</td>
 														<td className="text-end" style={forthColWidth}>
