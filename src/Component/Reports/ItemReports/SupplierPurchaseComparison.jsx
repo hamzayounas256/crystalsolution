@@ -66,10 +66,6 @@ export default function SupplierPurchaseComparison() {
 	const [accountTypeDataValue, setAccountTypeDataValue] = useState("");
 
 	const [totalQnty, setTotalQnty] = useState(0);
-	const [totalOpening, setTotalOpening] = useState(0);
-	const [totalDebit, setTotalDebit] = useState(0);
-	const [totalCredit, setTotalCredit] = useState(0);
-	const [closingBalance, setClosingBalance] = useState(0);
 	const [totalAmount, setTotalAmount] = useState(0);
 
 	// state for from DatePicker
@@ -256,17 +252,7 @@ export default function SupplierPurchaseComparison() {
 			default:
 				break;
 		}
-
-		const data = {
-			FIntDat: fromInputDate,
-			FFnlDat: toInputDate,
-			FTrnTyp: transectionType,
-			FAccCod: saleType,
-			code: "EMART",
-			FLocCod: "001",
-			FYerDsc: "2024-2024",
-		};
-		// console.log(data);
+		
 		document.getElementById(
 			"fromdatevalidation"
 		).style.border = `1px solid ${fontcolor}`;
