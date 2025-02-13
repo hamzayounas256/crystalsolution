@@ -27,7 +27,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./ItemReports.css";
 
-export default function ItemStockReport() {
+export default function StoreStockReport() {
 	const navigate = useNavigate();
 	const user = getUserData();
 	const organisation = getOrganisationData();
@@ -141,7 +141,7 @@ export default function ItemStockReport() {
 		settoInputDate(e.target.value);
 	};
 
-	function fetchItemStockReport() {
+	function fetchStoreStockReport() {
 		const dateRegex = /^\d{2}-\d{2}-\d{4}$/;
 
 		let hasError = false;
@@ -221,7 +221,7 @@ export default function ItemStockReport() {
 			"todatevalidation"
 		).style.border = `1px solid ${fontcolor}`;
 
-		const apiMainUrl = apiLinks + "/ItemStockReport.php";
+		const apiMainUrl = apiLinks + "/StoreStockReport.php";
 		setIsLoading(true);
 		const formMainData = new URLSearchParams({
 			// code: "EMART",
@@ -297,8 +297,8 @@ export default function ItemStockReport() {
 		const apiCapacityUrl = apiLinks + "/GetCapacity.php";
 		const formCapacityData = new URLSearchParams({
 			// FLocCod: getLocationNumber,
-			// code: organisation.code,
-			code: "EMART",
+			code: organisation.code,
+			// code: "EMART",
 		}).toString();
 		axios
 			.post(apiCapacityUrl, formCapacityData)
@@ -329,8 +329,8 @@ export default function ItemStockReport() {
 		const apiCategoryUrl = apiLinks + "/GetCatg.php";
 		const formCategoryData = new URLSearchParams({
 			// FLocCod: getLocationNumber,
-			// code: organisation.code,
-			code: "EMART",
+			code: organisation.code,
+			// code: "EMART",
 		}).toString();
 		axios
 			.post(apiCategoryUrl, formCategoryData)
@@ -515,22 +515,41 @@ export default function ItemStockReport() {
 		const rows = tableData.map((item) => [
 			item.Code,
 			item.Description,
-			item["Last Date"],
 			item["Pur Rate"],
+			item["Qnt001"],
+			item["Qnt002"],
+			item["Qnt003"],
+			item["Qnt004"],
+			item["Qnt005"],
 			item.Qnty,
 			item["Amount"],
 		]);
-		rows.push(["", "Total", "", "", String(totalQnty), String(totalAmount)]);
+		rows.push([
+			"",
+			"Total",
+			"",
+			"",
+			"",
+			"",
+			"",
+			"",
+			String(totalQnty),
+			String(totalAmount),
+		]);
 
 		const headers = [
 			"Code",
 			"Description",
-			"Last Date",
 			"Rate",
+			"Qnt1",
+			"Qnt2",
+			"Qnt3",
+			"Qnt4",
+			"Qnt5",
 			"Qnty",
 			"Amount",
 		];
-		const columnWidths = [45, 100, 25, 20, 15, 25];
+		const columnWidths = [45, 100, 20, 15, 15, 15, 15, 15, 15, 25];
 		const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
 		const pageHeight = doc.internal.pageSize.height;
 		const paddingTop = 15;
@@ -568,7 +587,7 @@ export default function ItemStockReport() {
 			for (let i = startIndex; i < endIndex; i++) {
 				const row = rows[i];
 				const isTotalRow = i === rows.length - 1;
-				const isNegativeQnty = row[4] && row[4].startsWith("-");
+				const isNegativeQnty = row[8] && row[8].startsWith("-");
 				let textColor = [0, 0, 0]; // Default text color
 				let fontName = normalFont;
 				const bgColor = [255, 255, 255]; // Always white background
@@ -603,8 +622,17 @@ export default function ItemStockReport() {
 
 					doc.setTextColor(textColor[0], textColor[1], textColor[2]);
 					const cellValue = String(cell);
-					if (cellIndex === 3 || cellIndex === 4 || cellIndex === 5) {
-						const rightAlignX = startX + columnWidths[cellIndex] - 2;
+					if (
+						cellIndex === 2 ||
+						cellIndex === 3 ||
+						cellIndex === 4 ||
+						cellIndex === 5 ||
+						cellIndex === 6 ||
+						cellIndex === 7 ||
+						cellIndex === 8 ||
+						cellIndex === 9
+					) {
+						const rightAlignX = startX + columnWidths[cellIndex] - 0.5;
 						doc.text(cellValue, rightAlignX, cellY, {
 							align: "right",
 							baseline: "middle",
@@ -703,7 +731,7 @@ export default function ItemStockReport() {
 				doc.setFont(getfontstyle, "normal");
 				startY += 7;
 				addTitle(
-					`Item Stock Report Rep Date: ${toInputDate}`,
+					`Store Stock Report Rep Date: ${toInputDate}`,
 					"",
 					"",
 					pageNumber,
@@ -743,11 +771,11 @@ export default function ItemStockReport() {
 					? capacityTypeDataValue.label
 					: "ALL";
 
-				const labelXLeftWord = doc.internal.pageSize.width - totalWidth - 15;
-				const labelXLeftTerm = doc.internal.pageSize.width - totalWidth + 10;
+				const labelXLeftWord = doc.internal.pageSize.width - totalWidth;
+				const labelXLeftTerm = doc.internal.pageSize.width - totalWidth + 25;
 
-				const labelXRightWord = doc.internal.pageSize.width - totalWidth + 150;
-				const labelXRightTerm = doc.internal.pageSize.width - totalWidth + 165;
+				const labelXRightWord = doc.internal.pageSize.width - totalWidth + 215;
+				const labelXRightTerm = doc.internal.pageSize.width - totalWidth + 230;
 
 				doc.setFontSize(parseInt(getdatafontsize));
 
@@ -816,7 +844,7 @@ export default function ItemStockReport() {
 		const time = getCurrentTime();
 
 		handlePagination();
-		doc.save(`ItemStockReportFrom${fromInputDate}To${toInputDate}.pdf`);
+		doc.save(`StoreStockReportFrom${fromInputDate}To${toInputDate}.pdf`);
 
 		const pdfBlob = doc.output("blob");
 		const pdfFile = new File([pdfBlob], "table_data.pdf", {
@@ -827,18 +855,22 @@ export default function ItemStockReport() {
 	const handleDownloadCSV = async () => {
 		const workbook = new ExcelJS.Workbook();
 		const worksheet = workbook.addWorksheet("Sheet1");
-		const numColumns = 6;
+		const numColumns = 10;
 
 		const columnAlignments = [
 			"left",
 			"left",
-			"left",
+			"right",
+			"right",
+			"right",
+			"right",
+			"right",
 			"right",
 			"right",
 			"right",
 		];
 		worksheet.addRow([]);
-		[comapnyname, `Item Stock Report Rep Date: ${toInputDate}`].forEach(
+		[comapnyname, `Store Stock Report Rep Date: ${toInputDate}`].forEach(
 			(title, index) => {
 				worksheet.addRow([title]).eachCell((cell) => {
 					cell.style = {
@@ -874,6 +906,10 @@ export default function ItemStockReport() {
 				categoryTypeDataValue ? categoryTypeDataValue.label : "ALL",
 				"",
 				"",
+				"",
+				"",
+				"",
+				"",
 				"Rate: ",
 				transectionType === "P"
 					? "Purchase Rate"
@@ -886,7 +922,7 @@ export default function ItemStockReport() {
 					: "ALL",
 			])
 			.eachCell((cell, colNumber) => {
-				if (colNumber === 1 || colNumber === 5) {
+				if (colNumber === 1 || colNumber === 9) {
 					cell.font = {
 						bold: true,
 						size: parseInt(getdatafontsize), // Apply dynamic font size if required
@@ -899,11 +935,15 @@ export default function ItemStockReport() {
 				capacityTypeDataValue ? capacityTypeDataValue.label : "ALL",
 				"",
 				"",
+				"",
+				"",
+				"",
+				"",
 				searchQuery ? "Search: " : "",
 				searchQuery ? searchQuery : "",
 			])
 			.eachCell((cell, colNumber) => {
-				if (colNumber === 1 || colNumber === 5) {
+				if (colNumber === 1 || colNumber === 9) {
 					cell.font = {
 						bold: true,
 						size: parseInt(getdatafontsize), // Apply dynamic font size if required
@@ -929,8 +969,12 @@ export default function ItemStockReport() {
 		const headers = [
 			"Code",
 			"Description",
-			"Last Date",
 			"Rate",
+			"Qnt1",
+			"Qnt2",
+			"Qnt3",
+			"Qnt4",
+			"Qnt5",
 			"Qnty",
 			"Amount",
 		];
@@ -949,8 +993,12 @@ export default function ItemStockReport() {
 			const row = worksheet.addRow([
 				item.Code,
 				item.Description,
-				item["Last Date"],
 				item["Pur Rate"],
+				item["Qnt001"],
+				item["Qnt002"],
+				item["Qnt003"],
+				item["Qnt004"],
+				item["Qnt005"],
 				item.Qnty,
 				item["Amount"],
 			]);
@@ -974,13 +1022,17 @@ export default function ItemStockReport() {
 			"Total",
 			"",
 			"",
+			"",
+			"",
+			"",
+			"",
 			totalQnty,
 			totalAmount,
 		]);
 		totalRow.eachCell((cell) => {
 			cell.font = { bold: true };
 		});
-		[17, 40, 12, 10, 7, 12].forEach((width, index) => {
+		[17, 40, 10, 7, 7, 7, 7, 7, 7, 12].forEach((width, index) => {
 			worksheet.getColumn(index + 1).width = width;
 		});
 		worksheet.eachRow((row, rowNumber) => {
@@ -1005,7 +1057,7 @@ export default function ItemStockReport() {
 		const blob = new Blob([buffer], {
 			type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 		});
-		saveAs(blob, `ItemStockReportRepDate${toInputDate}.xlsx`);
+		saveAs(blob, `StoreStockReportRepDate${toInputDate}.xlsx`);
 	};
 
 	const dispatch = useDispatch();
@@ -1022,25 +1074,37 @@ export default function ItemStockReport() {
 	const { data, loading, error } = useSelector((state) => state.getuser);
 
 	const firstColWidth = {
-		width: "18%",
+		width: "15%",
 	};
 	const secondColWidth = {
-		width: "40%",
+		width: "35%",
 	};
 	const thirdColWidth = {
-		width: "11%",
+		width: "10%",
 	};
 	const forthColWidth = {
-		width: "11%",
+		width: "5%",
 	};
 	const fifthColWidth = {
-		width: "7%",
+		width: "5%",
 	};
 	const sixthColWidth = {
-		width: "13%",
+		width: "5%",
+	};
+	const seventhColWidth = {
+		width: "5%",
+	};
+	const eighthColWidth = {
+		width: "5%",
+	};
+	const ninthColWidth = {
+		width: "5%",
+	};
+	const tenthColWidth = {
+		width: "10%",
 	};
 
-	useHotkeys("s", fetchItemStockReport);
+	useHotkeys("s", fetchStoreStockReport);
 	useHotkeys("alt+p", exportPDFHandler);
 	useHotkeys("alt+e", handleDownloadCSV);
 	useHotkeys("esc", () => navigate("/MainPage"));
@@ -1059,7 +1123,7 @@ export default function ItemStockReport() {
 
 	const contentStyle = {
 		backgroundColor: getcolor,
-		width: isSidebarVisible ? "calc(80vw - 0%)" : "80vw",
+		width: isSidebarVisible ? "calc(100vw - 0%)" : "100vw",
 		position: "relative",
 		top: "40%",
 		left: isSidebarVisible ? "50%" : "50%",
@@ -1074,7 +1138,7 @@ export default function ItemStockReport() {
 		overflowY: "hidden",
 		wordBreak: "break-word",
 		textAlign: "center",
-		maxWidth: "800px",
+		maxWidth: "950px",
 		fontSize: parseInt(getdatafontsize),
 		fontStyle: "normal",
 		fontWeight: "400",
@@ -1297,7 +1361,7 @@ export default function ItemStockReport() {
 						borderRadius: "9px",
 					}}
 				>
-					<NavComponent textdata="Item Stock Report" />
+					<NavComponent textdata="Store Stock Report" />
 
 					{/* ------------1st row */}
 					<div
@@ -1606,7 +1670,7 @@ export default function ItemStockReport() {
 										color: fontcolor,
 									}}
 								>
-									<option value="">ALL</option>
+									<option value="">All</option>
 									<option value="P">Purchase Rate</option>
 									<option value="M">Saleman</option>
 									<option value="A">Average</option>
@@ -1741,7 +1805,7 @@ export default function ItemStockReport() {
 						<div
 							style={{
 								overflowY: "auto",
-								width: "97.9%",
+								width: "98.9%",
 							}}
 						>
 							<table
@@ -1776,15 +1840,27 @@ export default function ItemStockReport() {
 											Description
 										</td>
 										<td className="border-dark" style={thirdColWidth}>
-											Last Date
-										</td>
-										<td className="border-dark" style={forthColWidth}>
 											Rate
 										</td>
+										<td className="border-dark" style={forthColWidth}>
+											Qnt1
+										</td>
 										<td className="border-dark" style={fifthColWidth}>
-											Qnty
+											Qnt2
 										</td>
 										<td className="border-dark" style={sixthColWidth}>
+											Qnt3
+										</td>
+										<td className="border-dark" style={seventhColWidth}>
+											Qnt4
+										</td>
+										<td className="border-dark" style={eighthColWidth}>
+											Qnt5
+										</td>
+										<td className="border-dark" style={ninthColWidth}>
+											Qnty
+										</td>
+										<td className="border-dark" style={tenthColWidth}>
 											Amount
 										</td>
 									</tr>
@@ -1820,7 +1896,7 @@ export default function ItemStockReport() {
 													backgroundColor: getcolor,
 												}}
 											>
-												<td colSpan="6" className="text-center">
+												<td colSpan="10" className="text-center">
 													<Spinner animation="border" variant="primary" />
 												</td>
 											</tr>
@@ -1833,7 +1909,7 @@ export default function ItemStockReport() {
 															color: fontcolor,
 														}}
 													>
-														{Array.from({ length: 6 }).map((_, colIndex) => (
+														{Array.from({ length: 10 }).map((_, colIndex) => (
 															<td key={`blank-${rowIndex}-${colIndex}`}>
 																&nbsp;
 															</td>
@@ -1848,6 +1924,10 @@ export default function ItemStockReport() {
 												<td style={forthColWidth}></td>
 												<td style={fifthColWidth}></td>
 												<td style={sixthColWidth}></td>
+												<td style={seventhColWidth}></td>
+												<td style={eighthColWidth}></td>
+												<td style={ninthColWidth}></td>
+												<td style={tenthColWidth}></td>
 											</tr>
 										</>
 									) : (
@@ -1874,16 +1954,28 @@ export default function ItemStockReport() {
 														<td className="text-start" style={secondColWidth}>
 															{item["Description"]}
 														</td>
-														<td className="text-start" style={thirdColWidth}>
-															{item["Last Date"]}
-														</td>
-														<td className="text-end" style={forthColWidth}>
+														<td className="text-end" style={thirdColWidth}>
 															{item["Pur Rate"]}
 														</td>
+														<td className="text-end" style={forthColWidth}>
+															{item["Qnt001"]}
+														</td>
 														<td className="text-end" style={fifthColWidth}>
-															{item["Qnty"]}
+															{item["Qnt002"]}
 														</td>
 														<td className="text-end" style={sixthColWidth}>
+															{item["Qnt003"]}
+														</td>
+														<td className="text-end" style={seventhColWidth}>
+															{item["Qnt004"]}
+														</td>
+														<td className="text-end" style={eighthColWidth}>
+															{item["Qnt005"]}
+														</td>
+														<td className="text-end" style={ninthColWidth}>
+															{item["Qnty"]}
+														</td>
+														<td className="text-end" style={tenthColWidth}>
 															{item["Amount"]}
 														</td>
 													</tr>
@@ -1899,7 +1991,7 @@ export default function ItemStockReport() {
 														color: fontcolor,
 													}}
 												>
-													{Array.from({ length: 6 }).map((_, colIndex) => (
+													{Array.from({ length: 10 }).map((_, colIndex) => (
 														<td key={`blank-${rowIndex}-${colIndex}`}>
 															&nbsp;
 														</td>
@@ -1913,6 +2005,10 @@ export default function ItemStockReport() {
 												<td style={forthColWidth}></td>
 												<td style={fifthColWidth}></td>
 												<td style={sixthColWidth}></td>
+												<td style={seventhColWidth}></td>
+												<td style={eighthColWidth}></td>
+												<td style={ninthColWidth}></td>
+												<td style={tenthColWidth}></td>
 											</tr>
 										</>
 									)}
@@ -1927,7 +2023,7 @@ export default function ItemStockReport() {
 							borderTop: `1px solid ${fontcolor}`,
 							height: "24px",
 							display: "flex",
-							paddingRight: "2.1%",
+							paddingRight: "1.1%",
 						}}
 					>
 						<div
@@ -1964,12 +2060,40 @@ export default function ItemStockReport() {
 								background: getcolor,
 								borderRight: `1px solid ${fontcolor}`,
 							}}
+						></div>
+						<div
+							style={{
+								...sixthColWidth,
+								background: getcolor,
+								borderRight: `1px solid ${fontcolor}`,
+							}}
+						></div>
+						<div
+							style={{
+								...seventhColWidth,
+								background: getcolor,
+								borderRight: `1px solid ${fontcolor}`,
+							}}
+						></div>
+						<div
+							style={{
+								...eighthColWidth,
+								background: getcolor,
+								borderRight: `1px solid ${fontcolor}`,
+							}}
+						></div>
+						<div
+							style={{
+								...ninthColWidth,
+								background: getcolor,
+								borderRight: `1px solid ${fontcolor}`,
+							}}
 						>
 							<span className="mobileledger_total">{totalQnty}</span>
 						</div>
 						<div
 							style={{
-								...sixthColWidth,
+								...tenthColWidth,
 								background: getcolor,
 								borderRight: `1px solid ${fontcolor}`,
 							}}
@@ -2015,7 +2139,7 @@ export default function ItemStockReport() {
 							id="searchsubmit"
 							text="Select"
 							ref={selectButtonRef}
-							onClick={fetchItemStockReport}
+							onClick={fetchStoreStockReport}
 							style={{ backgroundColor: "#186DB7", width: "120px" }}
 							onFocus={(e) => (e.currentTarget.style.border = "2px solid red")}
 							onBlur={(e) =>

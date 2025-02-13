@@ -85,6 +85,7 @@ import EmployeeCommissionReport from "./Component/Reports/EmployeeReports/Employ
 import EmployeeCommissionSummary from "./Component/Reports/EmployeeReports/EmployeeCommissionSummary.jsx";
 import EmployeeCommissionComparison from "./Component/Reports/EmployeeReports/EmployeeCommissionComparison.jsx";
 import ItemStockReport from "./Component/Reports/ItemReports/ItemStockReport.jsx";
+import StoreStockReport from "./Component/Reports/ItemReports/StoreStockReport.jsx";
 
 function App() {
 	const queryClient = new QueryClient();
@@ -268,6 +269,11 @@ function App() {
 									exact
 									path="/ItemStockReport"
 									element={<ItemStockReport />}
+								/>
+								<Route
+									exact
+									path="/StoreStockReport"
+									element={<StoreStockReport />}
 								/>
 								<Route
 									exact
