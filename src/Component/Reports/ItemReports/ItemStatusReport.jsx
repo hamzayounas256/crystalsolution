@@ -601,7 +601,7 @@ export default function ItemStatusReport() {
 			"Sal Ret",
 			"Bal",
 		];
-		const columnWidths = [45, 110, 15, 15, 15, 15, 15, 15, 15, 15];
+		const columnWidths = [45, 108, 15, 15, 15, 15, 15, 15, 15, 15];
 		const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
 		const pageHeight = doc.internal.pageSize.height;
 		const paddingTop = 15;
