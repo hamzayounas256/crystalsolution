@@ -1091,7 +1091,7 @@ export default function ItemMonthlyPurchaseComparison() {
 										color: fontcolor,
 									}}
 								>
-									{/* <option value="">All</option> */}
+									<option value="">All</option>
 									<option value="A">Amount</option>
 									<option value="Q">Quantity</option>
 								</select>
